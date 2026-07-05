@@ -1,8 +1,8 @@
-error('WezTerm is Phase 2 and is intentionally not implemented in the Phase 0/1 deliverable. See PLAN.md.')
-
 local wezterm = require 'wezterm'
 local act = wezterm.action
 local config = wezterm.config_builder and wezterm.config_builder() or {}
+
+local default_shell = nil
 
 local function agent_state_from_title(title)
   title = title:lower()
@@ -10,6 +10,30 @@ local function agent_state_from_title(title)
     if title:find('agent:' .. state, 1, true) then return state end
   end
   return nil
+end
+
+local function file_exists(path)
+  if not path or path == '' then return false end
+  local file = io.open(path, 'r')
+  if file then
+    file:close()
+    return true
+  end
+  return false
+end
+
+local function bash_command(command)
+  if default_shell then
+    return { default_shell, '-lc', command }
+  end
+  return { 'bash', '-lc', command }
+end
+
+local function spawn_bash_command(command)
+  return act.SplitPane {
+    direction = 'Right',
+    command = { args = bash_command(command) },
+  }
 end
 
 config.default_prog = nil
@@ -22,23 +46,22 @@ if wezterm.target_triple:find('windows') then
     local_app_data .. '/Programs/Git/bin/bash.exe',
   }
   for _, candidate in ipairs(candidates) do
-    local file = io.open(candidate, 'r')
-    if file then
-      file:close()
+    if file_exists(candidate) then
+      default_shell = candidate
       config.default_prog = { candidate, '--login', '-i' }
       break
     end
   end
 elseif wezterm.target_triple:find('apple') then
   for _, candidate in ipairs({ '/opt/homebrew/bin/bash', '/usr/local/bin/bash', '/bin/bash' }) do
-    local file = io.open(candidate, 'r')
-    if file then
-      file:close()
+    if file_exists(candidate) then
+      default_shell = candidate
       config.default_prog = { candidate, '--login' }
       break
     end
   end
 else
+  default_shell = '/bin/bash'
   config.default_prog = { '/bin/bash', '--login' }
 end
 
@@ -55,8 +78,16 @@ config.cursor_blink_rate = 0
 config.leader = { key = 'a', mods = 'CTRL', timeout_milliseconds = 1500 }
 
 config.keys = {
+  { key = '|', mods = 'CTRL|SHIFT', action = act.SplitHorizontal { domain = 'CurrentPaneDomain' } },
+  { key = 'mapped:|', mods = 'CTRL|SHIFT', action = act.SplitHorizontal { domain = 'CurrentPaneDomain' } },
+  { key = '-', mods = 'CTRL', action = act.SplitVertical { domain = 'CurrentPaneDomain' } },
+  { key = 'mapped:-', mods = 'CTRL', action = act.SplitVertical { domain = 'CurrentPaneDomain' } },
+  { key = '_', mods = 'CTRL|SHIFT', action = act.SplitVertical { domain = 'CurrentPaneDomain' } },
+  { key = 'mapped:_', mods = 'CTRL|SHIFT', action = act.SplitVertical { domain = 'CurrentPaneDomain' } },
   { key = '|', mods = 'LEADER|SHIFT', action = act.SplitHorizontal { domain = 'CurrentPaneDomain' } },
+  { key = '\\', mods = 'LEADER|SHIFT', action = act.SplitHorizontal { domain = 'CurrentPaneDomain' } },
   { key = '-', mods = 'LEADER', action = act.SplitVertical { domain = 'CurrentPaneDomain' } },
+  { key = '_', mods = 'LEADER|SHIFT', action = act.SplitVertical { domain = 'CurrentPaneDomain' } },
   { key = 'h', mods = 'LEADER', action = act.ActivatePaneDirection 'Left' },
   { key = 'j', mods = 'LEADER', action = act.ActivatePaneDirection 'Down' },
   { key = 'k', mods = 'LEADER', action = act.ActivatePaneDirection 'Up' },
@@ -87,6 +118,14 @@ config.keys = {
     } },
   { key = '[', mods = 'LEADER', action = act.ActivateCopyMode },
   { key = 'a', mods = 'LEADER', action = act.SendKey { key = 'a', mods = 'CTRL' } },
+  { key = 'C', mods = 'CTRL|SHIFT', action = act.CopyTo 'Clipboard' },
+  { key = 'V', mods = 'CTRL|SHIFT', action = act.PasteFrom 'Clipboard' },
+  { key = 'Insert', mods = 'CTRL', action = act.CopyTo 'Clipboard' },
+  { key = 'Insert', mods = 'SHIFT', action = act.PasteFrom 'Clipboard' },
+  { key = 'e', mods = 'LEADER', action = spawn_bash_command('y') },
+  { key = 'E', mods = 'LEADER|SHIFT', action = act.SendString 'y\n' },
+  { key = 'v', mods = 'LEADER', action = act.SendString 'nv\n' },
+  { key = 'V', mods = 'LEADER|SHIFT', action = spawn_bash_command('nv') },
   { key = 'u', mods = 'LEADER', action = act.EmitEvent 'workstation-next-agent' },
 }
 
@@ -95,6 +134,14 @@ for i = 1, 9 do
     key = tostring(i), mods = 'LEADER', action = act.ActivateTab(i - 1),
   })
 end
+
+config.mouse_bindings = {
+  {
+    event = { Down = { streak = 1, button = 'Right' } },
+    mods = 'NONE',
+    action = act.PasteFrom 'Clipboard',
+  },
+}
 
 wezterm.on('workstation-next-agent', function(window, pane)
   local panes = window:active_tab():panes()

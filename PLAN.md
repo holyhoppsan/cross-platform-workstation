@@ -219,7 +219,7 @@ Do not include Yazi in the AI agent list.
 | ----- | ----------------------------------------- | ----------------------------------------- |
 | 0     | Repository foundation                     | Implemented and locally validated         |
 | 1     | Common shell workflow                     | Implemented and validated on Windows; needs macOS/Ubuntu validation |
-| 2     | WezTerm baseline with tmux-style bindings | Not started                               |
+| 2     | WezTerm baseline with tmux-style bindings | Implemented and automated validation passed on Windows; needs manual GUI validation |
 | 3     | Quake-mode dropdown                       | Stubbed                                   |
 | 4     | Neovim baseline                           | Not started                               |
 | 5     | Yazi baseline                             | Not started                               |
@@ -528,7 +528,7 @@ Deferred items:
 
 ## Phase 2: WezTerm Baseline with Tmux-Style Bindings
 
-Status: Not started
+Status: Implemented and validated on Windows; needs macOS/Ubuntu validation
 
 Goal: Configure WezTerm as the cross-platform terminal and pane/tab/workspace layer.
 
@@ -546,6 +546,7 @@ Requirements:
 * consistent keybindings on all platforms
 * tabs
 * pane splits
+* one-stroke pane split shortcuts for ergonomics, while preserving tmux-style leader bindings
 * named workspaces
 * workspace picker
 * pane navigation using h, j, k, and l
@@ -595,6 +596,12 @@ WezTerm tmux-like bindings:
 * Ctrl+A, u        move to next agent pane needing attention, if implemented later
 * Ctrl+`           operating-system-level Quake dropdown toggle, not a WezTerm-only binding
 
+Additional direct split bindings:
+
+* Ctrl+|           split left/right
+* Ctrl+-           split top/bottom
+* Ctrl+_           split top/bottom fallback when Shift is held
+
 Deliverables:
 
 * chezmoi/dot_config/wezterm/
@@ -608,37 +615,52 @@ Deliverables:
 Tasks:
 
 * [x] Add WezTerm config directory placeholder.
-* [ ] Add base wezterm.lua.
-* [ ] Add platform-aware shell startup.
-* [ ] Configure Git Bash startup on Windows.
-* [ ] Configure Bash startup on macOS/Ubuntu.
-* [ ] Add tmux-style leader key.
-* [ ] Add split bindings.
-* [ ] Add pane movement bindings.
-* [ ] Add pane resize bindings.
-* [ ] Add zoom binding.
-* [ ] Add tab bindings.
-* [ ] Add copy-mode binding.
-* [ ] Add workspace picker.
-* [ ] Add placeholder Quake workspace identity.
-* [ ] Add docs/wezterm.md.
-* [ ] Add doctor checks for WezTerm.
+* [x] Add base wezterm.lua.
+* [x] Add platform-aware shell startup.
+* [x] Configure Git Bash startup on Windows.
+* [x] Configure Bash startup on macOS/Ubuntu.
+* [x] Add tmux-style leader key.
+* [x] Add split bindings.
+* [x] Add pane movement bindings.
+* [x] Add pane resize bindings.
+* [x] Add zoom binding.
+* [x] Add tab bindings.
+* [x] Add copy-mode binding.
+* [x] Add workspace picker.
+* [x] Add placeholder Quake workspace identity.
+* [x] Add docs/wezterm.md.
+* [x] Add doctor checks for WezTerm.
 
 Validation:
 
-* [ ] WezTerm starts successfully.
-* [ ] It launches the correct shell.
-* [ ] On Windows, WezTerm launches Git Bash.
+* [x] WezTerm starts successfully on Windows.
+* [ ] It launches the correct shell. Status: Windows Git Bash validated; macOS/Ubuntu pending.
+* [x] On Windows, WezTerm launches Git Bash.
 * [ ] On macOS and Ubuntu, WezTerm launches Bash.
-* [ ] Ctrl+A bindings work.
-* [ ] Pane splits and navigation work.
-* [ ] Tabs work.
-* [ ] `doctor --phase wezterm` reports status.
+* [x] Ctrl+A bindings work on Windows. Status: macOS/Ubuntu pending.
+* [x] Pane splits and navigation work on Windows. Status: macOS/Ubuntu pending.
+* [x] Tabs work on Windows. Status: macOS/Ubuntu pending.
+* [x] `doctor --phase wezterm` reports status.
 
 Notes:
 
-* WezTerm is intentionally not implemented in the Phase 0/1 deliverable.
-* `chezmoi/dot_config/wezterm/wezterm.lua` is an explicit non-functional placeholder that fails if loaded.
+* Phase 2 replaces the former non-functional placeholder with an active baseline config.
+* 2026-07-05 readiness check: the placeholder file already contains a draft config after the intentional failure line, but it must be audited before activation.
+* 2026-07-05 readiness check: `wezterm.exe` is not currently on PATH on the validated Windows machine.
+* 2026-07-05 readiness check: `setup.ps1 -Phase wezterm -DryRun` is rejected because setup only accepts `foundation`, `shell`, and `all`.
+* 2026-07-05 readiness check: `doctor --phase wezterm` reports the phase as not implemented.
+* 2026-07-05: `setup.ps1 -Phase wezterm` installed WezTerm with winget package `wez.wezterm`, applied chezmoi, and passed `doctor --phase wezterm`.
+* 2026-07-05: `doctor --phase wezterm` validates WezTerm presence, config presence, absence of the old placeholder failure, and config loading through `wezterm --config-file <path> show-keys`.
+* 2026-07-05: Git Bash shell config now adds the WinGet Links directory on Windows so newly installed winget aliases are visible in Git Bash launched from stale parent environments.
+* 2026-07-05: Manual WezTerm launch found `SpawnCommandInNewPane` is not a valid key assignment in stable WezTerm 20240203. Replaced it with `SplitPane` for helper panes, added a regression test, reapplied chezmoi, and verified the installed config with `wezterm --config-file ~/.config/wezterm/wezterm.lua show-keys`.
+* 2026-07-05: Manual WezTerm launch then found `domain` is not a valid top-level `SplitPane` field. Removed the invalid field from the helper-pane wrapper and changed doctor validation to use `show-keys --lua` so configured leader keys are included in validation output.
+* 2026-07-05: Manual WezTerm use showed copy/paste ergonomics were unclear and there is no Windows-style context menu. Added explicit `Ctrl+Shift+C`, `Ctrl+Shift+V`, `Ctrl+Insert`, `Shift+Insert`, and right-click paste bindings.
+* 2026-07-05: Manual WezTerm validation confirmed Git Bash starts, but `doctor --phase wezterm` failed from `~` because the repository root was not known outside the worktree. Setup now writes machine-local `~/.config/workstation/env.sh` with `WORKSTATION_REPO_ROOT`; shell startup, `workstation-root`, and `doctor` all load it so validation works from home.
+* 2026-07-05: User manually validated a WezTerm-launched Git Bash session from `~`: `echo "$WORKSTATION_REPO_ROOT"` and `workstation-root` both returned `C:/work/cross-platform-workstation`, and `doctor --phase wezterm` passed with only expected warnings for optional `fdfind` and deferred future-phase helpers.
+* 2026-07-05: User reported `Ctrl+A`, `|` did not split panes on Windows. Added an equivalent `Ctrl+A`, `Shift+\` binding for the same horizontal split action, documented it as the Windows fallback, reapplied setup, and added a regression test.
+* 2026-07-05: User found two-stroke split bindings too clunky. Added one-stroke direct split bindings matching tmux symbols: `Ctrl+|` for left/right and `Ctrl+-` for top/bottom, while preserving the tmux-style `Ctrl+A` bindings. The failed `Ctrl+Shift+\` experiment was replaced because it targeted the physical key rather than the mapped tmux symbol.
+* 2026-07-05: User manually validated that `Ctrl+Shift+|` splits left/right and `Ctrl+-` splits top/bottom. User also found `Ctrl+Shift+-` reduced the window/font size, which is expected because shifted minus is `_` rather than the tmux `-` symbol; added `Ctrl+_` and leader `_` fallbacks so holding Shift on minus splits instead of invoking the default size behavior.
+* 2026-07-05: User manually validated the Windows WezTerm GUI bindings: direct split shortcuts, tmux-style split bindings, pane movement, pane resize, zoom/unzoom, tab create/select, close-pane confirmation, copy/paste, right-click paste, workspace picker, and `quake` workspace placeholder all work.
 
 Deferred items:
 
@@ -1774,13 +1796,11 @@ This section mirrors and expands the unsupported/deferred policy for quick looku
 
 Current next actions:
 
-1. Optionally run `scripts/setup/reset-windows.ps1 -Phase shell -Apply` and then `setup.ps1 -Phase shell` to retest the Windows reset/provisioning loop. Git for Windows must remain installed before and after the reset.
-2. If package cleanup needs testing, run `scripts/setup/reset-windows.ps1 -Phase shell -Apply -RemovePackages`, then rerun `setup.ps1 -Phase shell`.
-3. Validate Phase 1 on macOS Bash and update the Phase 1 validation checklist.
-4. Validate Phase 1 on Ubuntu GNOME Bash and update the Phase 1 validation checklist.
-5. Decide whether Phase 2 should replace the current WezTerm placeholder with the first real `wezterm.lua`.
-6. Begin Phase 2 once the Windows validation result is accepted and macOS/Ubuntu are either validated or explicitly deferred.
-7. Keep `PLAN.md` updated after each implementation or validation session.
+1. Validate Phase 2 on macOS Bash and update the Phase 2 validation checklist.
+2. Validate Phase 2 on Ubuntu GNOME Bash and update the Phase 2 validation checklist.
+3. Decide whether to commit the Windows-validated Phase 2 state now or continue with a small close-pane no-confirm binding.
+4. Begin Phase 3 after Phase 2 is committed or explicitly accepted with macOS/Ubuntu pending.
+5. Keep `PLAN.md` updated after each implementation or validation session.
 
 ## PLAN.md Update Rules
 
@@ -1877,3 +1897,59 @@ Format:
 - Validation performed: `setup.ps1 -Phase shell -DryRun` passed and now reports `chezmoi apply --force`. `chezmoi apply --help` confirmed `--force` makes changes without prompting. `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 24 setup tests. `git diff --check` passed for tracked changes. User then manually validated `setup.ps1 -Phase shell`, fresh Git Bash `doctor --phase shell`, `platform-info`, `workstation-root`, `reset-windows.ps1 -Phase shell -Apply -RemovePackages`, and a full reinstall via `setup.ps1 -Phase shell`; all required checks passed.
 - Known gaps: macOS and Ubuntu remain untested. Reset package removal idempotency should be improved so rerunning removal after packages are already absent reports "not installed" rather than relying on winget behavior.
 - Next actions: Optionally harden package uninstall idempotency messages, then commit the Phase 1 reset/provisioning updates if accepted.
+
+### 2026-07-05
+
+- Summary of changes: Prepared the tracker for Phase 2. Confirmed the repository is clean after the Phase 1 commit, audited the current WezTerm placeholder state, and recorded the first Phase 2 entry points.
+- Phases touched: Phase 2 planning.
+- Validation performed: `wezterm.exe --version` failed because WezTerm is not on PATH. `setup.ps1 -Phase wezterm -DryRun` failed because setup does not yet accept the `wezterm` phase. `doctor --phase wezterm` correctly reports the phase as not implemented.
+- Known gaps: Phase 2 implementation has not started. macOS and Ubuntu remain untested.
+- Next actions: Implement the WezTerm baseline, setup support, doctor checks, docs, tests, and Windows validation.
+
+### 2026-07-05
+
+- Summary of changes: Implemented the Phase 2 WezTerm baseline. Activated `wezterm.lua`, added tmux-style `Ctrl+A` bindings, platform-aware Bash startup, Windows WezTerm installation through winget package `wez.wezterm`, `setup.ps1`/`setup.sh` phase support, `doctor --phase wezterm`, `docs/wezterm.md`, and tests. Added Windows Git Bash PATH hardening for WinGet Links.
+- Phases touched: Phase 1 PATH hardening, Phase 2.
+- Validation performed: `setup.ps1 -Phase wezterm -DryRun` passed. `setup.ps1 -Phase wezterm` installed WezTerm 20240203-110809-5046fc22, applied chezmoi, and passed `doctor --phase wezterm`. `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 7 function tests, 5 platform tests, 30 setup tests, and 13 WezTerm tests. Interactive Git Bash `doctor --phase wezterm` passed required checks. `wezterm --config-file <repo>/chezmoi/dot_config/wezterm/wezterm.lua show-keys` succeeded.
+- Known gaps: Windows GUI launch and key chords still need manual validation. macOS and Ubuntu remain untested. Yazi/Neovim bindings call helper stubs until later phases. Quake mode remains deferred to Phase 3.
+- Next actions: Manually validate Windows WezTerm GUI startup and keybindings, update this tracker, then decide whether to commit or continue hardening before Phase 3.
+
+### 2026-07-05
+
+- Summary of changes: Fixed a manual WezTerm launch failure caused by invalid action `SpawnCommandInNewPane`. Helper-pane bindings now use supported `SplitPane` action.
+- Phases touched: Phase 2.
+- Validation performed: `wezterm --config-file <repo>/chezmoi/dot_config/wezterm/wezterm.lua show-keys` passed. `setup.ps1 -Phase wezterm` reapplied the corrected config and passed `doctor --phase wezterm`. `wezterm --config-file ~/.config/wezterm/wezterm.lua show-keys` passed. `tests/run.bash` passed under Git for Windows Bash with 14 WezTerm tests. `git diff --check` passed for tracked changes.
+- Known gaps: Windows GUI startup should be retried. Key chord validation remains manual. macOS and Ubuntu remain untested.
+- Next actions: Reopen WezTerm and confirm it starts without config errors, then test the core `Ctrl+A` bindings.
+
+### 2026-07-05
+
+- Summary of changes: Fixed a second manual WezTerm launch failure caused by invalid top-level `domain` field on `SplitPane`. The helper-pane wrapper now uses only supported `SplitPane` fields, and doctor validation now runs `show-keys --lua`.
+- Phases touched: Phase 2.
+- Validation performed: `setup.ps1 -Phase wezterm` reapplied the corrected config and passed `doctor --phase wezterm` with `show-keys --lua succeeded`. `tests/run.bash` passed under Git for Windows Bash with 15 WezTerm tests. `git diff --check` passed for tracked changes.
+- Known gaps: Windows GUI startup should be retried. Key chord validation remains manual. macOS and Ubuntu remain untested.
+- Next actions: Reopen WezTerm and confirm it starts without config errors, then test the core `Ctrl+A` bindings.
+
+### 2026-07-05
+
+- Summary of changes: Added explicit WezTerm clipboard ergonomics after manual testing found copy/paste and context-menu behavior unclear. Right click is now bound to paste, and keyboard copy/paste bindings are documented.
+- Phases touched: Phase 2.
+- Validation performed: `wezterm --config-file <repo>/chezmoi/dot_config/wezterm/wezterm.lua show-keys --lua` passed. `setup.ps1 -Phase wezterm` applied the updated config and passed `doctor --phase wezterm`. `tests/run.bash` passed under Git for Windows Bash with 20 WezTerm tests. `git diff --check` passed for tracked changes.
+- Known gaps: User still needs to manually validate right-click paste, `Ctrl+Shift+C`, `Ctrl+Shift+V`, `Ctrl+Insert`, and `Shift+Insert` inside the WezTerm GUI. macOS and Ubuntu remain untested.
+- Next actions: Reopen WezTerm, test clipboard bindings, then continue the core Phase 2 keybinding validation.
+
+### 2026-07-05
+
+- Summary of changes: Fixed `doctor --phase wezterm` from WezTerm sessions launched in `~` by generating and loading a machine-local `WORKSTATION_REPO_ROOT` env file. PowerShell setup writes the file without a UTF-8 BOM, and `functions.sh` plus `doctor` now load it directly so helper behavior is robust outside the repository.
+- Phases touched: Phase 1 shell hardening, Phase 2 validation.
+- Validation performed: `setup.ps1 -Phase wezterm` regenerated env/config and passed `doctor --phase wezterm`. `tests/run.bash` passed under Git for Windows Bash with 11 function tests, 32 setup tests, and 20 WezTerm tests. An interactive Git Bash launched in `~` resolved `WORKSTATION_REPO_ROOT`, `workstation-root`, and `doctor --phase wezterm` successfully. `git diff --check` passed for tracked changes.
+- Known gaps: Core WezTerm key chord validation remains manual. macOS and Ubuntu remain untested.
+- Next actions: Reopen WezTerm and run `doctor --phase wezterm` from `~`, then test the core `Ctrl+A` pane/tab/workspace bindings.
+
+### 2026-07-05
+
+- Summary of changes: Completed Windows manual validation for Phase 2 WezTerm. Added and documented direct tmux-symbol split shortcuts, shifted-minus split fallback, clipboard bindings, and robust repo-root loading from WezTerm sessions launched outside the repository.
+- Phases touched: Phase 1 shell hardening, Phase 2.
+- Validation performed: `setup.ps1 -Phase wezterm` passed. `tests/run.bash` passed under Git for Windows Bash with 13 config tests, 11 function tests, 5 platform tests, 32 setup tests, and 27 WezTerm tests. User manually validated Windows WezTerm GUI behavior: Git Bash startup, repo-root doctor from `~`, pane splits, pane movement, pane resize, zoom, tabs, close-pane confirmation, copy/paste, right-click paste, workspace picker, and `quake` workspace placeholder.
+- Known gaps: macOS and Ubuntu Phase 2 validation remain untested. Quake dropdown remains deferred to Phase 3. Yazi and Neovim bindings intentionally call stubs until later phases.
+- Next actions: Commit and push Phase 2, then begin Phase 3 or defer macOS/Ubuntu validation explicitly.

@@ -2,6 +2,18 @@
 
 has() { command -v "$1" >/dev/null 2>&1; }
 
+workstation_load_env() {
+  if [ -n "${WORKSTATION_REPO_ROOT:-}" ]; then
+    return 0
+  fi
+
+  local env_file="${XDG_CONFIG_HOME:-$HOME/.config}/workstation/env.sh"
+  if [ -r "$env_file" ]; then
+    # shellcheck source=env.sh
+    . "$env_file"
+  fi
+}
+
 winpath() {
   [ "$#" -eq 1 ] || { printf 'usage: winpath PATH\n' >&2; return 2; }
   if [ "${WORKSTATION_OS:-}" != windows ]; then
@@ -41,6 +53,13 @@ platform-info() {
 }
 
 workstation-root() {
+  workstation_load_env
+
+  if [ -n "${WORKSTATION_REPO_ROOT:-}" ] && [ -r "$WORKSTATION_REPO_ROOT/PLAN.md" ]; then
+    printf '%s\n' "$WORKSTATION_REPO_ROOT"
+    return 0
+  fi
+
   local dir
   dir=$(git rev-parse --show-toplevel 2>/dev/null) || {
     printf 'workstation-root: not inside a Git worktree\n' >&2
@@ -50,6 +69,8 @@ workstation-root() {
 }
 
 doctor() {
+  workstation_load_env
+
   if command -v workstation-doctor >/dev/null 2>&1; then
     workstation-doctor "$@"
   elif [ -n "${WORKSTATION_REPO_ROOT:-}" ] && [ -x "$WORKSTATION_REPO_ROOT/scripts/doctor" ]; then

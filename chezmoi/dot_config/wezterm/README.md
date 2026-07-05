@@ -1,6 +1,5 @@
-# WezTerm Placeholder
+# WezTerm
 
-WezTerm is Phase 2 and is not implemented in the Phase 0/1 deliverable.
+Phase 2 baseline WezTerm configuration.
 
-`wezterm.lua` intentionally fails if loaded so this repository cannot accidentally present Phase 2 as complete.
-
+The active config is `wezterm.lua`. It uses Git Bash on Windows, Bash on macOS/Ubuntu, and tmux-style `Ctrl+A` keybindings.

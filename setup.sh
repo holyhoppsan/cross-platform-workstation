@@ -39,7 +39,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$phase" in
-  foundation|shell|all) ;;
+  foundation|shell|wezterm|all) ;;
   *) die "phase is not implemented in this deliverable: $phase" ;;
 esac
 
@@ -67,11 +67,20 @@ case "$phase" in
     "$repo_root/scripts/doctor" --phase shell
     setup_validate_interactive_shell "$repo_root"
     ;;
+  wezterm)
+    "$repo_root/scripts/setup/phases/foundation.sh" "$repo_root"
+    "$repo_root/scripts/setup/phases/shell.sh" "$repo_root" "$install_missing"
+    "$repo_root/scripts/setup/phases/wezterm.sh" "$repo_root" "$install_missing"
+    setup_apply_chezmoi "$repo_root"
+    "$repo_root/scripts/doctor" --phase wezterm
+    setup_validate_interactive_shell "$repo_root"
+    ;;
   all)
     "$repo_root/scripts/setup/phases/foundation.sh" "$repo_root"
     "$repo_root/scripts/setup/phases/shell.sh" "$repo_root" "$install_missing"
+    "$repo_root/scripts/setup/phases/wezterm.sh" "$repo_root" "$install_missing"
     setup_apply_chezmoi "$repo_root"
-    "$repo_root/scripts/doctor" --phase shell
+    "$repo_root/scripts/doctor" --phase wezterm
     setup_validate_interactive_shell "$repo_root"
     ;;
 esac
@@ -79,5 +88,5 @@ esac
 cat <<'EOF'
 
 Setup completed. Open a fresh Git Bash session and run:
-  doctor --phase shell
+  doctor --phase wezterm
 EOF

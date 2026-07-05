@@ -7,7 +7,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 workstation_config=$(cat "$repo_root/config/workstation.example.toml")
 assert_contains "$workstation_config" 'foundation = true' 'foundation feature enabled'
 assert_contains "$workstation_config" 'bash = true' 'bash feature enabled'
-assert_contains "$workstation_config" 'wezterm = false' 'WezTerm deferred'
+assert_contains "$workstation_config" 'wezterm = true' 'WezTerm feature enabled'
 assert_contains "$workstation_config" 'install_wsl = false' 'WSL disabled'
 assert_contains "$workstation_config" 'shell = "git-bash"' 'Windows shell is Git Bash'
 
