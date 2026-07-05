@@ -1,0 +1,7 @@
+{{- $os := .chezmoi.os -}}
+[data.workstation]
+os = {{ $os | quote }}
+is_windows = {{ eq $os "windows" }}
+is_macos = {{ eq $os "darwin" }}
+is_linux = {{ eq $os "linux" }}
+

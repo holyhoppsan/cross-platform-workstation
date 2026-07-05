@@ -1,0 +1,23 @@
+# Durable project constraints
+
+- Before making changes, read `PLAN.md`.
+- Before making changes, read `docs/architecture.md`.
+- Check the current phase and next actions in `PLAN.md`.
+- Preserve the phase-based implementation model.
+- Update `PLAN.md` after changes.
+- Never mark platform-specific behavior as validated unless it was actually tested on that platform.
+- If requirements change, update `PLAN.md` first or in the same change.
+- Do not rely on chat context alone; `PLAN.md` is the persistent source of truth.
+- Windows uses native Git for Windows Bash and native Windows paths. Never add WSL dependencies or paths.
+- Keep shared behavior in `chezmoi/`; isolate operating-system automation in `platform/`.
+- Quote shell variables, support spaces in paths, and avoid aliases that alter destructive commands.
+- Never commit credentials. Checked-in configuration must use placeholders and `.example` names.
+- Each write-capable coding agent gets its own Git worktree by default.
+- OpenCode, Pi, Claude Code, and Codex are independent integrations; do not make one mandatory.
+- Do not claim model/profile support that an agent does not expose natively.
+- Quake windows must persist processes while hidden. `Ctrl+`` is owned by the OS adapter, not WezTerm.
+- Platform automation is untested until manually validated on that platform; label it accordingly.
+- Prefer official, version-specific documentation before using unstable operating-system or tool APIs.
+- Bootstrap scripts must be idempotent and must not silently install Homebrew or use curl-to-shell.
+- Run relevant tests and ShellCheck after changes when those tools are available.
+- Do not commit unless the user explicitly asks.

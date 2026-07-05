@@ -1,0 +1,24 @@
+# Intent-only examples. Agent adapters must validate actual support.
+[profiles.local-fast]
+provider = "ollama"
+model = "replace-with-installed-model"
+base_url = "http://127.0.0.1:11434"
+
+[profiles.local-coder]
+provider = "lm-studio"
+model = "replace-with-loaded-coder-model"
+base_url = "http://127.0.0.1:1234/v1"
+
+[profiles.cloud-fast]
+provider = "agent-native"
+model = "replace-with-provider-model"
+
+[profiles.cloud-reasoning]
+provider = "openai-compatible-gateway"
+model = "replace-with-reasoning-model"
+base_url = "https://gateway.example.invalid/v1"
+
+[profiles.review]
+provider = "agent-native"
+model = "replace-with-review-model"
+

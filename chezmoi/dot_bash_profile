@@ -1,0 +1,5 @@
+# Login shells also load the shared interactive configuration.
+if [ -f "$HOME/.bashrc" ]; then
+  . "$HOME/.bashrc"
+fi
+
