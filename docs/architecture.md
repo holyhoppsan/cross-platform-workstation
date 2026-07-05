@@ -1,68 +1,49 @@
 # Architecture
 
-## Goals and invariants
+## Goals and Invariants
 
-This repository owns a consistent interaction model while allowing each operating system to retain its native process, path, window-management, and credential systems. WezTerm owns terminal multiplexing and named workspaces. Bash owns portable command-line behavior. chezmoi deploys user files. A small native adapter on each platform owns only the global `Ctrl+`` shortcut and dropdown placement.
+This repository builds a workstation in explicit phases. Phase 0 establishes the repository foundation. Phase 1 establishes a common Bash workflow. Later phases add terminal, editor, file manager, IDE, worktree, AI agent, notification, model, and hardening behavior.
 
-Windows is not a Unix compatibility target. Git for Windows Bash is the interactive shell, but Unreal Editor, build tools, Explorer, PowerShell, and `cmd.exe` remain native Windows executables using Windows paths. WSL paths and WSL processes are outside the design.
+Windows remains native. Git for Windows Bash is used for the Unix-style interactive workflow, but Windows-native tools keep using Windows-native paths when required. WSL paths and WSL dependencies are outside the design.
 
-## Component boundaries
+Shared behavior belongs in `chezmoi/`. Operating-system automation belongs in `platform/`. Optional tools and future integrations may have placeholders, but they must not become required before their phase is implemented.
 
-### chezmoi source
+## Component Boundaries
 
-`chezmoi/` is the deployable source of truth. `.chezmoi.toml.tmpl` records platform facts without secrets. Bash startup loads small modules from `~/.config/workstation/`. WezTerm chooses a shell from the runtime platform and provides one key map everywhere; macOS Command keys are optional OS conventions, not the primary workflow.
+### PLAN.md
 
-### WezTerm
+`PLAN.md` is the operational source of truth. It records phases, requirements, status, validation, risks, deferred work, and next actions. Future Codex sessions must read it before changing code.
 
-WezTerm owns tabs, panes, workspaces, titles, and status rendering. The Quake window is identified by the dedicated `quake` workspace and a stable GUI window title. WezTerm does not register the global hotkey because terminal key handlers cannot operate while another application is focused.
+### Setup Entrypoints
 
-The first slice renders the current workspace and reads agent state later through a stable cache contract. Project tab orchestration, agent-attention traversal, and rich state parsing are subsequent phases because they require tested WezTerm callback and CLI behavior.
+`setup`, `setup.sh`, and `setup.ps1` are thin entrypoints. They parse a phase and dry-run flag, detect the host platform, call modular helpers under `scripts/setup/`, and then run the doctor for the selected phase.
 
-### Native Quake adapters
+The setup layer is intentionally conservative in Phase 0/1. It verifies and reports; it does not silently install package managers, does not install WSL, and does not overwrite user configuration.
 
-Each adapter must implement the same state machine:
+### Shared Bash
 
-1. Find the foreground application and its monitor.
-2. Find or spawn the persistent WezTerm GUI window attached to workspace `quake`.
-3. If that dropdown is foreground, hide it without closing it.
-4. Otherwise move it to the target monitor's work area, size it to approximately 95% by 55%, show, raise, and focus it.
+`chezmoi/dot_bashrc` and `chezmoi/dot_bash_profile` load modules from `~/.config/workstation/` after chezmoi applies them:
 
-The platform directories currently expose documented stubs only. This is deliberate: foreground-monitor and window APIs are version-sensitive and cannot be represented as working until validated on Windows 11, macOS, and supported GNOME Shell releases.
+- `platform.sh`: platform, shell, and Git Bash detection
+- `shell.sh`: safe interactive defaults, aliases, PATH handling, tool availability checks
+- `functions.sh`: helpers and future-phase stubs
 
-### Shell and platform detection
+Shell helpers must quote variables and preserve paths containing spaces.
 
-`~/.config/workstation/platform.sh` uses `uname` and Windows environment markers. It exports one normalized value: `windows`, `macos`, `ubuntu`, or `linux`. The library is side-effect-light and testable with injected uname values. Windows helpers use `cygpath`; they never rewrite arguments implicitly.
+### Doctor
 
-### Agents and worktrees
+`scripts/doctor` runs the same doctor implementation that chezmoi can expose as `workstation-doctor`. The doctor is phase-aware. For Phase 0 and Phase 1 it checks only required foundation and shell behavior. Later phases are reported as not implemented rather than pretending validation exists.
 
-The target agent launcher treats OpenCode, Pi, Claude Code, and Codex as peer tools. Profiles describe intent and provider endpoints, but adapters translate only capabilities a given CLI actually supports. Secrets remain in environment variables, native agent configuration, or an OS credential store.
+### Platform Placeholders
 
-Every write-capable launch creates or selects a distinct Git worktree. Shared read-only control and review processes may operate from the primary checkout. Agent state is written atomically outside repositories under `${XDG_CACHE_HOME:-~/.cache}/workstation/agents/`; WezTerm consumes summaries from there.
+`platform/windows`, `platform/macos`, and `platform/ubuntu` hold OS-specific bootstrap and future Quake adapter placeholders. Platform UI behavior is unvalidated until tested on the actual platform.
 
-### Configuration and trust
+### Future Phases
 
-Checked-in TOML files are examples. Local values, API keys, engine locations, and endpoint credentials are ignored. Bootstrap and doctor scripts must redact secret values and report only presence. Installers use package managers and pinned repositories where practical; they do not pipe downloaded scripts into a shell.
+WezTerm, Quake mode, Neovim, Yazi, Rider, worktree commands, AI agents, notifications, and model tooling are future phases. Placeholder directories may exist so the repository shape is stable, but functional implementations must wait for their phase.
 
-## Important tradeoffs
+## Verification Policy
 
-- Native window adapters duplicate a small amount of logic, but provide reliable focused-monitor behavior that portable terminal configuration cannot.
-- Bash is the common shell even though macOS ships an old Bash; scripts therefore target conservative Bash syntax. Homebrew Bash is preferred when installed.
-- GNOME Shell extensions are tied to Shell API versions. The Ubuntu adapter will declare supported versions and fail visibly on unknown versions instead of guessing.
-- State files are more portable than terminal-process introspection. Atomic, minimal files avoid leaking prompts or task contents.
-- Project workspace creation is deferred until its process-spawn and naming behavior can be integration-tested; the base key map works without it.
+Portable tests can validate parsing, platform detection, path conversion, setup argument parsing, config shape, and doctor behavior. They do not validate GUI hotkeys, focused-monitor placement, macOS Spaces, Ubuntu Wayland, Windows virtual desktops, or tool-specific integrations.
 
-## Platform boundaries
-
-| Concern | Windows 11 | macOS | Ubuntu GNOME |
-|---|---|---|---|
-| Shell | Git for Windows Bash | Homebrew Bash, then system Bash | system Bash |
-| Global hotkey | AutoHotkey v2 | Hammerspoon | GNOME Shell extension |
-| Paths | explicit `cygpath` conversion | POSIX | POSIX |
-| Package manager | winget | existing Homebrew | apt plus documented WezTerm source |
-| Window API validation | Windows virtual desktops | Spaces and permissions | Wayland and Shell versions |
-| Unreal | primary, native tools | helper-only future scope | helper-only future scope |
-
-## Verification policy
-
-Portable tests exercise detection and configuration structure. Platform UI behavior requires the manual matrices listed in the implementation plan. Passing repository tests is not evidence that a global shortcut, focused-monitor placement, virtual desktop, Spaces, or Wayland behavior has been validated.
-
+Never mark platform-specific behavior as validated unless it was actually tested on that platform.

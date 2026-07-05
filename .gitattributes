@@ -1,0 +1,14 @@
+* text=auto
+
+*.bash text eol=lf
+*.sh text eol=lf
+setup text eol=lf
+scripts/doctor text eol=lf
+chezmoi/dot_config/workstation/doctor text eol=lf
+chezmoi/dot_local/bin/executable_workstation-doctor text eol=lf
+
+*.ps1 text eol=crlf
+*.md text eol=lf
+*.toml text eol=lf
+*.lua text eol=lf
+

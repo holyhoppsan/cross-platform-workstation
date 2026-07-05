@@ -2,5 +2,5 @@
 set -u
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 export XDG_CONFIG_HOME="$repo_root/chezmoi/dot_config"
+export WORKSTATION_REPO_ROOT="$repo_root"
 exec "$repo_root/chezmoi/dot_config/workstation/doctor" "$@"
-

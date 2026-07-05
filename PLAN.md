@@ -216,9 +216,9 @@ Do not include Yazi in the AI agent list.
 
 | Phase | Name                                      | Status                                    |
 | ----- | ----------------------------------------- | ----------------------------------------- |
-| 0     | Repository foundation                     | Implemented but needs tracker audit       |
-| 1     | Common shell workflow                     | Implemented but needs manual validation   |
-| 2     | WezTerm baseline with tmux-style bindings | Implemented but needs manual validation   |
+| 0     | Repository foundation                     | Implemented and locally validated         |
+| 1     | Common shell workflow                     | Implemented and validated on Windows; needs macOS/Ubuntu validation |
+| 2     | WezTerm baseline with tmux-style bindings | Not started                               |
 | 3     | Quake-mode dropdown                       | Stubbed                                   |
 | 4     | Neovim baseline                           | Not started                               |
 | 5     | Yazi baseline                             | Not started                               |
@@ -269,7 +269,7 @@ Optional convenience entrypoint:
 
 ## Phase 0: Repository Foundation
 
-Status: Implemented but needs tracker audit
+Status: Implemented and locally validated
 
 Goal: Create the repository structure, documentation, setup entrypoints, config examples, and doctor command skeleton.
 
@@ -318,47 +318,44 @@ Tasks:
 * [x] Create PLAN.md.
 * [x] Create docs/architecture.md.
 * [x] Create docs/implementation-plan.md.
-* [ ] Create docs/provisioning.md.
-* [ ] Create setup entrypoint.
-* [ ] Create setup.sh.
-* [ ] Create setup.ps1.
+* [x] Create docs/provisioning.md.
+* [x] Create setup entrypoint.
+* [x] Create setup.sh.
+* [x] Create setup.ps1.
 * [x] Create scripts/doctor.
-* [ ] Create scripts/setup/.
+* [x] Create scripts/setup/.
 * [x] Create config/workstation.example.toml.
-* [ ] Create config/agents.example.toml.
+* [x] Create config/agents.example.toml.
 * [x] Create config/models.example.toml.
 * [x] Create .gitignore.
 * [x] Create .editorconfig.
 * [x] Create initial test structure.
-* [ ] Add dry-run support to setup where practical.
-* [ ] Add OS detection to setup.
-* [ ] Add phase selection to setup.
+* [x] Add dry-run support to setup where practical.
+* [x] Add OS detection to setup.
+* [x] Add phase selection to setup.
 * [x] Add basic doctor output.
 
 Validation:
 
 * [x] Repository has clear structure.
-* [ ] `doctor` runs without crashing.
-* [ ] Setup scripts detect OS and selected phase.
-* [ ] Setup scripts support dry-run mode.
+* [x] `doctor` runs without crashing.
+* [x] Setup scripts detect OS and selected phase.
+* [x] Setup scripts support dry-run mode.
 * [x] No secrets are committed.
 * [x] Platform-specific sections are isolated.
 
 Notes:
 
-* This phase is partially implemented by existing repository files.
-* Setup entrypoints are still missing and remain unchecked.
-* `docs/provisioning.md` is still missing.
-* 2026-07-05: `scripts/doctor --phase foundation` runs under Git for Windows Bash after fixing an existing syntax typo, but exits nonzero because `wezterm`, `chezmoi`, and the managed `~/.bashrc` are missing in the current environment.
+* Phase 0 is implemented for the repository foundation and local Windows Git Bash validation passed on 2026-07-05.
+* Setup is conservative: it verifies and reports, but does not silently install package managers or overwrite user configuration.
 
 Deferred items:
 
-* Full setup framework implementation remains pending.
-* Complete per-platform bootstrap behavior remains pending.
+* Package installation and per-platform bootstrap automation remain pending for later phases.
 
 ## Phase 1: Common Shell Workflow
 
-Status: Implemented but needs manual validation
+Status: Implemented and validated on Windows; needs macOS/Ubuntu validation
 
 Goal: Create a shared Bash-first workflow across Windows, macOS, and Ubuntu.
 
@@ -483,33 +480,41 @@ Tasks:
 * [x] Add tool detection.
 * [x] Add Git Bash detection on Windows.
 * [x] Add Unix-style command availability checks.
-* [ ] Add shell documentation.
+* [x] Add shell documentation.
 * [x] Add `platform-info` helper.
 * [x] Add `workstation-root` helper.
 * [x] Add initial `project` helper stub.
 * [x] Add initial `y` helper stub.
 * [x] Add initial `nv` helper stub.
-* [ ] Add initial `rider` helper stub.
-* [ ] Add initial worktree helper stubs.
-* [ ] Add initial agent helper stubs.
+* [x] Add initial `rider` helper stub.
+* [x] Add initial worktree helper stubs.
+* [x] Add initial agent helper stubs.
 * [x] Add doctor checks for shell phase.
 
 Validation:
 
-* [ ] Windows Git Bash opens and loads shared config.
-* [ ] `ls`, `git`, `rg`, `fd`, and `jq` work from Git Bash when installed.
+* [x] Windows Git Bash opens and loads shared config.
+* [x] `ls`, `git`, `rg`, `fd`, and `jq` work from Git Bash when installed.
 * [ ] macOS Bash loads shared config.
 * [ ] Ubuntu Bash loads shared config.
-* [ ] `platform-info` identifies the platform.
-* [ ] `doctor --phase shell` reports shell status.
-* [ ] Path helpers handle spaces in paths.
+* [x] `platform-info` identifies the platform.
+* [x] `doctor --phase shell` reports shell status.
+* [x] Path helpers handle spaces in paths.
 
 Notes:
 
-* Existing tests cover some platform and helper behavior, but platform-specific manual validation has not been recorded here.
+* Existing tests cover platform and helper behavior under Git for Windows Bash.
 * Do not mark platform behavior as validated until tested on that platform.
-* 2026-07-05: `tests/run.bash` passed under Git for Windows Bash: 11 config tests, 4 function tests, and 4 platform tests.
-* 2026-07-05: `scripts/doctor --phase shell` runs under Git for Windows Bash, but exits nonzero because `wezterm`, `chezmoi`, and the managed `~/.bashrc` are missing in the current environment.
+* 2026-07-05: `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 4 setup tests.
+* 2026-07-05: `scripts/doctor --phase foundation` and `scripts/doctor --phase shell` passed under Git for Windows Bash.
+* 2026-07-05: `setup.sh --phase shell` passed under Git for Windows Bash and only performed verification plus doctor checks.
+* 2026-07-05: User clarified the acceptance bar: on clean Windows, `setup.ps1 -Phase shell` must install or verify Git for Windows, Git Bash, chezmoi, and Phase 1 CLI tools; apply chezmoi; and run automated validation without requiring manual helper checks.
+* 2026-07-05: `setup.ps1` now defaults to `shell`, installs/verifies Windows Phase 1 tools through `winget`, applies chezmoi, and validates the configured interactive Git Bash shell. `setup.sh` also applies chezmoi and validates the interactive shell when Bash already exists.
+* 2026-07-05: `setup.ps1 -Phase shell` passed on this Windows machine. It installed/verified Git Bash, chezmoi, ripgrep, fd, jq, and fzf; applied chezmoi; ran repository tests through Git Bash; and validated the configured interactive Git Bash shell.
+* 2026-07-05: `scripts/setup/verify.ps1 -Phase shell` passed in a separate PowerShell process after setup.
+* 2026-07-05: after Windows provisioning, `fd`, `jq`, and `fzf` are available in configured Git Bash. `fdfind` remains an optional warning on Windows because the command is named `fd`.
+* 2026-07-05: ShellCheck was not available in the validation environment.
+* Automated interactive Git Bash validation passed. A user-opened fresh terminal window is still a useful smoke test but is no longer required to call the Windows path validated.
 
 Deferred items:
 
@@ -517,7 +522,7 @@ Deferred items:
 
 ## Phase 2: WezTerm Baseline with Tmux-Style Bindings
 
-Status: Implemented but needs manual validation
+Status: Not started
 
 Goal: Configure WezTerm as the cross-platform terminal and pane/tab/workspace layer.
 
@@ -596,22 +601,22 @@ Deliverables:
 
 Tasks:
 
-* [x] Add WezTerm config directory.
-* [x] Add base wezterm.lua.
-* [x] Add platform-aware shell startup.
-* [x] Configure Git Bash startup on Windows.
-* [x] Configure Bash startup on macOS/Ubuntu.
-* [x] Add tmux-style leader key.
-* [x] Add split bindings.
-* [x] Add pane movement bindings.
-* [x] Add pane resize bindings.
-* [x] Add zoom binding.
-* [x] Add tab bindings.
-* [x] Add copy-mode binding.
-* [x] Add workspace picker.
-* [x] Add placeholder Quake workspace identity.
+* [x] Add WezTerm config directory placeholder.
+* [ ] Add base wezterm.lua.
+* [ ] Add platform-aware shell startup.
+* [ ] Configure Git Bash startup on Windows.
+* [ ] Configure Bash startup on macOS/Ubuntu.
+* [ ] Add tmux-style leader key.
+* [ ] Add split bindings.
+* [ ] Add pane movement bindings.
+* [ ] Add pane resize bindings.
+* [ ] Add zoom binding.
+* [ ] Add tab bindings.
+* [ ] Add copy-mode binding.
+* [ ] Add workspace picker.
+* [ ] Add placeholder Quake workspace identity.
 * [ ] Add docs/wezterm.md.
-* [x] Add doctor checks for WezTerm.
+* [ ] Add doctor checks for WezTerm.
 
 Validation:
 
@@ -626,7 +631,8 @@ Validation:
 
 Notes:
 
-* Configuration exists, but interactive WezTerm behavior still requires manual validation.
+* WezTerm is intentionally not implemented in the Phase 0/1 deliverable.
+* `chezmoi/dot_config/wezterm/wezterm.lua` is an explicit non-functional placeholder that fails if loaded.
 
 Deferred items:
 
@@ -1729,7 +1735,7 @@ Initial known risks:
 * Agent CLIs may change their configuration formats over time.
 * Rider executable discovery may differ by install method.
 * Windows paths with spaces must be tested carefully.
-* Doctor phase handling currently needs audit: `--phase foundation` and `--phase shell` ran the same checks during 2026-07-05 validation.
+* Phase 1 shell loading still needs manual validation in fresh interactive shells after chezmoi is applied.
 
 ## Deferred Features
 
@@ -1760,16 +1766,14 @@ This section mirrors and expands the unsupported/deferred policy for quick looku
 
 ## Current Next Actions
 
-Initial next actions:
+Current next actions:
 
-1. Audit Phase 0 checklist against the existing repository.
-2. Fix or refine doctor phase handling so `--phase foundation` and `--phase shell` enforce only the required checks for the selected phase.
-3. Fill remaining Phase 0 gaps: setup entrypoints, setup framework, `docs/provisioning.md`, and `config/agents.example.toml`.
-4. Install or expose required tools for local validation where appropriate: `wezterm`, `chezmoi`, and managed Bash config.
-5. Validate shell workflow on Windows Git Bash.
-6. Validate shell workflow on macOS Bash.
-7. Validate shell workflow on Ubuntu Bash.
-8. Update PLAN.md with results.
+1. Optionally open a fresh Git Bash window manually and run `doctor --phase shell` as a user smoke test.
+2. Validate Phase 1 on macOS Bash and update the Phase 1 validation checklist.
+3. Validate Phase 1 on Ubuntu GNOME Bash and update the Phase 1 validation checklist.
+4. Decide whether Phase 2 should replace the current WezTerm placeholder with the first real `wezterm.lua`.
+5. Begin Phase 2 once the Windows validation result is accepted and macOS/Ubuntu are either validated or explicitly deferred.
+6. Keep `PLAN.md` updated after each implementation or validation session.
 
 ## PLAN.md Update Rules
 
@@ -1805,8 +1809,40 @@ Format:
 
 ### 2026-07-05
 
-- Summary of changes: Added `PLAN.md` as the root canonical implementation tracker and requirements record; linked it from `README.md`; updated `AGENTS.md` with mandatory `PLAN.md` workflow rules; fixed an existing missing-brace syntax typo in the doctor script.
-- Phases touched: Phase 0, Phase 1, repository-wide tracking.
-- Validation performed: `tests/run.bash` passed under Git for Windows Bash: 11 config tests, 4 function tests, and 4 platform tests. `scripts/doctor --phase foundation` and `scripts/doctor --phase shell` both ran under Git for Windows Bash without a syntax crash.
-- Known gaps: Doctor exits nonzero in the current environment because `wezterm`, `chezmoi`, and the managed `~/.bashrc` are missing. Doctor phase handling needs audit because foundation and shell checks currently produce the same required failures. Platform-specific behavior remains manually unvalidated unless explicitly recorded.
-- Next actions: Audit Phase 0 checklist, refine doctor phase handling, add missing setup/provisioning files, and perform manual platform validation.
+- Summary of changes: Completed the Phase 0/1 deliverable: setup entrypoints, setup helper skeleton, provisioning and shell docs, `config/agents.example.toml`, Phase 0/1 example config defaults, shared Bash helpers, explicit future-phase helper stubs, phase-aware doctor checks, repository skeleton placeholders, tests, and `.gitattributes` line-ending policy. Later phases remain placeholders only. WezTerm has an explicit non-functional placeholder so Phase 2 is not accidentally represented as implemented.
+- Phases touched: Phase 0, Phase 1, Phase 2 placeholder correction, repository-wide tracking.
+- Validation performed: `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 4 setup tests. `scripts/doctor --phase foundation` passed. `scripts/doctor --phase shell` passed with warnings for missing optional tools `fd`, `fdfind`, `jq`, and `fzf`. `setup.sh --phase shell` passed. `setup.ps1 -Phase foundation -DryRun` and `setup.ps1 -Phase shell -DryRun` passed.
+- Known gaps: macOS and Ubuntu validation has not been performed. Fresh interactive shell loading after chezmoi apply has not been manually validated. ShellCheck was not available in the validation environment. Later phases are not implemented. Optional Phase 1 tools may be absent and are reported as warnings.
+- Next actions: Apply and validate Bash config in fresh shells, validate macOS and Ubuntu, then start Phase 2 only after updating this tracker with validation results.
+
+### 2026-07-05
+
+- Summary of changes: Updated setup behavior after Windows validation showed `chezmoi` was missing. `setup.sh` and `setup.ps1` now default to Phase 1 (`shell`) instead of stopping at Phase 0, detect missing `chezmoi`, and support explicit Windows installation with `--install-missing` / `-InstallMissing`.
+- Phases touched: Phase 0, Phase 1.
+- Validation performed: `tests/run.bash` passed under Git for Windows Bash after setup changes: 13 config tests, 6 function tests, 5 platform tests, and 7 setup tests. `setup.sh --dry-run`, `setup.sh --phase shell --install-missing --dry-run`, `setup.ps1 -DryRun`, and `setup.ps1 -Phase shell -InstallMissing -DryRun` passed.
+- Known gaps: Need to rerun setup/tests and then validate `chezmoi apply` in a fresh Git Bash session.
+- Next actions: Run `./setup.sh --phase shell --install-missing`, then apply chezmoi and verify fresh-shell helpers.
+
+### 2026-07-05
+
+- Summary of changes: Revised the Phase 1 Windows setup model so `setup.ps1 -Phase shell` is the clean-machine bootstrap path. It now installs/verifies Git for Windows, Git Bash, chezmoi, ripgrep, fd, jq, and fzf through `winget`; applies chezmoi; runs repository tests through Git Bash; and validates a configured interactive Git Bash shell. `setup.sh` also applies chezmoi and validates the configured shell when Bash already exists.
+- Phases touched: Phase 0, Phase 1.
+- Validation performed: `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 16 setup tests. `setup.ps1 -DryRun`, `setup.ps1 -Phase shell -DryRun`, `setup.ps1 -Phase foundation -DryRun`, and `setup.sh --dry-run` passed. PowerShell scripts parsed successfully. `git diff --check` passed.
+- Known gaps: The real non-dry `setup.ps1 -Phase shell` has not been run yet because it may install packages and apply dotfiles. macOS and Ubuntu validation remain untested.
+- Next actions: Run `setup.ps1 -Phase shell` with user approval, then record whether automated Windows provisioning passed.
+
+### 2026-07-05
+
+- Summary of changes: Completed the Windows Phase 1 provisioning path. Fixed winget discovery through the WindowsApps alias, resolved winget-installed executable locations, persisted discovered command directories into the user PATH, fixed chezmoi apply to use the repository source explicitly, and exported `WORKSTATION_REPO_ROOT` during configured-shell validation.
+- Phases touched: Phase 1.
+- Validation performed: `setup.ps1 -Phase shell` passed end-to-end and was rerun successfully as an idempotency check. `scripts/setup/verify.ps1 -Phase shell` passed in a separate PowerShell process. Repository tests passed through Git Bash. Configured interactive Git Bash validation passed with required tools available: Git, Bash, chezmoi-applied shell config, ripgrep, fd, jq, and fzf.
+- Known gaps: macOS and Ubuntu validation remain untested. `fdfind` remains an optional warning on Windows because Windows uses `fd`.
+- Next actions: Accept Windows Phase 1 as validated, optionally smoke-test a fresh Git Bash window, then move to Phase 2 or defer macOS/Ubuntu validation explicitly.
+
+### 2026-07-05
+
+- Summary of changes: Fixed installed `doctor` repo-root detection after manual testing showed `doctor --phase shell` failed from the repository root unless `WORKSTATION_REPO_ROOT` was set. The doctor now checks `WORKSTATION_REPO_ROOT`, then the current Git worktree root, then walks upward from the current directory before falling back to its installed path.
+- Phases touched: Phase 1.
+- Validation performed: `setup.ps1 -Phase shell` passed and applied the updated doctor. An interactive Git Bash command from `/c/work/cross-platform-workstation` ran `doctor --phase shell` successfully with all required checks passing.
+- Known gaps: Git Bash instances launched from an already-running PowerShell process may not inherit newly persisted user PATH entries until the parent process is refreshed; newly opened Git Bash windows should see them. macOS and Ubuntu validation remain untested.
+- Next actions: User can rerun `doctor --phase shell` from a fresh Git Bash window at the repo root as a final smoke test.

@@ -1,0 +1,35 @@
+[agents.opencode]
+enabled = false
+executable = "opencode"
+supports_local_models = false
+supports_cloud_models = false
+supports_mcp = false
+
+[agents.pi]
+enabled = false
+executable = "pi"
+supports_local_models = false
+supports_cloud_models = false
+supports_mcp = false
+
+[agents.claude]
+enabled = false
+executable = "claude"
+supports_local_models = false
+supports_cloud_models = false
+supports_mcp = false
+
+[agents.codex]
+enabled = false
+executable = "codex"
+supports_local_models = false
+supports_cloud_models = false
+supports_mcp = false
+
+[agents.goose]
+enabled = false
+executable = "goose"
+supports_local_models = false
+supports_cloud_models = false
+supports_mcp = false
+

@@ -3,6 +3,8 @@ set -u
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 # shellcheck source=test_helper.bash
 . "$repo_root/tests/test_helper.bash"
+# shellcheck source=../chezmoi/dot_config/workstation/platform.sh
+. "$repo_root/chezmoi/dot_config/workstation/platform.sh"
 # shellcheck source=../chezmoi/dot_config/workstation/functions.sh
 . "$repo_root/chezmoi/dot_config/workstation/functions.sh"
 
@@ -20,5 +22,9 @@ cygpath() {
 }
 assert_eq 'C:\work path\file.txt' "$(winpath '/c/work path/file.txt')" 'Windows conversion preserves one argument'
 assert_eq '/c/work path/file.txt' "$(unixpath 'C:\work path\file.txt')" 'Unix conversion preserves one argument'
-finish_tests
 
+project >/tmp/project-stub.out 2>&1
+assert_eq 64 "$?" 'project helper is an explicit stub'
+agent >/tmp/agent-stub.out 2>&1
+assert_eq 64 "$?" 'agent helper is an explicit stub'
+finish_tests

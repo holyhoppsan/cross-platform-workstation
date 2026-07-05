@@ -8,7 +8,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 
 assert_eq windows "$(workstation_detect_platform MINGW64_NT-10.0)" 'detects Git Bash'
 assert_eq windows "$(workstation_detect_platform MSYS_NT-10.0)" 'detects MSYS'
+assert_eq windows "$(workstation_detect_platform CYGWIN_NT-10.0)" 'detects Cygwin-like Windows shell as Windows'
 assert_eq macos "$(workstation_detect_platform Darwin)" 'detects macOS'
 assert_eq unknown "$(workstation_detect_platform Plan9)" 'handles unknown kernels'
 finish_tests
-
