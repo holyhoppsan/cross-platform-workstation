@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -u
+
+config_dir=${XDG_CONFIG_HOME:-$HOME/.config}/workstation
+if [ -r "$config_dir/platform.sh" ]; then
+  # shellcheck source=platform.sh
+  . "$config_dir/platform.sh"
+else
+  script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+  # shellcheck source=platform.sh
+  . "$script_dir/platform.sh"
+fi
+
+failures=0
+ok() { printf '[ok]   %-20s %s\n' "$1" "$2"; }
+warn() { printf '[warn] %-20s %s\n' "$1" "$2"; }
+fail() { printf '[fail] %-20s %s\n' "$1" "$2"; failures=$((failures + 1)); }
+version_of() { "$1" --version 2>/dev/null | head -n 1; }
+required_tool() {
+  if command -v "$1" >/dev/null 2>&1; then ok "$1" "$(version_of "$1")"; else fail "$1" 'not found'; fi
+}
+optional_tool() {
+  if command -v "$1" >/dev/null 2>&1; then ok "$1" "$(version_of "$1")"; else warn "$1" 'optional; not found'; fi
+}
+
+ok 'operating system' "$WORKSTATION_OS"
+ok 'architecture' "$(uname -m 2>/dev/null || printf unknown)"
+ok 'shell' "${SHELL:-${COMSPEC:-unknown}}"
+if [ -n "${BASH_VERSION:-}" ]; then ok 'bash' "$BASH_VERSION"; else fail 'bash' 'doctor must run under Bash'; fi
+required_tool git
+required_tool wezterm
+required_tool chezmoi
+
+if [ "$WORKSTATION_OS" = windows ]; then
+  git_bash=$(workstation_git_bash_path 2>/dev/null || true)
+  if [ -n "$git_bash" ]; then ok 'Git Bash path' "$git_bash"; else fail 'Git Bash path' 'not detected'; fi
+elif [ "$WORKSTATION_OS" = ubuntu ]; then
+  gnome=${GNOME_SHELL_SESSION_MODE:-}
+  if command -v gnome-shell >/dev/null 2>&1; then gnome=$(gnome-shell --version 2>/dev/null); fi
+  [ -n "$gnome" ] && ok 'GNOME' "$gnome" || warn 'GNOME' 'version unavailable'
+  ok 'session type' "${XDG_SESSION_TYPE:-unknown}"
+fi
+
+warn 'Quake adapter' 'Phase 1 interface stub; not installed'
+for tool in opencode pi claude codex; do optional_tool "$tool"; done
+optional_tool ollama
+if [ -n "${LM_STUDIO_API_BASE:-${OPENAI_BASE_URL:-}}" ]; then ok 'local endpoint' 'configured (value redacted)'; else warn 'local endpoint' 'not configured'; fi
+
+local_config=${WORKSTATION_CONFIG:-$HOME/.config/workstation/workstation.toml}
+if [ -r "$local_config" ]; then ok 'local config' "$local_config"; else warn 'local config' 'not present; Unreal paths are unconfigured'; fi
+
+for file in "$HOME/.bashrc" "${XDG_CONFIG_HOME:-$HOME/.config}/wezterm/wezterm.lua"; do
+  if [ -r "$file" ]; then ok 'managed file' "$file"; else fail 'managed file' "$file is missing"; fi
+done
+
+for tool in rg fd fdfind jq fzf uv node cmake ninja shellcheck; do optional_tool "$tool"; done
+
+if [ "$failures" -gt 0 ]; then
+  printf '\n%d required check(s) failed.\n' "$failures" >&2
+  exit 1
+fi
+printf '\nRequired checks passed; warnings are optional or planned features.\n'

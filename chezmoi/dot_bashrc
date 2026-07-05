@@ -1,0 +1,15 @@
+# workstation managed Bash configuration
+case $- in
+  *i*) ;;
+  *) return ;;
+esac
+
+_workstation_config="${XDG_CONFIG_HOME:-$HOME/.config}/workstation"
+for _workstation_module in platform.sh shell.sh functions.sh; do
+  if [ -r "$_workstation_config/$_workstation_module" ]; then
+    # shellcheck source=/dev/null
+    . "$_workstation_config/$_workstation_module"
+  fi
+done
+unset _workstation_config _workstation_module
+

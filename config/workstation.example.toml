@@ -1,0 +1,11 @@
+[unreal]
+engine_root = ""
+editor_path = ""
+visual_studio_tools = ""
+
+[notifications]
+desktop = false
+
+[agents]
+state_directory = ""
+
