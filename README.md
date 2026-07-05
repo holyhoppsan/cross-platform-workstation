@@ -2,7 +2,7 @@
 
 Phased workstation setup for Windows 11, macOS, and Ubuntu GNOME.
 
-The current deliverable implements Phase 0 and Phase 1 only:
+The current deliverable implements Phases 0 through 2:
 
 - repository foundation
 - persistent implementation tracker
@@ -12,9 +12,10 @@ The current deliverable implements Phase 0 and Phase 1 only:
 - Git Bash detection on Windows
 - Unix-style command availability checks
 - phase-aware doctor command
+- WezTerm baseline with tmux-style bindings
 - initial portable tests
 
-Later phases for WezTerm, Quake mode, Neovim, Yazi, Rider, worktrees, agents, model tooling, and hardening are documented in [PLAN.md](PLAN.md), but they are not implemented yet except as placeholders.
+Later phases for Quake mode, Neovim, Yazi, Rider, worktrees, agents, model tooling, and hardening are documented in [PLAN.md](PLAN.md), but they are not implemented yet except as placeholders.
 
 Windows remains native. Git for Windows Bash is the shell target. WSL is not installed or required. Git for Windows is a prerequisite for cloning and running this repository; setup verifies it but does not install it.
 
@@ -29,6 +30,7 @@ Useful docs:
 - [implementation plan narrative](docs/implementation-plan.md)
 - [provisioning](docs/provisioning.md)
 - [shell workflow](docs/shell.md)
+- [WezTerm](docs/wezterm.md)
 
 ## Phase 0 and Phase 1 Setup
 
@@ -38,6 +40,7 @@ Windows, from PowerShell:
 ./setup.ps1 -Phase foundation -DryRun
 ./setup.ps1 -Phase shell -DryRun
 ./setup.ps1 -Phase shell
+./setup.ps1 -Phase wezterm
 ```
 
 On Windows, install Git for Windows first, clone this repository, then run `setup.ps1 -Phase shell`. Setup verifies Git and Git Bash, installs or verifies chezmoi and Phase 1 CLI tools with `winget`, backs up known Phase 1 shell targets, applies chezmoi, then validates the configured Git Bash shell automatically. It never installs WSL or Git.
@@ -48,6 +51,7 @@ Windows, from Git Bash:
 ./setup --phase foundation --dry-run
 ./setup --phase shell --dry-run
 ./setup --phase shell --install-missing
+./setup --phase wezterm --install-missing
 ```
 
 macOS / Ubuntu:
@@ -55,6 +59,7 @@ macOS / Ubuntu:
 ```bash
 ./setup.sh --phase foundation --dry-run
 ./setup.sh --phase shell --dry-run
+./setup.sh --phase wezterm --dry-run
 ```
 
 Dry-run mode reports what would happen. Non-dry-run mode verifies prerequisites and prints the next manual steps; it does not install package managers, does not install WSL, and does not overwrite user configuration.
@@ -72,6 +77,7 @@ Run the phase-aware doctor:
 ```bash
 ./scripts/doctor --phase foundation
 ./scripts/doctor --phase shell
+./scripts/doctor --phase wezterm
 ```
 
 After setup completes, these helpers should be available in a fresh Git Bash session:

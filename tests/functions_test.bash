@@ -27,4 +27,17 @@ project >/tmp/project-stub.out 2>&1
 assert_eq 64 "$?" 'project helper is an explicit stub'
 agent >/tmp/agent-stub.out 2>&1
 assert_eq 64 "$?" 'agent helper is an explicit stub'
+
+shell_config=$(cat "$repo_root/chezmoi/dot_config/workstation/shell.sh")
+assert_contains "$shell_config" 'Microsoft/WinGet/Links' 'Windows shell adds winget links directory'
+assert_contains "$shell_config" 'workstation/env.sh' 'shell loads machine-local workstation env'
+
+functions_config=$(cat "$repo_root/chezmoi/dot_config/workstation/functions.sh")
+assert_contains "$functions_config" 'workstation_load_env' 'functions can load machine-local workstation env'
+
+doctor_config=$(cat "$repo_root/chezmoi/dot_config/workstation/doctor")
+assert_contains "$doctor_config" 'workstation_load_env' 'doctor can load machine-local workstation env'
+
+WORKSTATION_REPO_ROOT="$repo_root"
+assert_eq "$repo_root" "$(workstation-root)" 'workstation-root uses configured repository root'
 finish_tests

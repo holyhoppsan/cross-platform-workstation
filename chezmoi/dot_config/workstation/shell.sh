@@ -20,6 +20,15 @@ path_prepend() {
 path_prepend "$HOME/.local/bin"
 path_prepend "$HOME/bin"
 
+if [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/workstation/env.sh" ]; then
+  # shellcheck source=env.sh
+  . "${XDG_CONFIG_HOME:-$HOME/.config}/workstation/env.sh"
+fi
+
+if [ "${WORKSTATION_OS:-}" = windows ] && command -v cygpath >/dev/null 2>&1 && [ -n "${LOCALAPPDATA:-}" ]; then
+  path_prepend "$(cygpath -u "$LOCALAPPDATA")/Microsoft/WinGet/Links"
+fi
+
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'

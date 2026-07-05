@@ -1,7 +1,7 @@
 [features]
 foundation = true
 bash = true
-wezterm = false
+wezterm = true
 quake_mode = false
 neovim = false
 yazi = false

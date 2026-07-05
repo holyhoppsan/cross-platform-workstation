@@ -12,6 +12,9 @@ shell_output=$("$repo_root/setup.sh" --phase shell --dry-run)
 assert_contains "$shell_output" 'phase: shell' 'setup.sh parses shell phase'
 assert_contains "$shell_output" 'install_missing: false' 'setup.sh reports install-missing default'
 
+wezterm_output=$("$repo_root/setup.sh" --phase wezterm --dry-run)
+assert_contains "$wezterm_output" 'phase: wezterm' 'setup.sh parses wezterm phase'
+
 default_output=$("$repo_root/setup.sh" --dry-run)
 assert_contains "$default_output" 'phase: shell' 'setup.sh defaults to current implemented phase'
 
@@ -20,9 +23,12 @@ assert_contains "$install_output" 'install_missing: true' 'setup.sh parses insta
 
 powershell_setup=$(cat "$repo_root/setup.ps1")
 assert_contains "$powershell_setup" "[string]\$Phase = 'shell'" 'setup.ps1 defaults to shell phase'
+assert_contains "$powershell_setup" "'wezterm'" 'setup.ps1 accepts wezterm phase'
 assert_contains "$powershell_setup" 'Ensure-WindowsPhaseOneTools' 'setup.ps1 verifies Windows Phase 1 prerequisites'
+assert_contains "$powershell_setup" 'Ensure-WindowsWezTerm' 'setup.ps1 verifies Windows WezTerm'
 assert_contains "$powershell_setup" 'Invoke-ChezmoiApply' 'setup.ps1 applies chezmoi'
 assert_contains "$powershell_setup" 'Invoke-WindowsShellValidation' 'setup.ps1 validates configured Git Bash'
+assert_contains "$powershell_setup" 'Invoke-WindowsWezTermValidation' 'setup.ps1 validates WezTerm phase'
 
 reset_windows=$(cat "$repo_root/scripts/setup/reset-windows.ps1")
 assert_contains "$reset_windows" '[switch]$Apply' 'reset-windows requires explicit apply switch'
@@ -36,12 +42,18 @@ assert_contains "$common_ps1" "PackageId 'twpayne.chezmoi'" 'Windows bootstrap k
 assert_contains "$common_ps1" 'Do not install WSL or Git' 'Windows bootstrap documents Git as prerequisite'
 assert_contains "$common_ps1" 'Backup-ChezmoiManagedTargets' 'setup.ps1 backs up managed dotfiles before chezmoi apply'
 assert_contains "$common_ps1" 'apply --force' 'setup.ps1 forces chezmoi apply after backup'
+assert_contains "$common_ps1" "PackageId 'wez.wezterm'" 'Windows bootstrap knows WezTerm package'
+assert_contains "$common_ps1" 'Write-WorkstationEnv' 'setup.ps1 writes machine-local repo root env'
 
 common_sh=$(cat "$repo_root/scripts/setup/common.sh")
 assert_contains "$common_sh" 'setup_apply_chezmoi' 'setup.sh has chezmoi apply helper'
 assert_contains "$common_sh" 'setup_backup_chezmoi_targets' 'setup.sh backs up managed dotfiles before chezmoi apply'
 assert_contains "$common_sh" 'apply --force' 'setup.sh forces chezmoi apply after backup'
+assert_contains "$common_sh" 'WORKSTATION_REPO_ROOT' 'setup.sh writes machine-local repo root env'
 assert_contains "$common_sh" 'setup_validate_interactive_shell' 'setup.sh has interactive shell validation helper'
+
+wezterm_phase=$(cat "$repo_root/scripts/setup/phases/wezterm.sh")
+assert_contains "$wezterm_phase" 'wez.wezterm' 'setup.sh WezTerm phase knows Windows package'
 
 detect_output=$("$repo_root/scripts/setup/detect-platform.sh")
 case "$detect_output" in

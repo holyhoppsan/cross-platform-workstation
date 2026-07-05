@@ -3,9 +3,9 @@ set -u
 
 usage() {
   cat <<'EOF'
-usage: doctor [--phase foundation|shell|all] [--help]
+usage: doctor [--phase foundation|shell|wezterm|all] [--help]
 
-Later phases are documented in PLAN.md but are not implemented in this deliverable.
+Later phases are documented in PLAN.md but are not implemented yet.
 EOF
 }
 
@@ -34,9 +34,9 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$phase" in
-  foundation|shell|all) ;;
-  wezterm|quake|neovim|yazi|rider|project|agents|models)
-    printf '[fail] %-24s %s\n' "phase $phase" 'not implemented in Phase 0/1 deliverable'
+  foundation|shell|wezterm|all) ;;
+  quake|neovim|yazi|rider|project|agents|models)
+    printf '[fail] %-24s %s\n' "phase $phase" 'not implemented yet'
     exit 2
     ;;
   *)
@@ -64,6 +64,13 @@ else
   . "$script_dir/functions.sh"
 fi
 
+if command -v workstation_load_env >/dev/null 2>&1; then
+  workstation_load_env
+elif [ -z "${WORKSTATION_REPO_ROOT:-}" ] && [ -r "$config_dir/env.sh" ]; then
+  # shellcheck source=env.sh
+  . "$config_dir/env.sh"
+fi
+
 failures=0
 warnings=0
 
@@ -89,6 +96,17 @@ optional_command() {
   else
     warn "$1" 'optional; not found'
   fi
+}
+
+find_command() {
+  local candidate
+  for candidate in "$@"; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      command -v "$candidate"
+      return 0
+    fi
+  done
+  return 1
 }
 
 repo_root() {
@@ -174,9 +192,48 @@ check_shell() {
   warn 'future helpers' 'project, y, nv, rider, wt-*, agent, and agent-notify are stubs'
 }
 
+check_wezterm() {
+  check_shell
+
+  local root wezterm_cmd config_path
+  root=$(repo_root)
+  config_path="${XDG_CONFIG_HOME:-$HOME/.config}/wezterm/wezterm.lua"
+  if [ ! -r "$config_path" ] && [ -r "$root/chezmoi/dot_config/wezterm/wezterm.lua" ]; then
+    config_path="$root/chezmoi/dot_config/wezterm/wezterm.lua"
+  fi
+
+  wezterm_cmd=$(find_command wezterm wezterm.exe || true)
+  if [ -n "$wezterm_cmd" ]; then
+    ok 'wezterm' "$("$wezterm_cmd" --version 2>/dev/null | head -n 1)"
+  else
+    fail 'wezterm' 'not found'
+  fi
+
+  if [ -r "$config_path" ]; then
+    ok 'WezTerm config' "$config_path"
+    if grep -q 'intentionally not implemented' "$config_path"; then
+      fail 'WezTerm config' 'placeholder failure is still present'
+    fi
+  else
+    fail 'WezTerm config' 'wezterm.lua missing'
+  fi
+
+  if [ -n "$wezterm_cmd" ] && [ -r "$config_path" ]; then
+    if "$wezterm_cmd" --config-file "$config_path" show-keys --lua >/dev/null 2>&1; then
+      ok 'WezTerm config load' 'show-keys --lua succeeded'
+    else
+      fail 'WezTerm config load' 'show-keys --lua failed'
+    fi
+  fi
+
+  warn 'Quake mode' 'deferred to Phase 3'
+  warn 'Yazi/Neovim bindings' 'bindings call helper stubs until Phases 4 and 5'
+}
+
 case "$phase" in
   foundation) check_foundation ;;
-  shell|all) check_shell ;;
+  shell) check_shell ;;
+  wezterm|all) check_wezterm ;;
 esac
 
 if [ "$failures" -gt 0 ]; then

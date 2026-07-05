@@ -8,11 +8,13 @@ Supported entrypoints:
 ./setup --phase foundation
 ./setup.sh --phase shell
 ./setup.sh --phase shell --install-missing
+./setup.sh --phase wezterm --install-missing
 ```
 
 ```powershell
 ./setup.ps1 -Phase foundation
 ./setup.ps1 -Phase shell
+./setup.ps1 -Phase wezterm
 ```
 
 On Windows, install Git for Windows first, clone this repository, then use `setup.ps1` as the primary bootstrap entrypoint. `setup.sh` is useful after Git Bash exists, but it cannot bootstrap a machine before Bash exists.
@@ -86,3 +88,18 @@ For Phase 1, setup backs up the known managed targets before forcing chezmoi app
 - `~/.local/bin/workstation-doctor`
 
 When later phases require tools, setup should prefer verification first and document explicit installation steps.
+
+## Phase 2
+
+Phase 2 provisions and verifies the WezTerm baseline.
+
+Expected behavior:
+
+- verify Phase 1 prerequisites
+- install or verify WezTerm on Windows with winget package `wez.wezterm`
+- apply chezmoi dotfiles
+- verify `wezterm` or `wezterm.exe`
+- verify `wezterm.lua` is present and no longer contains the intentional placeholder failure
+- run `doctor --phase wezterm`
+
+On macOS and Ubuntu, setup currently verifies that WezTerm is installed; automatic package installation is deferred until platform validation.

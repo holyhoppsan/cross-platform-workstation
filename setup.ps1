@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('foundation', 'shell', 'all')]
+    [ValidateSet('foundation', 'shell', 'wezterm', 'all')]
     [string]$Phase = 'shell',
     [switch]$DryRun,
     [switch]$SkipInstall,
@@ -21,7 +21,7 @@ Write-SetupInfo "skip_apply: $($SkipApply.IsPresent)"
 
 Test-FoundationPhase -RepoRoot $RepoRoot
 
-if ($Phase -in @('shell', 'all')) {
+if ($Phase -in @('shell', 'wezterm', 'all')) {
     if ($Platform -eq 'windows') {
         if ($SkipInstall) {
             Test-ShellPhase -RepoRoot $RepoRoot -Platform $Platform
@@ -29,16 +29,45 @@ if ($Phase -in @('shell', 'all')) {
             Ensure-WindowsPhaseOneTools -DryRun:$DryRun
         }
 
-        if ($SkipApply) {
-            Write-SetupInfo 'skipping chezmoi apply by request'
+        if ($Phase -in @('shell', 'all')) {
+            if ($SkipApply) {
+                Write-SetupInfo 'skipping chezmoi apply by request'
+            } else {
+                Invoke-ChezmoiApply -RepoRoot $RepoRoot -DryRun:$DryRun
+            }
+
+            Invoke-WindowsShellValidation -RepoRoot $RepoRoot -DryRun:$DryRun
+        }
+    } else {
+        Test-ShellPhase -RepoRoot $RepoRoot -Platform $Platform
+        if ($Phase -in @('shell', 'all')) {
+            if (-not $SkipApply) {
+                Invoke-ChezmoiApply -RepoRoot $RepoRoot -DryRun:$DryRun
+            }
+        }
+    }
+}
+
+if ($Phase -in @('wezterm', 'all')) {
+    if ($Platform -eq 'windows') {
+        if ($SkipInstall) {
+            Write-SetupInfo 'skipping WezTerm install/verify by request'
         } else {
+            Ensure-WindowsWezTerm -DryRun:$DryRun
+        }
+
+        if ($SkipApply) {
+            Write-SetupInfo 'skipping WezTerm config apply by request'
+        } elseif ($Phase -eq 'wezterm') {
             Invoke-ChezmoiApply -RepoRoot $RepoRoot -DryRun:$DryRun
         }
 
-        Invoke-WindowsShellValidation -RepoRoot $RepoRoot -DryRun:$DryRun
+        Invoke-WindowsWezTermValidation -RepoRoot $RepoRoot -DryRun:$DryRun
     } else {
-        Test-ShellPhase -RepoRoot $RepoRoot -Platform $Platform
-        if (-not $SkipApply) {
+        if (-not (Get-Command wezterm -ErrorAction SilentlyContinue)) {
+            throw 'WezTerm is required for Phase 2. Install it with your platform package manager, then rerun setup.'
+        }
+        if (-not $SkipApply -and $Phase -eq 'wezterm') {
             Invoke-ChezmoiApply -RepoRoot $RepoRoot -DryRun:$DryRun
         }
     }
