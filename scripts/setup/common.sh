@@ -60,7 +60,7 @@ setup_backup_chezmoi_targets() {
   timestamp=$(date +%Y%m%d-%H%M%S)
   backup_root="$HOME/.workstation-setup-backup/$timestamp"
 
-  for target in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.config/workstation" "$HOME/.local/bin/workstation-doctor"; do
+  for target in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.config/workstation" "$HOME/.config/wezterm" "$HOME/.local/bin/workstation-doctor"; do
     [ -e "$target" ] || continue
     relative=${target#/}
     relative=${relative//\//_}

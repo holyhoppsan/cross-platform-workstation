@@ -661,6 +661,7 @@ Notes:
 * 2026-07-05: User found two-stroke split bindings too clunky. Added one-stroke direct split bindings matching tmux symbols: `Ctrl+|` for left/right and `Ctrl+-` for top/bottom, while preserving the tmux-style `Ctrl+A` bindings. The failed `Ctrl+Shift+\` experiment was replaced because it targeted the physical key rather than the mapped tmux symbol.
 * 2026-07-05: User manually validated that `Ctrl+Shift+|` splits left/right and `Ctrl+-` splits top/bottom. User also found `Ctrl+Shift+-` reduced the window/font size, which is expected because shifted minus is `_` rather than the tmux `-` symbol; added `Ctrl+_` and leader `_` fallbacks so holding Shift on minus splits instead of invoking the default size behavior.
 * 2026-07-05: User manually validated the Windows WezTerm GUI bindings: direct split shortcuts, tmux-style split bindings, pane movement, pane resize, zoom/unzoom, tab create/select, close-pane confirmation, copy/paste, right-click paste, workspace picker, and `quake` workspace placeholder all work.
+* 2026-07-05: Setup/reset validation was extended for Phase 2. Setup now backs up `~/.config/wezterm` before forced chezmoi apply. `reset-windows.ps1` accepts `-Phase wezterm`, removes or backs up `~/.config/wezterm`, and includes WezTerm package removal only when `-RemovePackages` is provided. Git is still never removed. User manually validated the full destructive reset/reinstall loop with `-Apply -RemovePackages`.
 
 Deferred items:
 
@@ -1796,10 +1797,10 @@ This section mirrors and expands the unsupported/deferred policy for quick looku
 
 Current next actions:
 
-1. Validate Phase 2 on macOS Bash and update the Phase 2 validation checklist.
-2. Validate Phase 2 on Ubuntu GNOME Bash and update the Phase 2 validation checklist.
-3. Decide whether to commit the Windows-validated Phase 2 state now or continue with a small close-pane no-confirm binding.
-4. Begin Phase 3 after Phase 2 is committed or explicitly accepted with macOS/Ubuntu pending.
+1. Decide whether to commit the Phase 2 setup/reset validation hardening.
+2. Validate Phase 2 on macOS Bash and update the Phase 2 validation checklist.
+3. Validate Phase 2 on Ubuntu GNOME Bash and update the Phase 2 validation checklist.
+4. Begin Phase 3 after Phase 2 setup/reset hardening is committed or explicitly accepted with macOS/Ubuntu pending.
 5. Keep `PLAN.md` updated after each implementation or validation session.
 
 ## PLAN.md Update Rules
@@ -1953,3 +1954,11 @@ Format:
 - Validation performed: `setup.ps1 -Phase wezterm` passed. `tests/run.bash` passed under Git for Windows Bash with 13 config tests, 11 function tests, 5 platform tests, 32 setup tests, and 27 WezTerm tests. User manually validated Windows WezTerm GUI behavior: Git Bash startup, repo-root doctor from `~`, pane splits, pane movement, pane resize, zoom, tabs, close-pane confirmation, copy/paste, right-click paste, workspace picker, and `quake` workspace placeholder.
 - Known gaps: macOS and Ubuntu Phase 2 validation remain untested. Quake dropdown remains deferred to Phase 3. Yazi and Neovim bindings intentionally call stubs until later phases.
 - Next actions: Commit and push Phase 2, then begin Phase 3 or defer macOS/Ubuntu validation explicitly.
+
+### 2026-07-05
+
+- Summary of changes: Hardened setup/reset handling for Phase 2. Setup backup logic now includes the managed WezTerm config directory, and `reset-windows.ps1` now supports `-Phase wezterm`/`all`, includes `~/.config/wezterm` in cleanup targets, and includes setup-managed WezTerm package removal only behind `-RemovePackages`.
+- Phases touched: Phase 2, Phase 11 hardening precursor.
+- Validation performed: `setup.ps1 -Phase wezterm -DryRun` passed and showed WezTerm config backup. `reset-windows.ps1 -Phase wezterm` dry-run passed and showed WezTerm config cleanup. `reset-windows.ps1 -Phase wezterm -RemovePackages` dry-run passed and showed setup-managed WezTerm package removal while still not removing Git. User then ran `reset-windows.ps1 -Phase wezterm -Apply -RemovePackages`, which backed up/removed managed files and uninstalled chezmoi, ripgrep, fd, jq, fzf, and WezTerm without removing Git. `setup.ps1 -Phase wezterm` then reinstalled/verifed Phase 1 tools plus WezTerm, applied chezmoi, and passed `doctor --phase wezterm`. `tests/run.bash` passed with 38 setup tests and 27 WezTerm tests. `git diff --check` passed with only expected CRLF warnings for PowerShell scripts.
+- Known gaps: macOS and Ubuntu remain untested.
+- Next actions: Commit and push the Phase 2 setup/reset hardening, then proceed to Phase 3 or defer macOS/Ubuntu validation explicitly.

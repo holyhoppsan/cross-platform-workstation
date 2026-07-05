@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('shell')]
+    [ValidateSet('shell', 'wezterm', 'all')]
     [string]$Phase = 'shell',
     [switch]$Apply,
     [switch]$RemovePackages,
@@ -86,6 +86,10 @@ $targets = @(
     (Join-Path $HOME '.local/share/chezmoi')
 )
 
+if ($Phase -in @('wezterm', 'all')) {
+    $targets += Join-Path $HOME '.config/wezterm'
+}
+
 foreach ($target in $targets) {
     if (Test-Path -LiteralPath $target) {
         Invoke-ResetAction "remove or back up $target" {
@@ -102,12 +106,15 @@ if ($RemovePackages) {
     Uninstall-WingetPackage -Id 'sharkdp.fd' -Name 'fd'
     Uninstall-WingetPackage -Id 'jqlang.jq' -Name 'jq'
     Uninstall-WingetPackage -Id 'junegunn.fzf' -Name 'fzf'
+    if ($Phase -in @('wezterm', 'all')) {
+        Uninstall-WingetPackage -Id 'wez.wezterm' -Name 'WezTerm'
+    }
 }
 
 if (-not $Apply) {
     Write-Host ''
     Write-Host 'Dry run only. Re-run with -Apply to perform the reset.'
-    Write-Host 'Use -RemovePackages to uninstall setup-managed Phase 1 packages. Git is never removed by this script.'
+    Write-Host 'Use -RemovePackages to uninstall setup-managed packages for the selected phase. Git is never removed by this script.'
 } else {
     Write-Host ''
     Write-Host 'Reset completed.'
