@@ -214,37 +214,67 @@ function Ensure-WindowsPackageCommand {
 }
 
 function Ensure-WindowsGitBash {
-    param([switch]$DryRun)
-
     $bash = Get-WindowsGitBashPath
     if ($bash) {
         Write-SetupInfo "Git Bash already available: $bash"
         return $bash
     }
 
-    Install-WingetPackage -Id 'Git.Git' -Name 'Git for Windows' -DryRun:$DryRun
-    if ($DryRun) {
-        return $null
-    }
-
-    $bash = Get-WindowsGitBashPath
-    if (-not $bash) {
-        throw 'Git for Windows was installed, but Git Bash could not be found. Open a new PowerShell window and rerun setup.'
-    }
-    return $bash
+    throw 'Git for Windows Bash is required before setup. Install Git for Windows, clone this repository, then rerun setup.'
 }
 
 function Ensure-WindowsPhaseOneTools {
     param([switch]$DryRun)
 
-    # Do not install WSL. Windows Phase 1 uses native Git for Windows Bash.
-    Ensure-WindowsGitBash -DryRun:$DryRun | Out-Null
-    Ensure-WindowsPackageCommand -Command 'git.exe' -PackageId 'Git.Git' -Name 'Git' -DryRun:$DryRun
+    # Do not install WSL or Git. Windows Phase 1 assumes this repo was cloned with Git for Windows.
+    Ensure-WindowsGitBash | Out-Null
+    if (-not (Test-CommandAvailable -Name 'git.exe')) {
+        throw 'Git is required before setup. Install Git for Windows, clone this repository, then rerun setup.'
+    }
+    Write-SetupInfo 'Git already available'
     Ensure-WindowsPackageCommand -Command 'chezmoi.exe' -PackageId 'twpayne.chezmoi' -Name 'chezmoi' -DryRun:$DryRun
     Ensure-WindowsPackageCommand -Command 'rg.exe' -PackageId 'BurntSushi.ripgrep.MSVC' -Name 'ripgrep' -DryRun:$DryRun
     Ensure-WindowsPackageCommand -Command 'fd.exe' -PackageId 'sharkdp.fd' -Name 'fd' -DryRun:$DryRun
     Ensure-WindowsPackageCommand -Command 'jq.exe' -PackageId 'jqlang.jq' -Name 'jq' -DryRun:$DryRun
     Ensure-WindowsPackageCommand -Command 'fzf.exe' -PackageId 'junegunn.fzf' -Name 'fzf' -DryRun:$DryRun
+}
+
+function Backup-ChezmoiManagedTargets {
+    param(
+        [switch]$DryRun
+    )
+
+    $timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+    $backupRoot = Join-Path $HOME ".workstation-setup-backup\$timestamp"
+    $targets = @(
+        (Join-Path $HOME '.bashrc'),
+        (Join-Path $HOME '.bash_profile'),
+        (Join-Path $HOME '.config/workstation'),
+        (Join-Path $HOME '.local/bin/workstation-doctor')
+    )
+
+    foreach ($target in $targets) {
+        if (-not (Test-Path -LiteralPath $target)) {
+            continue
+        }
+
+        $resolved = Resolve-Path -LiteralPath $target
+        $relativeName = ($resolved.Path -replace '^[A-Za-z]:\\', '') -replace '[\\/:*?"<>| ]+', '_'
+        $backupTarget = Join-Path $backupRoot $relativeName
+
+        if ($DryRun) {
+            Write-SetupInfo "would back up $target to $backupTarget before forced chezmoi apply"
+            continue
+        }
+
+        Write-SetupInfo "backing up $target to $backupTarget"
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $backupTarget) | Out-Null
+        if ((Get-Item -LiteralPath $resolved.Path).PSIsContainer) {
+            Copy-Item -LiteralPath $resolved.Path -Destination $backupTarget -Recurse -Force
+        } else {
+            Copy-Item -LiteralPath $resolved.Path -Destination $backupTarget -Force
+        }
+    }
 }
 
 function Invoke-ChezmoiApply {
@@ -258,7 +288,8 @@ function Invoke-ChezmoiApply {
 
     if ($DryRun) {
         Write-SetupInfo "would run: chezmoi init --source `"$source`""
-        Write-SetupInfo 'would run: chezmoi apply'
+        Backup-ChezmoiManagedTargets -DryRun
+        Write-SetupInfo 'would run: chezmoi apply --force'
         return
     }
 
@@ -273,8 +304,10 @@ function Invoke-ChezmoiApply {
         throw 'chezmoi init failed.'
     }
 
-    Write-SetupInfo 'applying chezmoi dotfiles'
-    & $chezmoi --source $source apply
+    Backup-ChezmoiManagedTargets
+
+    Write-SetupInfo 'applying chezmoi dotfiles with --force'
+    & $chezmoi --source $source apply --force
     if ($LASTEXITCODE -ne 0) {
         throw 'chezmoi apply failed.'
     }

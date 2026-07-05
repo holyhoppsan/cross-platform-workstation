@@ -20,17 +20,27 @@ assert_contains "$install_output" 'install_missing: true' 'setup.sh parses insta
 
 powershell_setup=$(cat "$repo_root/setup.ps1")
 assert_contains "$powershell_setup" "[string]\$Phase = 'shell'" 'setup.ps1 defaults to shell phase'
-assert_contains "$powershell_setup" 'Ensure-WindowsPhaseOneTools' 'setup.ps1 installs or verifies Windows Phase 1 tools'
+assert_contains "$powershell_setup" 'Ensure-WindowsPhaseOneTools' 'setup.ps1 verifies Windows Phase 1 prerequisites'
 assert_contains "$powershell_setup" 'Invoke-ChezmoiApply' 'setup.ps1 applies chezmoi'
 assert_contains "$powershell_setup" 'Invoke-WindowsShellValidation' 'setup.ps1 validates configured Git Bash'
 
+reset_windows=$(cat "$repo_root/scripts/setup/reset-windows.ps1")
+assert_contains "$reset_windows" '[switch]$Apply' 'reset-windows requires explicit apply switch'
+assert_contains "$reset_windows" '[switch]$RemovePackages' 'reset-windows makes package removal explicit'
+assert_not_contains "$reset_windows" 'RemoveGit' 'reset-windows has no Git removal switch'
+assert_not_contains "$reset_windows" "Git.Git" 'reset-windows never uninstalls Git'
+
 common_ps1=$(cat "$repo_root/scripts/setup/common.ps1")
-assert_contains "$common_ps1" "PackageId 'Git.Git'" 'Windows bootstrap knows Git package'
+assert_not_contains "$common_ps1" "PackageId 'Git.Git'" 'setup.ps1 never installs Git'
 assert_contains "$common_ps1" "PackageId 'twpayne.chezmoi'" 'Windows bootstrap knows chezmoi package'
-assert_contains "$common_ps1" 'Do not install WSL' 'placeholder'
+assert_contains "$common_ps1" 'Do not install WSL or Git' 'Windows bootstrap documents Git as prerequisite'
+assert_contains "$common_ps1" 'Backup-ChezmoiManagedTargets' 'setup.ps1 backs up managed dotfiles before chezmoi apply'
+assert_contains "$common_ps1" 'apply --force' 'setup.ps1 forces chezmoi apply after backup'
 
 common_sh=$(cat "$repo_root/scripts/setup/common.sh")
 assert_contains "$common_sh" 'setup_apply_chezmoi' 'setup.sh has chezmoi apply helper'
+assert_contains "$common_sh" 'setup_backup_chezmoi_targets' 'setup.sh backs up managed dotfiles before chezmoi apply'
+assert_contains "$common_sh" 'apply --force' 'setup.sh forces chezmoi apply after backup'
 assert_contains "$common_sh" 'setup_validate_interactive_shell' 'setup.sh has interactive shell validation helper'
 
 detect_output=$("$repo_root/scripts/setup/detect-platform.sh")
