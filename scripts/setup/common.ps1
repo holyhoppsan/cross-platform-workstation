@@ -256,6 +256,7 @@ function Backup-ChezmoiManagedTargets {
         (Join-Path $HOME '.bashrc'),
         (Join-Path $HOME '.bash_profile'),
         (Join-Path $HOME '.config/workstation'),
+        (Join-Path $HOME '.config/wezterm'),
         (Join-Path $HOME '.local/bin/workstation-doctor')
     )
 
