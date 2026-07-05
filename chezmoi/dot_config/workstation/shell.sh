@@ -18,6 +18,7 @@ path_prepend() {
 }
 
 path_prepend "$HOME/.local/bin"
+path_prepend "$HOME/bin"
 
 alias ll='ls -alF'
 alias la='ls -A'
@@ -30,3 +31,6 @@ if command -v fzf >/dev/null 2>&1; then
   export FZF_DEFAULT_OPTS="${FZF_DEFAULT_OPTS:---height=40% --layout=reverse --border}"
 fi
 
+if command -v rg >/dev/null 2>&1; then
+  export RIPGREP_CONFIG_PATH="${RIPGREP_CONFIG_PATH:-}"
+fi

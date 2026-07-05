@@ -1,6 +1,50 @@
 #!/usr/bin/env bash
 set -u
 
+usage() {
+  cat <<'EOF'
+usage: doctor [--phase foundation|shell|all] [--help]
+
+Later phases are documented in PLAN.md but are not implemented in this deliverable.
+EOF
+}
+
+phase=all
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --phase)
+      [ "$#" -ge 2 ] || { printf 'doctor: --phase requires a value\n' >&2; exit 2; }
+      phase=$2
+      shift 2
+      ;;
+    --phase=*)
+      phase=${1#--phase=}
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'doctor: unknown argument: %s\n' "$1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+case "$phase" in
+  foundation|shell|all) ;;
+  wezterm|quake|neovim|yazi|rider|project|agents|models)
+    printf '[fail] %-24s %s\n' "phase $phase" 'not implemented in Phase 0/1 deliverable'
+    exit 2
+    ;;
+  *)
+    printf 'doctor: unknown phase: %s\n' "$phase" >&2
+    exit 2
+    ;;
+esac
+
 config_dir=${XDG_CONFIG_HOME:-$HOME/.config}/workstation
 if [ -r "$config_dir/platform.sh" ]; then
   # shellcheck source=platform.sh
@@ -11,52 +55,133 @@ else
   . "$script_dir/platform.sh"
 fi
 
-failures=0
-ok() { printf '[ok]   %-20s %s\n' "$1" "$2"; }
-warn() { printf '[warn] %-20s %s\n' "$1" "$2"; }
-fail() { printf '[fail] %-20s %s\n' "$1" "$2"; failures=$((failures + 1)); }
-version_of() { "$1" --version 2>/dev/null | head -n 1; }
-required_tool() {
-  if command -v "$1" >/dev/null 2>&1; then ok "$1" "$(version_of "$1")"; else fail "$1" 'not found'; fi
-}
-optional_tool() {
-  if command -v "$1" >/dev/null 2>&1; then ok "$1" "$(version_of "$1")"; else warn "$1" 'optional; not found'; fi
-}
-
-ok 'operating system' "$WORKSTATION_OS"
-ok 'architecture' "$(uname -m 2>/dev/null || printf unknown)"
-ok 'shell' "${SHELL:-${COMSPEC:-unknown}}"
-if [ -n "${BASH_VERSION:-}" ]; then ok 'bash' "$BASH_VERSION"; else fail 'bash' 'doctor must run under Bash'; fi
-required_tool git
-required_tool wezterm
-required_tool chezmoi
-
-if [ "$WORKSTATION_OS" = windows ]; then
-  git_bash=$(workstation_git_bash_path 2>/dev/null || true)
-  if [ -n "$git_bash" ]; then ok 'Git Bash path' "$git_bash"; else fail 'Git Bash path' 'not detected'; fi
-elif [ "$WORKSTATION_OS" = ubuntu ]; then
-  gnome=${GNOME_SHELL_SESSION_MODE:-}
-  if command -v gnome-shell >/dev/null 2>&1; then gnome=$(gnome-shell --version 2>/dev/null); fi
-  [ -n "$gnome" ] && ok 'GNOME' "$gnome" || warn 'GNOME' 'version unavailable'
-  ok 'session type' "${XDG_SESSION_TYPE:-unknown}"
+if [ -r "$config_dir/functions.sh" ]; then
+  # shellcheck source=functions.sh
+  . "$config_dir/functions.sh"
+else
+  script_dir=${script_dir:-$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)}
+  # shellcheck source=functions.sh
+  . "$script_dir/functions.sh"
 fi
 
-warn 'Quake adapter' 'Phase 1 interface stub; not installed'
-for tool in opencode pi claude codex; do optional_tool "$tool"; done
-optional_tool ollama
-if [ -n "${LM_STUDIO_API_BASE:-${OPENAI_BASE_URL:-}}" ]; then ok 'local endpoint' 'configured (value redacted)'; else warn 'local endpoint' 'not configured'; fi
+failures=0
+warnings=0
 
-local_config=${WORKSTATION_CONFIG:-$HOME/.config/workstation/workstation.toml}
-if [ -r "$local_config" ]; then ok 'local config' "$local_config"; else warn 'local config' 'not present; Unreal paths are unconfigured'; fi
+ok() { printf '[ok]   %-24s %s\n' "$1" "$2"; }
+warn() { warnings=$((warnings + 1)); printf '[warn] %-24s %s\n' "$1" "$2"; }
+fail() { failures=$((failures + 1)); printf '[fail] %-24s %s\n' "$1" "$2"; }
 
-for file in "$HOME/.bashrc" "${XDG_CONFIG_HOME:-$HOME/.config}/wezterm/wezterm.lua"; do
-  if [ -r "$file" ]; then ok 'managed file' "$file"; else fail 'managed file' "$file is missing"; fi
-done
+version_of() {
+  "$1" --version 2>/dev/null | head -n 1
+}
 
-for tool in rg fd fdfind jq fzf uv node cmake ninja shellcheck; do optional_tool "$tool"; done
+require_command() {
+  if command -v "$1" >/dev/null 2>&1; then
+    ok "$1" "$(version_of "$1")"
+  else
+    fail "$1" 'not found'
+  fi
+}
+
+optional_command() {
+  if command -v "$1" >/dev/null 2>&1; then
+    ok "$1" "$(version_of "$1")"
+  else
+    warn "$1" 'optional; not found'
+  fi
+}
+
+repo_root() {
+  if [ -n "${WORKSTATION_REPO_ROOT:-}" ]; then
+    printf '%s\n' "$WORKSTATION_REPO_ROOT"
+    return 0
+  fi
+
+  local root
+  root=$(git rev-parse --show-toplevel 2>/dev/null || true)
+  if [ -n "$root" ] && [ -r "$root/PLAN.md" ]; then
+    printf '%s\n' "$root"
+    return 0
+  fi
+
+  root=$PWD
+  while [ "$root" != "/" ] && [ -n "$root" ]; do
+    if [ -r "$root/PLAN.md" ] && [ -r "$root/README.md" ]; then
+      printf '%s\n' "$root"
+      return 0
+    fi
+    root=$(dirname -- "$root")
+  done
+
+  CDPATH= cd -- "$(dirname -- "$0")/../../.." && pwd
+}
+
+check_foundation() {
+  ok 'operating system' "$WORKSTATION_OS"
+  ok 'architecture' "$(uname -m 2>/dev/null || printf unknown)"
+  ok 'shell' "${SHELL:-${COMSPEC:-unknown}}"
+  if [ -n "${BASH_VERSION:-}" ]; then ok 'bash' "$BASH_VERSION"; else fail 'bash' 'doctor must run under Bash'; fi
+  require_command git
+
+  local root
+  root=$(repo_root)
+  [ -r "$root/README.md" ] && ok 'README.md' 'present' || fail 'README.md' 'missing'
+  [ -r "$root/PLAN.md" ] && ok 'PLAN.md' 'present' || fail 'PLAN.md' 'missing'
+  [ -r "$root/AGENTS.md" ] && ok 'AGENTS.md' 'present' || fail 'AGENTS.md' 'missing'
+  [ -r "$root/docs/architecture.md" ] && ok 'architecture doc' 'present' || fail 'architecture doc' 'missing'
+  [ -r "$root/docs/provisioning.md" ] && ok 'provisioning doc' 'present' || fail 'provisioning doc' 'missing'
+  [ -r "$root/docs/shell.md" ] && ok 'shell doc' 'present' || fail 'shell doc' 'missing'
+  [ -r "$root/config/workstation.example.toml" ] && ok 'workstation config' 'example present' || fail 'workstation config' 'missing'
+  [ -r "$root/config/agents.example.toml" ] && ok 'agents config' 'example present' || fail 'agents config' 'missing'
+  [ -r "$root/config/models.example.toml" ] && ok 'models config' 'example present' || fail 'models config' 'missing'
+}
+
+check_shell() {
+  check_foundation
+
+  if [ "$WORKSTATION_OS" = windows ]; then
+    if workstation_is_git_bash; then ok 'Git Bash session' 'detected'; else fail 'Git Bash session' 'not detected; run from Git for Windows Bash'; fi
+    local git_bash
+    git_bash=$(workstation_git_bash_path 2>/dev/null || true)
+    [ -n "$git_bash" ] && ok 'Git Bash path' "$git_bash" || fail 'Git Bash path' 'not detected'
+  elif [ "$WORKSTATION_OS" = ubuntu ]; then
+    ok 'session type' "$(workstation_session_type)"
+    if command -v gnome-shell >/dev/null 2>&1; then ok 'GNOME Shell' "$(gnome-shell --version 2>/dev/null)"; else warn 'GNOME Shell' 'not detected'; fi
+  elif [ "$WORKSTATION_OS" = macos ]; then
+    optional_command brew
+  fi
+
+  local missing=''
+  missing=$(workstation_check_unix_commands || true)
+  if [ -z "$missing" ]; then
+    ok 'Unix-style commands' 'required commands available'
+  else
+    fail 'Unix-style commands' "missing: $(printf '%s' "$missing" | tr '\n' ' ')"
+  fi
+
+  optional_command rg
+  optional_command fd
+  optional_command fdfind
+  optional_command jq
+  optional_command fzf
+
+  if [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/workstation/platform.sh" ]; then
+    ok 'managed shell config' 'platform.sh readable'
+  else
+    warn 'managed shell config' 'not applied with chezmoi yet'
+  fi
+
+  warn 'future helpers' 'project, y, nv, rider, wt-*, agent, and agent-notify are stubs'
+}
+
+case "$phase" in
+  foundation) check_foundation ;;
+  shell|all) check_shell ;;
+esac
 
 if [ "$failures" -gt 0 ]; then
-  printf '\n%d required check(s) failed.\n' "$failures" >&2
+  printf '\n%d required check(s) failed; %d warning(s).\n' "$failures" "$warnings" >&2
   exit 1
 fi
-printf '\nRequired checks passed; warnings are optional or planned features.\n'
+
+printf '\nRequired checks passed; %d warning(s).\n' "$warnings"

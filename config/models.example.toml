@@ -1,24 +1,34 @@
-# Intent-only examples. Agent adapters must validate actual support.
+[endpoints.ollama]
+enabled = false
+base_url = "http://localhost:11434"
+api_key_env = ""
+
+[endpoints.lm_studio]
+enabled = false
+base_url = "http://localhost:1234/v1"
+api_key_env = ""
+
+[endpoints.openai_compatible_gateway]
+enabled = false
+base_url = ""
+api_key_env = "OPENAI_API_KEY"
+
 [profiles.local-fast]
-provider = "ollama"
-model = "replace-with-installed-model"
-base_url = "http://127.0.0.1:11434"
+endpoint = "ollama"
+model = ""
 
 [profiles.local-coder]
-provider = "lm-studio"
-model = "replace-with-loaded-coder-model"
-base_url = "http://127.0.0.1:1234/v1"
+endpoint = "ollama"
+model = ""
 
 [profiles.cloud-fast]
-provider = "agent-native"
-model = "replace-with-provider-model"
+endpoint = "openai_compatible_gateway"
+model = ""
 
 [profiles.cloud-reasoning]
-provider = "openai-compatible-gateway"
-model = "replace-with-reasoning-model"
-base_url = "https://gateway.example.invalid/v1"
+endpoint = "native-agent-config"
+model = ""
 
 [profiles.review]
-provider = "agent-native"
-model = "replace-with-review-model"
-
+endpoint = "native-agent-config"
+model = ""

@@ -1,3 +1,5 @@
+error('WezTerm is Phase 2 and is intentionally not implemented in the Phase 0/1 deliverable. See PLAN.md.')
+
 local wezterm = require 'wezterm'
 local act = wezterm.action
 local config = wezterm.config_builder and wezterm.config_builder() or {}

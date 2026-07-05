@@ -1,11 +1,46 @@
-[unreal]
-engine_root = ""
-editor_path = ""
-visual_studio_tools = ""
+[features]
+foundation = true
+bash = true
+wezterm = false
+quake_mode = false
+neovim = false
+yazi = false
+rider = false
+agents = false
+unreal_minimal = false
+local_models = false
+tmux = false
 
-[notifications]
-desktop = false
+[editor]
+default = "nvim"
+ide = "rider"
 
-[agents]
-state_directory = ""
+[rider]
+path = ""
+prefer_uproject = true
 
+[paths]
+projects = []
+worktrees = ""
+
+[platform.windows]
+use_winget = true
+install_autohotkey = false
+install_wsl = false
+shell = "git-bash"
+
+[platform.macos]
+use_homebrew = true
+install_homebrew_if_missing = false
+install_hammerspoon = false
+prefer_homebrew_bash = true
+
+[platform.ubuntu]
+use_apt = true
+install_gnome_extension = false
+assume_wayland = true
+
+[terminal]
+backend = "wezterm"
+tmux_enabled = false
+leader = "CTRL+A"

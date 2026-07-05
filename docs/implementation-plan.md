@@ -1,61 +1,48 @@
-# Implementation plan
+# Implementation Plan Narrative
 
-## Phase 1: portable vertical slice
+The actionable tracker is [../PLAN.md](../PLAN.md). This document explains the implementation order and rationale.
 
-- Establish repository structure and durable constraints.
-- Deploy shared Bash and WezTerm configuration with chezmoi.
-- Implement testable platform and Git Bash detection.
-- Define explicit Quake adapter contracts as non-functional stubs.
-- Add a cross-platform doctor command with required versus optional checks.
-- Add portable tests and installation documentation.
+## Phase Strategy
 
-Exit criteria: Bash modules parse, detection tests pass, WezTerm configuration contains the required base bindings, doctor runs without leaking values, and untested adapters are clearly labeled.
+The repository is implemented in slices. Each phase should leave the repo usable and testable without requiring later phases.
 
-## Phase 2: native dropdown adapters and bootstrap
+Phase 0 creates the repository foundation: docs, examples, setup entrypoints, skeleton directories, and doctor/test infrastructure.
 
-- Implement AutoHotkey v2 foreground-monitor placement and startup registration.
-- Implement Hammerspoon placement, Accessibility checks, and safe config loading.
-- Implement a GNOME Shell extension against explicitly supported Shell versions.
-- Add idempotent package-manager bootstrap scripts.
-- Validate the full hotkey state machine manually on each target OS.
+Phase 1 creates the shared Bash workflow: Git Bash support on Windows, conservative Bash defaults, platform detection, path conversion helpers, Unix-style command checks, and stubs for future commands.
 
-Exit criteria: recorded manual results cover focus, multiple monitors, persistence, Windows virtual desktops, macOS Spaces, and GNOME Wayland. Unknown GNOME versions fail with guidance.
+Phases 2 through 11 are intentionally deferred. Their requirements are recorded in `PLAN.md` so future sessions can continue without chat context.
 
-## Phase 3: agent state and launchers
+## Current Deliverable
 
-- Define atomic cache-state schema and implement `agent-notify`.
-- Implement capability-aware adapters for all four agents using current official CLI documentation.
-- Add model-profile parsing without credentials.
-- Add WezTerm status and `Ctrl+A u` attention traversal.
-- Document provider boundaries and credential-store setup.
+The current deliverable implements Phase 0 and Phase 1 only.
 
-Exit criteria: each installed agent can launch independently; unsupported profile/tool combinations fail clearly; state transitions and argument parsing are tested.
+Implemented:
 
-## Phase 4: worktrees and project workspaces
+- root tracker and docs
+- setup entrypoints with phase parsing and dry-run support
+- Windows Phase 1 bootstrap through PowerShell
+- setup helper skeleton
+- example config files
+- Bash startup modules
+- platform detection
+- Git Bash detection
+- Unix-style command availability checks
+- phase-aware doctor
+- automated Windows Git Bash validation after setup
+- initial tests
 
-- Implement `wt-create`, `wt-list`, `wt-remove`, and `wt-open` with path-safe Git calls.
-- Implement `agent-worktree` so write-capable agents never default to one directory.
-- Create CONTROL, IMPLEMENT, TEST, REVIEW, LOGS, and conditional UNREAL tabs.
-- Add destructive-operation guards and temporary-repository integration tests.
+Not implemented:
 
-Exit criteria: parallel agents receive distinct worktrees and removal rejects dirty/unmerged work without an explicit override.
+- WezTerm configuration
+- Quake adapters
+- Neovim configuration
+- Yazi configuration
+- Rider launch helpers
+- project/worktree workflow
+- AI agent launcher
+- agent notifications
+- model endpoint detection
 
-## Phase 5: Unreal and production hardening
+## Why Keep Placeholders
 
-- Add local Unreal/Visual Studio configuration schema.
-- Implement `.uproject` discovery, Explorer opening, editor launch, native builds, and logs.
-- Test quoting with spaces and Git Bash to PowerShell/cmd boundaries.
-- Pin external sources where possible and complete troubleshooting/runbooks.
-
-Exit criteria: manual Windows test builds a sample native Unreal project from Git Bash without path conversion errors; diagnostics remain secret-safe.
-
-## Manual validation matrix
-
-- `Ctrl+`` from a non-terminal application creates, focuses, hides, and restores one persistent dropdown.
-- Active tabs, panes, processes, and agents survive at least ten hide/show cycles.
-- Dropdown follows the focused application across monitors with different scale factors.
-- Windows: repeat across virtual desktops and verify startup registration.
-- macOS: repeat across Spaces/full-screen contexts and verify Accessibility permissions.
-- Ubuntu: test Wayland, record GNOME Shell version, then test X11 if supported.
-- Unreal: invoke a native build and Editor path containing spaces from Git Bash.
-
+The final repository shape is known early, so placeholder directories reduce churn and make future phases easier to discover. Placeholders must remain clearly labeled and must not be represented as working behavior.

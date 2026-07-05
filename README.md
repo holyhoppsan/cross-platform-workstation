@@ -1,43 +1,103 @@
-# workstation
+# cross-platform-workstation
 
-Cross-platform terminal workstation configuration for Windows 11, macOS, and Ubuntu GNOME. It uses WezTerm, Bash, chezmoi, native platform hotkey adapters, and Git worktrees. Windows remains fully native: Git for Windows Bash is used and WSL is neither installed nor required.
+Phased workstation setup for Windows 11, macOS, and Ubuntu GNOME.
 
-## Current status
+The current deliverable implements Phase 0 and Phase 1 only:
 
-Phase 1 is a working configuration slice: shared Bash startup, platform detection, WezTerm leader bindings, chezmoi data, Quake adapter interface stubs, and diagnostics. The global dropdown adapters are intentionally non-functional stubs pending platform-specific implementation and manual validation.
+- repository foundation
+- persistent implementation tracker
+- setup entrypoints
+- shared Bash configuration
+- platform detection
+- Git Bash detection on Windows
+- Unix-style command availability checks
+- phase-aware doctor command
+- initial portable tests
 
-## Try the current slice
+Later phases for WezTerm, Quake mode, Neovim, Yazi, Rider, worktrees, agents, model tooling, and hardening are documented in [PLAN.md](PLAN.md), but they are not implemented yet except as placeholders.
 
-Prerequisites: Git, Bash, chezmoi, and WezTerm. From a clone of this repository:
+Windows remains native. Git for Windows Bash is the shell target. WSL is not installed or required.
 
-```bash
-chezmoi init --source "$PWD/chezmoi"
-chezmoi diff
-chezmoi apply
-workstation-doctor
+## Start Here
+
+`PLAN.md` is the canonical implementation tracker and requirements record. Read it before changing behavior.
+
+Useful docs:
+
+- [PLAN.md](PLAN.md)
+- [architecture](docs/architecture.md)
+- [implementation plan narrative](docs/implementation-plan.md)
+- [provisioning](docs/provisioning.md)
+- [shell workflow](docs/shell.md)
+
+## Phase 0 and Phase 1 Setup
+
+Windows, from PowerShell:
+
+```powershell
+./setup.ps1 -Phase foundation -DryRun
+./setup.ps1 -Phase shell -DryRun
+./setup.ps1 -Phase shell
 ```
 
-On Windows, run these commands in Git Bash. The configuration detects Git Bash and exports helpers for native path conversion:
+On Windows, `setup.ps1 -Phase shell` is the clean-machine bootstrap path. It installs or verifies Git for Windows, Git Bash, chezmoi, and Phase 1 CLI tools with `winget`, applies chezmoi, then validates the configured Git Bash shell automatically. It never installs WSL.
+
+Windows, from Git Bash:
 
 ```bash
-winpath "$PWD"       # C:\... form for native Windows programs
-unixpath 'C:\work'   # /c/work form for Bash tools
+./setup --phase foundation --dry-run
+./setup --phase shell --dry-run
+./setup --phase shell --install-missing
 ```
 
-## Core keys
+macOS / Ubuntu:
 
-Press `Ctrl+A`, release it, then press the second key: `|` or `-` splits; `h/j/k/l` navigates; `H/J/K/L` resizes; `c` creates a tab; `x` closes a pane; `z` zooms; `w` picks a workspace; `r` renames it; `p` creates a workspace from a project directory; `q` switches to the dedicated Quake workspace; `u` selects the next agent pane needing attention; `1..9` selects tabs; `[` enters copy mode; `a` sends literal `Ctrl+A`.
+```bash
+./setup.sh --phase foundation --dry-run
+./setup.sh --phase shell --dry-run
+```
 
-`Ctrl+`` is reserved for the operating-system Quake adapter and is not captured by WezTerm.
+Dry-run mode reports what would happen. Non-dry-run mode verifies prerequisites and prints the next manual steps; it does not install package managers, does not install WSL, and does not overwrite user configuration.
 
-## Repository map
+## Validate
 
-- `chezmoi/`: deployed shell and WezTerm configuration
-- `scripts/`: repository-local diagnostics and, in later phases, workflow commands
-- `platform/`: native dropdown and bootstrap adapters
-- `config/`: non-secret configuration examples
-- `templates/`: agent task contracts
-- `tests/`: portable Bash tests
-- `docs/`: architecture, implementation phases, and operating notes
+Run portable tests from Git Bash, macOS Bash, or Ubuntu Bash:
 
-`PLAN.md` is the canonical implementation tracker and requirements record for the repository. See [PLAN.md](PLAN.md), [architecture](docs/architecture.md), [implementation plan](docs/implementation-plan.md), and [installation notes](docs/installation.md).
+```bash
+./tests/run.bash
+```
+
+Run the phase-aware doctor:
+
+```bash
+./scripts/doctor --phase foundation
+./scripts/doctor --phase shell
+```
+
+After setup completes, these helpers should be available in a fresh Git Bash session:
+
+```bash
+platform-info
+workstation-root
+doctor --phase shell
+winpath "$PWD"      # Windows Git Bash only; passthrough elsewhere
+unixpath 'C:\work'  # Windows Git Bash only; passthrough elsewhere
+```
+
+Automated post-setup validation:
+
+```powershell
+./scripts/setup/verify.ps1 -Phase shell
+```
+
+## Repository Map
+
+- `PLAN.md`: canonical tracker and source of truth
+- `chezmoi/`: shared dotfile source
+- `scripts/`: doctor, setup support, and later workflow commands
+- `config/`: non-secret `.example` configuration
+- `platform/`: operating-system-specific placeholders and future adapters
+- `agents/`: future agent adapter placeholders
+- `tools/`: future tool integration placeholders
+- `docs/`: architecture and operating notes
+- `tests/`: initial portable tests

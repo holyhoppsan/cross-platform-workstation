@@ -4,16 +4,20 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 # shellcheck source=test_helper.bash
 . "$repo_root/tests/test_helper.bash"
 
-wezterm_config=$(cat "$repo_root/chezmoi/dot_config/wezterm/wezterm.lua")
-assert_contains "$wezterm_config" "key = 'a', mods = 'CTRL'" 'defines Ctrl+A leader'
-assert_contains "$wezterm_config" "flags = 'FUZZY|WORKSPACES'" 'defines workspace picker'
-assert_contains "$wezterm_config" "window:active_workspace()" 'shows active workspace'
-assert_contains "$wezterm_config" "name = 'quake'" 'defines dedicated Quake workspace action'
-assert_contains "$wezterm_config" "workstation-next-agent" 'defines agent attention traversal'
-assert_contains "$wezterm_config" "SwitchToWorkspace" 'defines project workspace creation'
+workstation_config=$(cat "$repo_root/config/workstation.example.toml")
+assert_contains "$workstation_config" 'foundation = true' 'foundation feature enabled'
+assert_contains "$workstation_config" 'bash = true' 'bash feature enabled'
+assert_contains "$workstation_config" 'wezterm = false' 'WezTerm deferred'
+assert_contains "$workstation_config" 'install_wsl = false' 'WSL disabled'
+assert_contains "$workstation_config" 'shell = "git-bash"' 'Windows shell is Git Bash'
+
+agents_config=$(cat "$repo_root/config/agents.example.toml")
+assert_contains "$agents_config" '[agents.opencode]' 'OpenCode placeholder exists'
+assert_contains "$agents_config" '[agents.goose]' 'Goose placeholder exists'
 
 models=$(cat "$repo_root/config/models.example.toml")
 for profile in local-fast local-coder cloud-fast cloud-reasoning review; do
-  assert_contains "$models" "[profiles.$profile]" "defines $profile profile"
+  assert_contains "$models" "[profiles.$profile]" "defines $profile model profile"
 done
+assert_contains "$models" 'api_key_env' 'models use environment variable placeholders'
 finish_tests
