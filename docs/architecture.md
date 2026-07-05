@@ -4,7 +4,7 @@
 
 This repository builds a workstation in explicit phases. Phase 0 establishes the repository foundation. Phase 1 establishes a common Bash workflow. Later phases add terminal, editor, file manager, IDE, worktree, AI agent, notification, model, and hardening behavior.
 
-Windows remains native. Git for Windows Bash is used for the Unix-style interactive workflow, but Windows-native tools keep using Windows-native paths when required. WSL paths and WSL dependencies are outside the design.
+Windows remains native. Git for Windows Bash is used for the Unix-style interactive workflow, but Windows-native tools keep using Windows-native paths when required. Git for Windows is a prerequisite for cloning the repository; setup verifies it but does not install or remove it. WSL paths and WSL dependencies are outside the design.
 
 Shared behavior belongs in `chezmoi/`. Operating-system automation belongs in `platform/`. Optional tools and future integrations may have placeholders, but they must not become required before their phase is implemented.
 

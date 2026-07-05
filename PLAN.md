@@ -31,6 +31,7 @@ This repository should eventually allow the user to:
 * [ ] Do not require WSL.
 * [ ] Windows development must remain native.
 * [ ] Windows shell workflow uses Git Bash.
+* [ ] Windows setup assumes Git for Windows is already installed because Git is required to clone this repository.
 * [ ] Common CLI workflow should use Unix-style commands across platforms.
 * [ ] Avoid requiring Windows-specific shell habits such as `dir`.
 * [ ] Prefer `ls`, `cd`, `pwd`, `cat`, `less`, `grep`, `rg`, `fd`, `jq`, `git`, `curl`, `tar`, `unzip`, `mkdir`, `rm`, `cp`, and `mv` across all platforms.
@@ -168,7 +169,7 @@ Platform-specific required tools:
 
 Windows:
 
-* Git for Windows
+* Git for Windows, assumed preinstalled before running repository setup
 * AutoHotkey v2
 * winget, when available
 * PowerShell 7, optional but preferred
@@ -372,6 +373,7 @@ Requirements:
 Windows:
 
 * Use Git for Windows Bash.
+* Assume Git for Windows is already installed before setup runs.
 * Detect the Git Bash executable robustly.
 * Support calling native Windows applications from Bash.
 * Preserve Windows-native paths where native tools require them.
@@ -508,13 +510,17 @@ Notes:
 * 2026-07-05: `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 4 setup tests.
 * 2026-07-05: `scripts/doctor --phase foundation` and `scripts/doctor --phase shell` passed under Git for Windows Bash.
 * 2026-07-05: `setup.sh --phase shell` passed under Git for Windows Bash and only performed verification plus doctor checks.
-* 2026-07-05: User clarified the acceptance bar: on clean Windows, `setup.ps1 -Phase shell` must install or verify Git for Windows, Git Bash, chezmoi, and Phase 1 CLI tools; apply chezmoi; and run automated validation without requiring manual helper checks.
-* 2026-07-05: `setup.ps1` now defaults to `shell`, installs/verifies Windows Phase 1 tools through `winget`, applies chezmoi, and validates the configured interactive Git Bash shell. `setup.sh` also applies chezmoi and validates the interactive shell when Bash already exists.
-* 2026-07-05: `setup.ps1 -Phase shell` passed on this Windows machine. It installed/verified Git Bash, chezmoi, ripgrep, fd, jq, and fzf; applied chezmoi; ran repository tests through Git Bash; and validated the configured interactive Git Bash shell.
+* 2026-07-05: User clarified the acceptance bar: on clean Windows after Git for Windows is installed and the repository is cloned, `setup.ps1 -Phase shell` must verify Git/Git Bash, install or verify chezmoi and Phase 1 CLI tools, apply chezmoi, and run automated validation without requiring manual helper checks.
+* 2026-07-05: `setup.ps1` now defaults to `shell`, verifies Git/Git Bash, installs/verifies setup-managed Windows Phase 1 tools through `winget`, applies chezmoi, and validates the configured interactive Git Bash shell. `setup.sh` also applies chezmoi and validates the interactive shell when Bash already exists.
+* 2026-07-05: `setup.ps1 -Phase shell` passed on this Windows machine. It verified Git/Git Bash, installed/verified chezmoi, ripgrep, fd, jq, and fzf; applied chezmoi; ran repository tests through Git Bash; and validated the configured interactive Git Bash shell.
 * 2026-07-05: `scripts/setup/verify.ps1 -Phase shell` passed in a separate PowerShell process after setup.
 * 2026-07-05: after Windows provisioning, `fd`, `jq`, and `fzf` are available in configured Git Bash. `fdfind` remains an optional warning on Windows because the command is named `fd`.
 * 2026-07-05: ShellCheck was not available in the validation environment.
 * Automated interactive Git Bash validation passed. A user-opened fresh terminal window is still a useful smoke test but is no longer required to call the Windows path validated.
+* 2026-07-05: Added `scripts/setup/reset-windows.ps1` for conservative Phase 1 reset dry-runs and explicit reset execution. Destructive reset requires `-Apply`; setup-managed package removal requires `-RemovePackages`; Git is never removed by the reset script.
+* 2026-07-05: User manually validated Windows dry-runs from PowerShell: `setup.ps1 -Phase shell -DryRun`, `scripts/setup/reset-windows.ps1 -Phase shell`, and `scripts/setup/reset-windows.ps1 -Phase shell -RemovePackages`. Output confirmed Git/Git Bash are verified, Git is not installed by setup, and Git is never removed by reset.
+* 2026-07-05: User found the real reset/provision loop could block at a chezmoi prompt after package reinstall. Setup was updated to back up known Phase 1 managed targets and run `chezmoi apply --force` so provisioning remains non-interactive.
+* 2026-07-05: User manually validated the full Windows reset/provision loop with package removal. `reset-windows.ps1 -Phase shell -Apply -RemovePackages` removed setup-managed Phase 1 packages and did not remove Git. `setup.ps1 -Phase shell` reinstalled setup-managed tools, applied chezmoi with `--force` without prompting, ran repository tests, and passed interactive Git Bash `doctor --phase shell` validation with only accepted warnings.
 
 Deferred items:
 
@@ -1768,12 +1774,13 @@ This section mirrors and expands the unsupported/deferred policy for quick looku
 
 Current next actions:
 
-1. Optionally open a fresh Git Bash window manually and run `doctor --phase shell` as a user smoke test.
-2. Validate Phase 1 on macOS Bash and update the Phase 1 validation checklist.
-3. Validate Phase 1 on Ubuntu GNOME Bash and update the Phase 1 validation checklist.
-4. Decide whether Phase 2 should replace the current WezTerm placeholder with the first real `wezterm.lua`.
-5. Begin Phase 2 once the Windows validation result is accepted and macOS/Ubuntu are either validated or explicitly deferred.
-6. Keep `PLAN.md` updated after each implementation or validation session.
+1. Optionally run `scripts/setup/reset-windows.ps1 -Phase shell -Apply` and then `setup.ps1 -Phase shell` to retest the Windows reset/provisioning loop. Git for Windows must remain installed before and after the reset.
+2. If package cleanup needs testing, run `scripts/setup/reset-windows.ps1 -Phase shell -Apply -RemovePackages`, then rerun `setup.ps1 -Phase shell`.
+3. Validate Phase 1 on macOS Bash and update the Phase 1 validation checklist.
+4. Validate Phase 1 on Ubuntu GNOME Bash and update the Phase 1 validation checklist.
+5. Decide whether Phase 2 should replace the current WezTerm placeholder with the first real `wezterm.lua`.
+6. Begin Phase 2 once the Windows validation result is accepted and macOS/Ubuntu are either validated or explicitly deferred.
+7. Keep `PLAN.md` updated after each implementation or validation session.
 
 ## PLAN.md Update Rules
 
@@ -1825,7 +1832,7 @@ Format:
 
 ### 2026-07-05
 
-- Summary of changes: Revised the Phase 1 Windows setup model so `setup.ps1 -Phase shell` is the clean-machine bootstrap path. It now installs/verifies Git for Windows, Git Bash, chezmoi, ripgrep, fd, jq, and fzf through `winget`; applies chezmoi; runs repository tests through Git Bash; and validates a configured interactive Git Bash shell. `setup.sh` also applies chezmoi and validates the configured shell when Bash already exists.
+- Summary of changes: Revised the Phase 1 Windows setup model so `setup.ps1 -Phase shell` is the clean-machine bootstrap path after Git for Windows is installed and the repository is cloned. It now verifies Git for Windows/Git Bash, installs/verifies chezmoi, ripgrep, fd, jq, and fzf through `winget`; applies chezmoi; runs repository tests through Git Bash; and validates a configured interactive Git Bash shell. `setup.sh` also applies chezmoi and validates the configured shell when Bash already exists.
 - Phases touched: Phase 0, Phase 1.
 - Validation performed: `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 16 setup tests. `setup.ps1 -DryRun`, `setup.ps1 -Phase shell -DryRun`, `setup.ps1 -Phase foundation -DryRun`, and `setup.sh --dry-run` passed. PowerShell scripts parsed successfully. `git diff --check` passed.
 - Known gaps: The real non-dry `setup.ps1 -Phase shell` has not been run yet because it may install packages and apply dotfiles. macOS and Ubuntu validation remain untested.
@@ -1846,3 +1853,27 @@ Format:
 - Validation performed: `setup.ps1 -Phase shell` passed and applied the updated doctor. An interactive Git Bash command from `/c/work/cross-platform-workstation` ran `doctor --phase shell` successfully with all required checks passing.
 - Known gaps: Git Bash instances launched from an already-running PowerShell process may not inherit newly persisted user PATH entries until the parent process is refreshed; newly opened Git Bash windows should see them. macOS and Ubuntu validation remain untested.
 - Next actions: User can rerun `doctor --phase shell` from a fresh Git Bash window at the repo root as a final smoke test.
+
+### 2026-07-05
+
+- Summary of changes: Added a conservative Windows Phase 1 reset script at `scripts/setup/reset-windows.ps1`. It dry-runs by default, backs up/removes known Phase 1 dotfiles only when `-Apply` is provided, uninstalls setup-managed Phase 1 packages only with `-RemovePackages`, and never removes Git.
+- Phases touched: Phase 1, Phase 11 hardening precursor.
+- Validation performed: `scripts/setup/reset-windows.ps1 -Phase shell` dry-run passed and listed the files it would back up/remove. `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 19 setup tests. `git diff --check` passed.
+- Known gaps: Actual reset execution has not been run. Package uninstall reset has not been run. macOS and Ubuntu remain untested.
+- Next actions: If a setup reset retest is desired, run reset with `-Apply`, then rerun `setup.ps1 -Phase shell`. Keep Git for Windows installed because it is the repository prerequisite.
+
+### 2026-07-05
+
+- Summary of changes: Tightened the Windows bootstrap/reset contract. `setup.ps1` now treats Git for Windows and Git Bash as prerequisites to verify, not tools to install. `scripts/setup/reset-windows.ps1` no longer has any Git removal option and only removes setup-managed packages when `-RemovePackages` is provided.
+- Phases touched: Phase 1, Phase 11 hardening precursor.
+- Validation performed: `setup.ps1 -Phase shell -DryRun` passed and reported Git/Git Bash as already available without any Git install action. `scripts/setup/reset-windows.ps1 -Phase shell` dry-run passed and reported that Git is never removed. `scripts/setup/reset-windows.ps1 -Phase shell -RemovePackages` dry-run passed and listed only setup-managed packages: chezmoi, ripgrep, fd, jq, and fzf. The user also manually reran these three dry-runs from PowerShell and confirmed matching output. `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 20 setup tests. `git diff --check` passed for tracked changes.
+- Known gaps: Actual reset execution and package uninstall reset remain untested. macOS and Ubuntu remain untested.
+- Next actions: If a setup reset retest is desired, run `scripts/setup/reset-windows.ps1 -Phase shell -Apply`, then rerun `setup.ps1 -Phase shell`. Do not uninstall Git; it remains a prerequisite.
+
+### 2026-07-05
+
+- Summary of changes: Fixed the real Windows reset/provision loop after user testing showed `chezmoi apply` could block with `.bash_profile has changed since chezmoi last wrote it?`. Setup now backs up known Phase 1 managed targets to `~/.workstation-setup-backup/<timestamp>` and then runs `chezmoi apply --force`.
+- Phases touched: Phase 1, Phase 11 hardening precursor.
+- Validation performed: `setup.ps1 -Phase shell -DryRun` passed and now reports `chezmoi apply --force`. `chezmoi apply --help` confirmed `--force` makes changes without prompting. `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 24 setup tests. `git diff --check` passed for tracked changes. User then manually validated `setup.ps1 -Phase shell`, fresh Git Bash `doctor --phase shell`, `platform-info`, `workstation-root`, `reset-windows.ps1 -Phase shell -Apply -RemovePackages`, and a full reinstall via `setup.ps1 -Phase shell`; all required checks passed.
+- Known gaps: macOS and Ubuntu remain untested. Reset package removal idempotency should be improved so rerunning removal after packages are already absent reports "not installed" rather than relying on winget behavior.
+- Next actions: Optionally harden package uninstall idempotency messages, then commit the Phase 1 reset/provisioning updates if accepted.

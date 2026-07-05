@@ -55,6 +55,23 @@ windows_command_exists() {
   return 1
 }
 
+setup_backup_chezmoi_targets() {
+  local timestamp backup_root target relative backup_target
+  timestamp=$(date +%Y%m%d-%H%M%S)
+  backup_root="$HOME/.workstation-setup-backup/$timestamp"
+
+  for target in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.config/workstation" "$HOME/.local/bin/workstation-doctor"; do
+    [ -e "$target" ] || continue
+    relative=${target#/}
+    relative=${relative//\//_}
+    relative=${relative// /_}
+    backup_target="$backup_root/$relative"
+    info "backing up $target to $backup_target"
+    mkdir -p "$(dirname -- "$backup_target")"
+    cp -R "$target" "$backup_target"
+  done
+}
+
 setup_apply_chezmoi() {
   local repo_root=${1:?repo root required}
   local source_dir="$repo_root/chezmoi"
@@ -62,8 +79,9 @@ setup_apply_chezmoi() {
   require_dir "$source_dir"
   info "initializing chezmoi source: $source_dir"
   chezmoi init --source "$source_dir"
-  info 'applying chezmoi dotfiles'
-  chezmoi --source "$source_dir" apply
+  setup_backup_chezmoi_targets
+  info 'applying chezmoi dotfiles with --force'
+  chezmoi --source "$source_dir" apply --force
 }
 
 setup_validate_interactive_shell() {

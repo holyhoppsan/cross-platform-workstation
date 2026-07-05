@@ -16,7 +16,7 @@ The current deliverable implements Phase 0 and Phase 1 only:
 
 Later phases for WezTerm, Quake mode, Neovim, Yazi, Rider, worktrees, agents, model tooling, and hardening are documented in [PLAN.md](PLAN.md), but they are not implemented yet except as placeholders.
 
-Windows remains native. Git for Windows Bash is the shell target. WSL is not installed or required.
+Windows remains native. Git for Windows Bash is the shell target. WSL is not installed or required. Git for Windows is a prerequisite for cloning and running this repository; setup verifies it but does not install it.
 
 ## Start Here
 
@@ -40,7 +40,7 @@ Windows, from PowerShell:
 ./setup.ps1 -Phase shell
 ```
 
-On Windows, `setup.ps1 -Phase shell` is the clean-machine bootstrap path. It installs or verifies Git for Windows, Git Bash, chezmoi, and Phase 1 CLI tools with `winget`, applies chezmoi, then validates the configured Git Bash shell automatically. It never installs WSL.
+On Windows, install Git for Windows first, clone this repository, then run `setup.ps1 -Phase shell`. Setup verifies Git and Git Bash, installs or verifies chezmoi and Phase 1 CLI tools with `winget`, backs up known Phase 1 shell targets, applies chezmoi, then validates the configured Git Bash shell automatically. It never installs WSL or Git.
 
 Windows, from Git Bash:
 
@@ -89,6 +89,14 @@ Automated post-setup validation:
 ```powershell
 ./scripts/setup/verify.ps1 -Phase shell
 ```
+
+Dry-run a Windows reset for Phase 1:
+
+```powershell
+./scripts/setup/reset-windows.ps1 -Phase shell
+```
+
+To actually remove setup-managed Phase 1 configuration, add `-Apply`. To also remove setup-managed Phase 1 packages, add `-RemovePackages`. Git is never removed by the reset script.
 
 ## Repository Map
 

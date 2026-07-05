@@ -25,8 +25,18 @@ assert_contains() {
   esac
 }
 
+assert_not_contains() {
+  tests=$((tests + 1))
+  case "$1" in
+    *"$2"*)
+      printf 'not ok %d - %s (unexpected <%s>)\n' "$tests" "$3" "$2"
+      failures=$((failures + 1))
+      ;;
+    *) printf 'ok %d - %s\n' "$tests" "$3" ;;
+  esac
+}
+
 finish_tests() {
   printf '1..%d\n' "$tests"
   [ "$failures" -eq 0 ]
 }
-
