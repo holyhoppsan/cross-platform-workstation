@@ -39,6 +39,10 @@ macOS prefers Homebrew Bash when present:
 
 Ubuntu uses `/bin/bash --login`.
 
+## Appearance
+
+WezTerm uses an explicit palette matching the default Windows Terminal scheme inherited by the default Windows PowerShell profile on the validated Windows machine. The local Windows Terminal settings do not define a custom color scheme, so the repository records the equivalent default palette directly instead of referencing a machine-local Windows Terminal setting.
+
 ## Key Hierarchy
 
 - `Ctrl+`` is reserved for the OS-level Quake adapter in Phase 3.

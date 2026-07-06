@@ -69,7 +69,23 @@ config.font = wezterm.font_with_fallback {
   'JetBrains Mono', 'Cascadia Mono', 'Menlo', 'DejaVu Sans Mono', 'monospace',
 }
 config.font_size = 11.0
-config.color_scheme = 'Builtin Solarized Dark'
+config.colors = {
+  foreground = '#cccccc',
+  background = '#0c0c0c',
+  cursor_bg = '#ffffff',
+  cursor_border = '#ffffff',
+  cursor_fg = '#0c0c0c',
+  selection_bg = '#ffffff',
+  selection_fg = '#000000',
+  ansi = {
+    '#0c0c0c', '#c50f1f', '#13a10e', '#c19c00',
+    '#0037da', '#881798', '#3a96dd', '#cccccc',
+  },
+  brights = {
+    '#767676', '#e74856', '#16c60c', '#f9f1a5',
+    '#3b78ff', '#b4009e', '#61d6d6', '#f2f2f2',
+  },
+}
 config.hide_tab_bar_if_only_one_tab = false
 config.use_fancy_tab_bar = false
 config.window_decorations = 'RESIZE'

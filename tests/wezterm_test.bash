@@ -10,6 +10,11 @@ wezterm_doc=$(cat "$repo_root/docs/wezterm.md")
 doctor=$(cat "$repo_root/chezmoi/dot_config/workstation/doctor")
 
 assert_not_contains "$wezterm_config" 'intentionally not implemented' 'WezTerm placeholder failure removed'
+assert_contains "$wezterm_config" "foreground = '#cccccc'" 'WezTerm mirrors Windows Terminal default foreground'
+assert_contains "$wezterm_config" "background = '#0c0c0c'" 'WezTerm mirrors Windows Terminal default background'
+assert_contains "$wezterm_config" "'#c50f1f'" 'WezTerm includes Windows Terminal default red'
+assert_contains "$wezterm_config" "'#3b78ff'" 'WezTerm includes Windows Terminal bright blue'
+assert_not_contains "$wezterm_config" 'Solarized' 'WezTerm no longer uses hard-to-read Solarized scheme'
 assert_contains "$wezterm_config" "config.leader = { key = 'a', mods = 'CTRL'" 'WezTerm uses Ctrl+A leader'
 assert_contains "$wezterm_config" 'SplitHorizontal' 'WezTerm has horizontal split binding'
 assert_contains "$wezterm_config" "key = '|', mods = 'CTRL|SHIFT'" 'WezTerm has one-stroke tmux-symbol horizontal split binding'

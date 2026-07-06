@@ -220,7 +220,7 @@ Do not include Yazi in the AI agent list.
 | 0     | Repository foundation                     | Implemented and locally validated         |
 | 1     | Common shell workflow                     | Implemented and validated on Windows; needs macOS/Ubuntu validation |
 | 2     | WezTerm baseline with tmux-style bindings | Implemented and automated validation passed on Windows; needs manual GUI validation |
-| 3     | Quake-mode dropdown                       | Stubbed                                   |
+| 3     | Quake-mode dropdown                       | Windows validated; macOS/Ubuntu stubbed |
 | 4     | Neovim baseline                           | Not started                               |
 | 5     | Yazi baseline                             | Not started                               |
 | 6     | Rider and minimal Unreal launching        | Not started                               |
@@ -662,6 +662,7 @@ Notes:
 * 2026-07-05: User manually validated that `Ctrl+Shift+|` splits left/right and `Ctrl+-` splits top/bottom. User also found `Ctrl+Shift+-` reduced the window/font size, which is expected because shifted minus is `_` rather than the tmux `-` symbol; added `Ctrl+_` and leader `_` fallbacks so holding Shift on minus splits instead of invoking the default size behavior.
 * 2026-07-05: User manually validated the Windows WezTerm GUI bindings: direct split shortcuts, tmux-style split bindings, pane movement, pane resize, zoom/unzoom, tab create/select, close-pane confirmation, copy/paste, right-click paste, workspace picker, and `quake` workspace placeholder all work.
 * 2026-07-05: Setup/reset validation was extended for Phase 2. Setup now backs up `~/.config/wezterm` before forced chezmoi apply. `reset-windows.ps1` accepts `-Phase wezterm`, removes or backs up `~/.config/wezterm`, and includes WezTerm package removal only when `-RemovePackages` is provided. Git is still never removed. User manually validated the full destructive reset/reinstall loop with `-Apply -RemovePackages`.
+* 2026-07-05: Replaced the hard-to-read Solarized Dark WezTerm scheme with an explicit palette matching the default Windows Terminal scheme inherited by the default Windows PowerShell profile on the validated Windows machine. The local Windows Terminal settings had no custom scheme configured.
 
 Deferred items:
 
@@ -669,7 +670,7 @@ Deferred items:
 
 ## Phase 3: Quake-Mode Dropdown
 
-Status: Stubbed
+Status: Windows validated; macOS/Ubuntu stubbed
 
 Goal: Add global Ctrl+` dropdown behavior using platform-specific adapters.
 
@@ -693,9 +694,10 @@ On activation:
 1. Show a dedicated persistent WezTerm dropdown window.
 2. Place it on the monitor containing the currently focused application window.
 3. Position it at the top of that monitor.
-4. Use approximately 95% of the monitor width and 55% of its height.
+4. Use approximately 95% of the monitor width and 100% of its work-area height.
 5. Focus the terminal immediately.
-6. Preserve all tabs, panes, shells, running commands, editors, file managers, and agents while hidden.
+6. Apply 95% window opacity to the Quake WezTerm window.
+7. Preserve all tabs, panes, shells, running commands, editors, file managers, and agents while hidden.
 
 On second activation, when the dropdown is focused:
 
@@ -704,9 +706,9 @@ On second activation, when the dropdown is focused:
 
 Platform-specific adapters:
 
-* Windows: AutoHotkey v2
-* macOS: Hammerspoon
-* Ubuntu GNOME on Wayland: a GNOME Shell extension or another GNOME-native mechanism
+* Windows: AutoHotkey v2. Status: implemented, syntax-validated, and manually validated on Windows.
+* macOS: Hammerspoon. Status: stubbed/deferred.
+* Ubuntu GNOME on Wayland: a GNOME Shell extension or another GNOME-native mechanism. Status: stubbed/deferred.
 
 State machine:
 
@@ -721,7 +723,8 @@ Quake window identity:
 * Window title/class/role: wezterm-quake, or the most reliable platform-specific equivalent
 * Workspace: quake
 * Width: approximately 95% of focused monitor
-* Height: approximately 55% of focused monitor
+* Height: approximately 100% of focused monitor work area
+* Opacity: 95% for the Quake window
 * Position: top center of focused monitor
 * Always-on-top if reliable and not disruptive
 * No dependency on WSL
@@ -737,31 +740,60 @@ Deliverables:
 
 Tasks:
 
-* [ ] Implement Windows AutoHotkey adapter.
+* [x] Implement Windows AutoHotkey adapter.
 * [ ] Implement macOS Hammerspoon adapter.
 * [ ] Implement Ubuntu GNOME adapter or documented stub.
-* [ ] Add setup support for adapters.
+* [x] Add setup support for Windows adapter.
+* [ ] Add setup support for macOS/Ubuntu adapters.
 * [x] Add Quake docs.
 * [x] Add doctor checks.
-* [ ] Add manual validation checklist.
+* [x] Add manual validation checklist.
+* [x] Add Windows per-user startup registration for the Quake adapter.
 
 Validation:
 
-* [ ] Ctrl+` toggles the dropdown.
-* [ ] It appears on the focused monitor.
-* [ ] It hides without killing the shell.
-* [ ] It preserves running commands.
-* [ ] It works after switching monitor focus.
-* [ ] Behavior is documented separately for Windows, macOS, and Ubuntu.
-* [ ] Untested platform-specific behavior is clearly marked.
+* [x] Ctrl+` toggles the dropdown on Windows.
+* [ ] It appears on the focused monitor. Status: Initial Windows validation confirms dropdown appears on the active machine; multi-monitor focused placement still needs validation.
+* [x] It hides without killing the shell on Windows.
+* [x] It preserves running commands on Windows with the minimize fallback.
+* [ ] It works after switching monitor focus. Status: Needs Windows manual GUI validation.
+* [x] Behavior is documented separately for Windows, macOS, and Ubuntu.
+* [x] Untested platform-specific behavior is clearly marked.
+* [x] `doctor --phase quake` reports adapter status and validates AutoHotkey syntax on Windows.
+* [x] `setup.ps1 -Phase quake` installs/verifies AutoHotkey v2 and validates the Quake phase on Windows.
+* [x] Windows startup registration works after reboot.
+* [x] Final Phase 3 automated validation passed on Windows.
 
 Notes:
 
-* Existing platform adapter files are stubs and must not be described as functional.
+* 2026-07-05: Windows adapter replaced the previous stub with an AutoHotkey v2 implementation. It registers `Ctrl+`` through AutoHotkey, launches a dedicated WezTerm `quake` workspace, uses title `wezterm-quake`, targets the focused monitor's work area, sizes to approximately 95% width and initially 55% height, hides when focused, and preserves the GUI process while hidden.
+* 2026-07-05: Added `platform/windows/start-quake.ps1` as the supported manual launcher so users do not need to type the long AutoHotkey executable/script path by hand.
+* 2026-07-05: `setup.ps1 -Phase quake` installed/verifed AutoHotkey v2 through winget package `AutoHotkey.AutoHotkey`, found the standard install path `C:\Program Files\AutoHotkey\v2`, and passed `doctor --phase quake`.
+* 2026-07-05: `doctor --phase quake` validates AutoHotkey availability, adapter presence, v2 requirement, hotkey registration, hide/placement behavior, and script syntax with `AutoHotkey64.exe //Validate`.
+* 2026-07-05: Manual GUI validation has not been performed yet. Do not mark focused-monitor behavior, hide/show persistence, or process preservation complete until tested in the Windows desktop session.
+* 2026-07-05: Initial Windows GUI validation found that the adapter launched `wezterm.exe`, which created a black non-interactive `wezterm-quake` window while the real interactive terminal opened separately. The adapter now prefers `wezterm-gui.exe` and keeps `wezterm.exe` only as a fallback. This fix still needs live GUI revalidation.
+* 2026-07-05: Follow-up Windows validation confirmed launch, sizing, focus, input, and hide behavior, but state was not preserved on restore. The adapter now enables `DetectHiddenWindows True` so `WinExist` can rediscover the hidden dropdown instead of launching a new WezTerm process. Process/state preservation needs retest.
+* 2026-07-05: Follow-up inspection after the restore failure showed `AutoHotkey64.exe` and a hidden `wezterm-gui.exe` process were still running, but the dropdown did not reappear. The restore sequence now calls hidden-window detection in the hotkey/find path and calls `WinShow` before `WinRestore`/`WinMove`.
+* 2026-07-05: Live retest showed the explicit hidden-window restore path still did not show the window on the next toggle. The Windows adapter now avoids `WinHide` entirely and parks the existing window off-screen, keeping it alive and discoverable for the next toggle.
+* 2026-07-05: Live retest of the parking strategy produced a black window plus a separate terminal window, and toggling could not recover cleanly after closing. The adapter now stops tracking launch PIDs and no longer mutates arbitrary window titles. It launches WezTerm with `--class wezterm-quake` and identifies the dropdown by that class.
+* 2026-07-05: Live retest of the class-based parking strategy still failed on restore. Process inspection showed WezTerm still running, but no top-level window was enumerable after parking. The adapter now dismisses the dropdown with `WinMinimize` instead of hiding or parking, accepting a possible taskbar entry in exchange for reliable state preservation.
+* 2026-07-05: User manually validated the Windows minimize fallback: first toggle launches a working terminal, subsequent `Ctrl+`` toggles dismiss and restore as expected, and shell state is preserved. User found the first-launch small-window-then-resize behavior disruptive.
+* 2026-07-05: Added first-launch polish: the adapter computes target monitor geometry before launch, passes approximate WezTerm `initial_cols`/`initial_rows`, passes `--position screen:x,y`, starts WezTerm minimized, then restores and applies final pixel-accurate placement. This needs live GUI retest.
+* 2026-07-05: Updated Windows Quake sizing/appearance requirements per user request: height is now 85% of focused monitor height and the Quake window launches with 85% `window_background_opacity`. Width remains 95%.
+* 2026-07-05: Updated the Quake opacity request from 85% to 95%. Height remains 85% and width remains 95%.
+* 2026-07-05: Updated `doctor --phase quake` to validate the current `WinMinimize` dismiss fallback instead of the abandoned `WinHide` implementation.
+* 2026-07-05: Updated the Quake height request from 85% to 100% of the focused monitor work area. Width remains 95% and opacity remains 95%.
+* 2026-07-05: Added Windows per-user startup registration. `setup.ps1 -Phase quake` creates `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\cross-platform-workstation-quake.lnk`, which runs `platform/windows/start-quake.ps1` at login. `reset-windows.ps1 -Phase quake -Apply` removes or backs up the shortcut. `doctor --phase quake` verifies the shortcut is present. Setup created the shortcut successfully on the validated Windows machine, doctor verified it, and user manually validated reset dry-run cleanup.
+* 2026-07-06: User rebooted Windows and confirmed `Ctrl+`` works as intended without manually running `start-quake.ps1`. Windows startup registration is manually validated.
+* 2026-07-06: User reran `setup.ps1 -Phase quake` after reboot. Setup verified Phase 1/2 tools, applied chezmoi, created the startup shortcut, and passed WezTerm plus Quake doctor checks.
+* 2026-07-06: Final Phase 3 validation passed on Windows. `doctor --phase quake`, `tests/run.bash`, and `git diff --check` all passed; the Quake doctor warning now only calls out focused-monitor placement and multi-monitor movement as manual GUI validation.
 
 Deferred items:
 
-* Full native adapter implementation and manual validation on all supported platforms.
+* macOS Hammerspoon adapter.
+* Ubuntu GNOME adapter.
+* None for Windows startup registration; reboot validation completed on 2026-07-06.
+* Manual validation on all supported platforms.
 
 ## Phase 4: Neovim Baseline
 
@@ -1797,11 +1829,10 @@ This section mirrors and expands the unsupported/deferred policy for quick looku
 
 Current next actions:
 
-1. Decide whether to commit the Phase 2 setup/reset validation hardening.
-2. Validate Phase 2 on macOS Bash and update the Phase 2 validation checklist.
-3. Validate Phase 2 on Ubuntu GNOME Bash and update the Phase 2 validation checklist.
-4. Begin Phase 3 after Phase 2 setup/reset hardening is committed or explicitly accepted with macOS/Ubuntu pending.
-5. Keep `PLAN.md` updated after each implementation or validation session.
+1. Commit and push Phase 3 when the Windows behavior is accepted.
+2. Validate Phase 2/3 on macOS and Ubuntu only when those platforms are available.
+3. Begin Phase 4 Neovim baseline after Phase 3 is saved.
+4. Keep `PLAN.md` updated after each implementation or validation session.
 
 ## PLAN.md Update Rules
 
@@ -1962,3 +1993,139 @@ Format:
 - Validation performed: `setup.ps1 -Phase wezterm -DryRun` passed and showed WezTerm config backup. `reset-windows.ps1 -Phase wezterm` dry-run passed and showed WezTerm config cleanup. `reset-windows.ps1 -Phase wezterm -RemovePackages` dry-run passed and showed setup-managed WezTerm package removal while still not removing Git. User then ran `reset-windows.ps1 -Phase wezterm -Apply -RemovePackages`, which backed up/removed managed files and uninstalled chezmoi, ripgrep, fd, jq, fzf, and WezTerm without removing Git. `setup.ps1 -Phase wezterm` then reinstalled/verifed Phase 1 tools plus WezTerm, applied chezmoi, and passed `doctor --phase wezterm`. `tests/run.bash` passed with 38 setup tests and 27 WezTerm tests. `git diff --check` passed with only expected CRLF warnings for PowerShell scripts.
 - Known gaps: macOS and Ubuntu remain untested.
 - Next actions: Commit and push the Phase 2 setup/reset hardening, then proceed to Phase 3 or defer macOS/Ubuntu validation explicitly.
+
+### 2026-07-05
+
+- Summary of changes: Implemented the Windows Phase 3 Quake-mode adapter. Added AutoHotkey v2 setup support, `doctor --phase quake`, AutoHotkey syntax validation, Windows Quake documentation, a short PowerShell launcher, reset support for AutoHotkey removal, and tests.
+- Phases touched: Phase 3, Windows setup/doctor/reset, docs, tests.
+- Validation performed: `setup.ps1 -Phase quake -DryRun` passed. `setup.ps1 -Phase quake` installed/verifed AutoHotkey v2, applied chezmoi, passed `doctor --phase wezterm`, and passed `doctor --phase quake`. `doctor --phase quake` validated adapter presence and AutoHotkey syntax through `//Validate`. `reset-windows.ps1 -Phase quake` and `reset-windows.ps1 -Phase quake -RemovePackages` dry-runs passed. `platform/windows/start-quake.ps1` parsed successfully. `tests/run.bash` passed with 24 Quake tests, 46 setup tests, and 27 WezTerm tests. `git diff --check` passed with only expected CRLF warnings.
+- Known gaps: Windows global hotkey behavior, focused-monitor placement, hide/show persistence, and process preservation still require manual GUI validation. macOS and Ubuntu adapters remain stubbed/deferred. Windows startup registration for the AutoHotkey adapter is not implemented yet.
+- Next actions: Start the AutoHotkey adapter manually with `.\platform\windows\start-quake.ps1`, validate `Ctrl+`` behavior on Windows, update this tracker, then decide whether startup registration belongs in Phase 3 or later hardening.
+
+### 2026-07-05
+
+- Summary of changes: Fixed the Windows Quake adapter launch target after initial GUI validation showed a black non-interactive `wezterm-quake` window and a separate interactive WezTerm window. The adapter now prefers `wezterm-gui.exe` and keeps `wezterm.exe` only as a fallback.
+- Phases touched: Phase 3, Windows Quake adapter, docs, tests.
+- Validation performed: Code inspection confirmed the previous adapter targeted `wezterm.exe`; process inspection showed both `wezterm.exe` and `wezterm-gui.exe` windows were running. AutoHotkey syntax validation passed. `doctor --phase quake` passed with the expected manual-validation warning. `tests/run.bash` passed with 25 Quake tests, 46 setup tests, and 27 WezTerm tests. `git diff --check` passed with only expected CRLF warnings.
+- Known gaps: Live Windows GUI revalidation still required after closing the stale windows and restarting the AutoHotkey adapter. macOS and Ubuntu remain unimplemented.
+- Next actions: Close stale WezTerm windows from the failed validation, restart `platform/windows/start-quake.ps1`, then retest `Ctrl+`` launch/focus/hide/persistence behavior.
+
+### 2026-07-05
+
+- Summary of changes: Fixed Windows Quake hide/show state persistence by enabling AutoHotkey hidden-window detection. Without this, `WinHide` hid the dropdown, but the next toggle could not find it and launched a new WezTerm window.
+- Phases touched: Phase 3, Windows Quake adapter, tests.
+- Validation performed: User manually validated that steps 1-7 of the Windows Quake flow work: launch, sizing/focus/input, and hide. Static Quake tests were updated to require `DetectHiddenWindows True`.
+- Known gaps: User reported state was not preserved on step 8 before this fix. The updated adapter still needs live GUI retesting for process/state preservation. Multi-monitor focused placement remains unvalidated.
+- Next actions: Restart the AutoHotkey adapter so it loads the updated script, then retest hiding/restoring a running command.
+
+### 2026-07-05
+
+- Summary of changes: Hardened the Windows Quake restore path after live validation showed the hidden `wezterm-gui.exe` process remained running but did not show again. The adapter now enables hidden-window detection in the hotkey/find path and explicitly calls `WinShow` before restore and move.
+- Phases touched: Phase 3, Windows Quake adapter, tests.
+- Validation performed: Process inspection showed `AutoHotkey64.exe` and hidden `wezterm-gui.exe` still running after hide. Static tests were updated to require the explicit show-before-move restore sequence.
+- Known gaps: Live Windows GUI retest is required to confirm the hidden window restores with shell state intact. Multi-monitor focused placement remains unvalidated.
+- Next actions: Stop the current adapter and hidden WezTerm process, restart `platform/windows/start-quake.ps1`, then retest hide/show state persistence.
+
+### 2026-07-05
+
+- Summary of changes: Replaced the Windows Quake `WinHide` path with off-screen parking after live validation showed hidden-window restore still failed. The adapter now moves the focused dropdown to an off-screen parking location and later moves the same window back to the focused monitor.
+- Phases touched: Phase 3, Windows Quake adapter, docs, tests.
+- Validation performed: User confirmed the hidden-window restore fix still did not restore on step 4. The implementation strategy was changed to keep the window discoverable instead of relying on `WinHide`.
+- Known gaps: Live Windows GUI retest is required to confirm off-screen parking preserves shell state and restores reliably. Multi-monitor focused placement remains unvalidated.
+- Next actions: Stop AutoHotkey and WezTerm, restart `platform/windows/start-quake.ps1`, then retest park/show state persistence.
+
+### 2026-07-05
+
+- Summary of changes: Replaced launch-PID/title tracking for the Windows Quake window with a dedicated WezTerm window class. The adapter now launches WezTerm with `--class wezterm-quake` and finds the dropdown by `ahk_class wezterm-quake`.
+- Phases touched: Phase 3, Windows Quake adapter, docs, tests.
+- Validation performed: User reported the parking strategy produced a black window plus a separate terminal window and could not recover cleanly after closing. This identified PID/title tracking as too brittle when WezTerm owns multiple windows/processes.
+- Known gaps: Live Windows GUI retest is required after killing stale AutoHotkey/WezTerm processes and restarting the adapter. Multi-monitor focused placement remains unvalidated.
+- Next actions: Stop all stale AutoHotkey and WezTerm processes, restart `platform/windows/start-quake.ps1`, then retest launch, park, restore, close, and retoggle behavior.
+
+### 2026-07-05
+
+- Summary of changes: Changed the Windows Quake dismiss behavior from off-screen parking to `WinMinimize` after live validation showed parking could leave WezTerm running with no enumerable top-level window to restore.
+- Phases touched: Phase 3, Windows Quake adapter, docs, tests.
+- Validation performed: User reported class-based parking still did not restore on step 5. Process inspection showed WezTerm was still running. A top-level window enumeration found no WezTerm window after parking, indicating the restore target was no longer available to AutoHotkey.
+- Known gaps: Live Windows GUI retest is required to confirm minimize/restore preserves shell state. This may leave a taskbar entry while dismissed. Multi-monitor focused placement remains unvalidated.
+- Next actions: Stop all stale AutoHotkey and WezTerm processes, restart `platform/windows/start-quake.ps1`, then retest launch, minimize/dismiss, restore, close, and retoggle behavior.
+
+### 2026-07-05
+
+- Summary of changes: Recorded successful manual Windows validation for the Quake minimize fallback.
+- Phases touched: Phase 3.
+- Validation performed: User confirmed the Windows Quake dropdown now launches a working terminal and toggles correctly after first launch. The window briefly launches small and is then resized to the expected dimensions, but subsequent toggles work as expected and state is preserved.
+- Known gaps: First-launch resize flicker remains a polish issue. Multi-monitor focused placement is still unvalidated. macOS and Ubuntu adapters remain stubbed/deferred. Windows startup registration is not implemented.
+- Next actions: Decide whether to polish first-launch sizing now or accept it, then run final Phase 3 validation and commit/push if accepted.
+
+### 2026-07-05
+
+- Summary of changes: Added a first-launch polish pass for the Windows Quake adapter to reduce the visible small-window-then-resize flicker.
+- Phases touched: Phase 3, Windows Quake adapter, docs, tests.
+- Validation performed: Static tests updated to require initial WezTerm rows/columns, initial screen position, and minimized launch before final placement. AutoHotkey/live GUI validation still needs to be rerun.
+- Known gaps: Live Windows GUI retest is required to confirm the flicker is gone or acceptable. Multi-monitor focused placement remains unvalidated. macOS/Ubuntu remain deferred.
+- Next actions: Restart AutoHotkey/WezTerm, retest first launch, then run final Phase 3 validation if accepted.
+
+### 2026-07-05
+
+- Summary of changes: Updated Windows Quake size and opacity defaults. The dropdown now targets 95% width, 85% height, and launches with 85% WezTerm window opacity.
+- Phases touched: Phase 3, Windows Quake adapter, docs, tests.
+- Validation performed: Static tests updated to require `QuakeHeightRatio := 0.85`, `QuakeOpacity := 0.85`, and the Quake-specific `window_background_opacity` launch override.
+- Known gaps: Live Windows GUI retest is required to confirm the new height and opacity. Multi-monitor focused placement remains unvalidated. macOS/Ubuntu remain deferred.
+- Next actions: Restart AutoHotkey/WezTerm, retest first launch, height, opacity, and toggle persistence.
+
+### 2026-07-05
+
+- Summary of changes: Updated Windows Quake opacity from 85% to 95% while keeping 95% width and 85% height.
+- Phases touched: Phase 3, Windows Quake adapter, docs, tests.
+- Validation performed: Static tests updated to require `QuakeOpacity := 0.95`; AutoHotkey syntax and targeted tests should be rerun.
+- Known gaps: Live Windows GUI retest is required to confirm the new opacity. Multi-monitor focused placement remains unvalidated. macOS/Ubuntu remain deferred.
+- Next actions: Restart AutoHotkey/WezTerm, retest first launch, height, opacity, and toggle persistence.
+
+### 2026-07-05
+
+- Summary of changes: Updated the WezTerm baseline color palette to match the default Windows Terminal scheme instead of Solarized Dark.
+- Phases touched: Phase 2 appearance, Phase 3 Quake inherits the WezTerm palette.
+- Validation performed: Inspected local Windows Terminal settings; the default profile inherits the built-in default scheme and does not define a custom scheme. Static WezTerm tests were updated to require the matching foreground/background and representative ANSI colors.
+- Known gaps: Live GUI retest is required to confirm readability in WezTerm and Quake mode. macOS and Ubuntu remain unvalidated.
+- Next actions: Apply the updated WezTerm config through setup or chezmoi, restart WezTerm/Quake, and confirm the colors match Windows Terminal closely enough.
+
+### 2026-07-05
+
+- Summary of changes: Updated the Quake doctor check to match the current validated Windows dismiss behavior. The doctor now checks for `WinMinimize` instead of the abandoned `WinHide` path.
+- Phases touched: Phase 3 doctor/tests.
+- Validation performed: Setup initially applied the updated WezTerm palette but failed `doctor --phase quake` because the doctor still required `WinHide`. The doctor and static Quake tests were updated to match the current adapter. AutoHotkey syntax validation passed, `tests/quake_test.bash` passed, `tests/wezterm_test.bash` passed, `doctor --phase quake` passed, and `setup.ps1 -Phase quake` completed successfully.
+- Known gaps: Live GUI retest is still needed for the Windows Terminal palette in WezTerm/Quake.
+- Next actions: Restart WezTerm/Quake and confirm the colors match Windows Terminal closely enough.
+
+### 2026-07-05
+
+- Summary of changes: Updated Windows Quake height from 85% to 100% of the focused monitor work area. Width remains 95%; opacity remains 95%.
+- Phases touched: Phase 3, Windows Quake adapter, docs, tests.
+- Validation performed: Static tests updated to require `QuakeHeightRatio := 1.00`; AutoHotkey syntax and targeted tests should be rerun.
+- Known gaps: Live Windows GUI retest is required to confirm full-height placement. Multi-monitor focused placement remains unvalidated. macOS/Ubuntu remain deferred.
+- Next actions: Restart AutoHotkey/WezTerm, retest first launch, full-height sizing, opacity, and toggle persistence.
+
+### 2026-07-05
+
+- Summary of changes: Added Windows startup registration for the Quake hotkey adapter.
+- Phases touched: Phase 3 Windows setup/reset/doctor/docs/tests.
+- Validation performed: Implementation adds a per-user Startup folder shortcut named `cross-platform-workstation-quake.lnk`, setup registration, reset cleanup, doctor verification, and static tests. `setup.ps1 -Phase quake -DryRun` showed the planned shortcut. `setup.ps1 -Phase quake` created it successfully. PowerShell inspection verified the shortcut target, arguments, working directory, and minimized window style. `doctor --phase quake` verified the shortcut. `reset-windows.ps1 -Phase quake` dry-run showed it would remove or back up the shortcut.
+- Known gaps: Reboot validation is required to confirm `Ctrl+`` works after login without manually starting the adapter. Multi-monitor focused placement remains unvalidated. macOS/Ubuntu remain deferred.
+- Next actions: Reboot and confirm the hotkey is active automatically, then run final validation and commit/push Phase 3 if accepted.
+
+### 2026-07-05
+
+- Summary of changes: Recorded user validation of Windows Quake startup registration setup and reset cleanup.
+- Phases touched: Phase 3 Windows startup registration.
+- Validation performed: User ran `setup.ps1 -Phase quake`; setup created the per-user startup shortcut and passed WezTerm/Quake doctor checks. User ran `doctor --phase quake` separately and it passed with the expected manual-validation warnings. User ran `reset-windows.ps1 -Phase quake` dry-run and it showed the startup shortcut would be removed or backed up.
+- Known gaps: Reboot validation is still required to confirm the hotkey starts automatically after login. Multi-monitor focused placement remains unvalidated. macOS/Ubuntu remain deferred.
+- Next actions: Reboot Windows, confirm `Ctrl+`` works without manually running `start-quake.ps1`, then update this tracker and commit/push Phase 3 if accepted.
+
+### 2026-07-06
+
+- Summary of changes: Recorded successful Windows reboot validation for Quake startup registration and final Phase 3 validation.
+- Phases touched: Phase 3 Windows startup registration, doctor, tests, tracking.
+- Validation performed: User rebooted Windows and confirmed `Ctrl+`` works as intended without manually running `platform/windows/start-quake.ps1`. User then reran `setup.ps1 -Phase quake`; setup recreated/verified the startup shortcut and passed WezTerm plus Quake doctor checks. Final validation passed with `doctor --phase quake`, `tests/run.bash`, and `git diff --check`.
+- Known gaps: Multi-monitor focused placement remains unvalidated. macOS/Ubuntu remain deferred.
+- Next actions: Commit/push Phase 3 if accepted, then begin Phase 4 Neovim baseline.

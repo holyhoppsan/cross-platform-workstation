@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('shell', 'wezterm', 'all')]
+    [ValidateSet('shell', 'wezterm', 'quake', 'all')]
     [string]$Phase = 'shell',
     [switch]$Apply,
     [switch]$RemovePackages,
@@ -86,8 +86,12 @@ $targets = @(
     (Join-Path $HOME '.local/share/chezmoi')
 )
 
-if ($Phase -in @('wezterm', 'all')) {
+if ($Phase -in @('wezterm', 'quake', 'all')) {
     $targets += Join-Path $HOME '.config/wezterm'
+}
+
+if ($Phase -in @('quake', 'all')) {
+    $targets += Get-WindowsQuakeStartupShortcutPath
 }
 
 foreach ($target in $targets) {
@@ -106,8 +110,11 @@ if ($RemovePackages) {
     Uninstall-WingetPackage -Id 'sharkdp.fd' -Name 'fd'
     Uninstall-WingetPackage -Id 'jqlang.jq' -Name 'jq'
     Uninstall-WingetPackage -Id 'junegunn.fzf' -Name 'fzf'
-    if ($Phase -in @('wezterm', 'all')) {
+    if ($Phase -in @('wezterm', 'quake', 'all')) {
         Uninstall-WingetPackage -Id 'wez.wezterm' -Name 'WezTerm'
+    }
+    if ($Phase -in @('quake', 'all')) {
+        Uninstall-WingetPackage -Id 'AutoHotkey.AutoHotkey' -Name 'AutoHotkey v2'
     }
 }
 

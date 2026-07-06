@@ -154,6 +154,12 @@ function Resolve-InstalledCommand {
     }
     if ($Env:ProgramFiles) {
         $candidateRoots += Join-Path $Env:ProgramFiles 'WinGet\Packages'
+        $candidateRoots += Join-Path $Env:ProgramFiles 'AutoHotkey\v2'
+        $candidateRoots += Join-Path $Env:ProgramFiles 'AutoHotkey'
+    }
+    if (${Env:ProgramFiles(x86)}) {
+        $candidateRoots += Join-Path ${Env:ProgramFiles(x86)} 'AutoHotkey\v2'
+        $candidateRoots += Join-Path ${Env:ProgramFiles(x86)} 'AutoHotkey'
     }
 
     foreach ($root in ($candidateRoots | Where-Object { $_ -and (Test-Path $_) })) {
@@ -243,6 +249,58 @@ function Ensure-WindowsWezTerm {
     param([switch]$DryRun)
 
     Ensure-WindowsPackageCommand -Command 'wezterm.exe' -PackageId 'wez.wezterm' -Name 'WezTerm' -DryRun:$DryRun
+}
+
+function Ensure-WindowsAutoHotkey {
+    param([switch]$DryRun)
+
+    Ensure-WindowsPackageCommand -Command 'AutoHotkey64.exe' -PackageId 'AutoHotkey.AutoHotkey' -Name 'AutoHotkey v2' -DryRun:$DryRun
+}
+
+function Get-WindowsQuakeStartupShortcutPath {
+    $startup = [Environment]::GetFolderPath('Startup')
+    if (-not $startup) {
+        throw 'Could not resolve the per-user Windows Startup folder.'
+    }
+    return Join-Path $startup 'cross-platform-workstation-quake.lnk'
+}
+
+function Register-WindowsQuakeStartup {
+    param(
+        [Parameter(Mandatory)][string]$RepoRoot,
+        [switch]$DryRun
+    )
+
+    $launcher = Join-Path $RepoRoot 'platform\windows\start-quake.ps1'
+    Test-RequiredPath -Path $launcher
+
+    $shortcutPath = Get-WindowsQuakeStartupShortcutPath
+    $powershell = Join-Path $Env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+    if (-not (Test-Path -LiteralPath $powershell)) {
+        $command = Get-Command powershell.exe -ErrorAction SilentlyContinue
+        if (-not $command) {
+            throw 'powershell.exe was not found; cannot register the Quake startup shortcut.'
+        }
+        $powershell = $command.Source
+    }
+
+    $arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$launcher`""
+
+    if ($DryRun) {
+        Write-SetupInfo "would create startup shortcut $shortcutPath -> $powershell $arguments"
+        return
+    }
+
+    Write-SetupInfo "creating startup shortcut: $shortcutPath"
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $shortcutPath) | Out-Null
+    $shell = New-Object -ComObject WScript.Shell
+    $shortcut = $shell.CreateShortcut($shortcutPath)
+    $shortcut.TargetPath = $powershell
+    $shortcut.Arguments = $arguments
+    $shortcut.WorkingDirectory = $RepoRoot
+    $shortcut.WindowStyle = 7
+    $shortcut.Description = 'Start cross-platform-workstation Quake hotkey adapter'
+    $shortcut.Save()
 }
 
 function Backup-ChezmoiManagedTargets {
@@ -437,6 +495,27 @@ function Invoke-WindowsWezTermValidation {
 
     Write-SetupInfo 'validating WezTerm phase through Git Bash'
     Invoke-GitBash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase wezterm'
+}
+
+function Invoke-WindowsQuakeValidation {
+    param(
+        [Parameter(Mandatory)][string]$RepoRoot,
+        [switch]$DryRun
+    )
+
+    Update-ProcessPathFromRegistry
+    $bash = Get-WindowsGitBashPath
+    if (-not $bash) {
+        throw 'Git Bash was not found for Quake validation.'
+    }
+
+    if ($DryRun) {
+        Write-SetupInfo 'would run doctor --phase quake through Git Bash'
+        return
+    }
+
+    Write-SetupInfo 'validating Quake phase through Git Bash'
+    Invoke-GitBash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase quake'
 }
 
 function Test-ShellPhase {

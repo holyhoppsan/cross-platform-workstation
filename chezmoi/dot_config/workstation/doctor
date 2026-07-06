@@ -3,7 +3,7 @@ set -u
 
 usage() {
   cat <<'EOF'
-usage: doctor [--phase foundation|shell|wezterm|all] [--help]
+usage: doctor [--phase foundation|shell|wezterm|quake|all] [--help]
 
 Later phases are documented in PLAN.md but are not implemented yet.
 EOF
@@ -34,8 +34,8 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$phase" in
-  foundation|shell|wezterm|all) ;;
-  quake|neovim|yazi|rider|project|agents|models)
+  foundation|shell|wezterm|quake|all) ;;
+  neovim|yazi|rider|project|agents|models)
     printf '[fail] %-24s %s\n' "phase $phase" 'not implemented yet'
     exit 2
     ;;
@@ -103,6 +103,17 @@ find_command() {
   for candidate in "$@"; do
     if command -v "$candidate" >/dev/null 2>&1; then
       command -v "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+find_windows_file() {
+  local candidate
+  for candidate in "$@"; do
+    if [ -x "$candidate" ] || [ -r "$candidate" ]; then
+      printf '%s\n' "$candidate"
       return 0
     fi
   done
@@ -226,14 +237,81 @@ check_wezterm() {
     fi
   fi
 
-  warn 'Quake mode' 'deferred to Phase 3'
+  if [ "$phase" = wezterm ]; then
+    warn 'Quake mode' 'deferred to Phase 3'
+  fi
   warn 'Yazi/Neovim bindings' 'bindings call helper stubs until Phases 4 and 5'
+}
+
+check_quake() {
+  check_wezterm
+
+  local root adapter autohotkey_cmd
+  root=$(repo_root)
+  adapter="$root/platform/windows/quake-toggle.ahk"
+
+  if [ "$WORKSTATION_OS" = windows ]; then
+    autohotkey_cmd=$(find_command AutoHotkey64.exe AutoHotkey.exe || true)
+    if [ -z "$autohotkey_cmd" ]; then
+      autohotkey_cmd=$(find_windows_file \
+        '/c/Program Files/AutoHotkey/v2/AutoHotkey64.exe' \
+        '/c/Program Files/AutoHotkey/AutoHotkey64.exe' \
+        "$HOME/AppData/Local/Programs/AutoHotkey/v2/AutoHotkey64.exe" \
+        "$HOME/AppData/Local/Programs/AutoHotkey/AutoHotkey64.exe" || true)
+    fi
+    if [ -n "$autohotkey_cmd" ]; then
+      ok 'AutoHotkey' "$autohotkey_cmd"
+    else
+      fail 'AutoHotkey' 'not found; install AutoHotkey v2'
+    fi
+
+    [ -r "$adapter" ] && ok 'Quake adapter' "$adapter" || fail 'Quake adapter' 'missing'
+    if [ -r "$adapter" ]; then
+      grep -q '#Requires AutoHotkey v2.0' "$adapter" && ok 'Quake adapter version' 'requires AutoHotkey v2' || fail 'Quake adapter version' 'missing AutoHotkey v2 requirement'
+      grep -Fq 'Hotkey("^``", ToggleQuake)' "$adapter" && ok 'Quake hotkey' 'Ctrl+` registered' || fail 'Quake hotkey' 'Ctrl+` registration missing'
+      grep -q 'WinMinimize' "$adapter" && ok 'Quake dismiss behavior' 'minimize fallback configured' || fail 'Quake dismiss behavior' 'missing'
+      grep -q 'WinMove' "$adapter" && ok 'Quake placement behavior' 'configured' || fail 'Quake placement behavior' 'missing'
+      if [ -n "$autohotkey_cmd" ]; then
+        local native_adapter
+        native_adapter=$adapter
+        if command -v cygpath >/dev/null 2>&1; then
+          native_adapter=$(cygpath -aw "$adapter")
+        fi
+        if "$autohotkey_cmd" //Validate "$native_adapter" >/dev/null 2>&1; then
+          ok 'Quake adapter syntax' 'AutoHotkey validation passed'
+        else
+          fail 'Quake adapter syntax' 'AutoHotkey validation failed'
+        fi
+      fi
+    fi
+
+    local startup_shortcut
+    if [ -n "${APPDATA:-}" ]; then
+      startup_shortcut=$APPDATA
+      if command -v cygpath >/dev/null 2>&1; then
+        startup_shortcut=$(cygpath -u "$APPDATA")
+      fi
+      startup_shortcut="$startup_shortcut/Microsoft/Windows/Start Menu/Programs/Startup/cross-platform-workstation-quake.lnk"
+      if [ -r "$startup_shortcut" ]; then
+        ok 'Quake startup' "$startup_shortcut"
+      else
+        fail 'Quake startup' 'Startup shortcut missing; rerun setup.ps1 -Phase quake'
+      fi
+    else
+      warn 'Quake startup' 'APPDATA not set; could not check Startup shortcut'
+    fi
+
+    warn 'Quake manual validation' 'focused-monitor placement and multi-monitor movement require manual GUI validation'
+  else
+    warn 'Quake adapter' 'implemented only for Windows; macOS/Ubuntu remain documented stubs'
+  fi
 }
 
 case "$phase" in
   foundation) check_foundation ;;
   shell) check_shell ;;
-  wezterm|all) check_wezterm ;;
+  wezterm) check_wezterm ;;
+  quake|all) check_quake ;;
 esac
 
 if [ "$failures" -gt 0 ]; then
