@@ -7,7 +7,7 @@ setup_usage() {
   cat <<'EOF'
 usage: setup.sh [--phase foundation|shell|wezterm|all] [--dry-run] [--install-missing]
 
-Phases 0, 1, and 2 are implemented.
+Phases 0, 1, 2, and Windows Phase 3 are implemented.
 EOF
 }
 

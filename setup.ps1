@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('foundation', 'shell', 'wezterm', 'all')]
+    [ValidateSet('foundation', 'shell', 'wezterm', 'quake', 'all')]
     [string]$Phase = 'shell',
     [switch]$DryRun,
     [switch]$SkipInstall,
@@ -21,7 +21,7 @@ Write-SetupInfo "skip_apply: $($SkipApply.IsPresent)"
 
 Test-FoundationPhase -RepoRoot $RepoRoot
 
-if ($Phase -in @('shell', 'wezterm', 'all')) {
+if ($Phase -in @('shell', 'wezterm', 'quake', 'all')) {
     if ($Platform -eq 'windows') {
         if ($SkipInstall) {
             Test-ShellPhase -RepoRoot $RepoRoot -Platform $Platform
@@ -48,7 +48,7 @@ if ($Phase -in @('shell', 'wezterm', 'all')) {
     }
 }
 
-if ($Phase -in @('wezterm', 'all')) {
+if ($Phase -in @('wezterm', 'quake', 'all')) {
     if ($Platform -eq 'windows') {
         if ($SkipInstall) {
             Write-SetupInfo 'skipping WezTerm install/verify by request'
@@ -58,7 +58,7 @@ if ($Phase -in @('wezterm', 'all')) {
 
         if ($SkipApply) {
             Write-SetupInfo 'skipping WezTerm config apply by request'
-        } elseif ($Phase -eq 'wezterm') {
+        } elseif ($Phase -in @('wezterm', 'quake')) {
             Invoke-ChezmoiApply -RepoRoot $RepoRoot -DryRun:$DryRun
         }
 
@@ -67,9 +67,24 @@ if ($Phase -in @('wezterm', 'all')) {
         if (-not (Get-Command wezterm -ErrorAction SilentlyContinue)) {
             throw 'WezTerm is required for Phase 2. Install it with your platform package manager, then rerun setup.'
         }
-        if (-not $SkipApply -and $Phase -eq 'wezterm') {
+        if (-not $SkipApply -and $Phase -in @('wezterm', 'quake')) {
             Invoke-ChezmoiApply -RepoRoot $RepoRoot -DryRun:$DryRun
         }
+    }
+}
+
+if ($Phase -in @('quake', 'all')) {
+    if ($Platform -eq 'windows') {
+        if ($SkipInstall) {
+            Write-SetupInfo 'skipping AutoHotkey install/verify by request'
+        } else {
+            Ensure-WindowsAutoHotkey -DryRun:$DryRun
+        }
+
+        Register-WindowsQuakeStartup -RepoRoot $RepoRoot -DryRun:$DryRun
+        Invoke-WindowsQuakeValidation -RepoRoot $RepoRoot -DryRun:$DryRun
+    } else {
+        throw 'Quake setup is currently implemented only for Windows. macOS and Ubuntu adapters are documented stubs.'
     }
 }
 

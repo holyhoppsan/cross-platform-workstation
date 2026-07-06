@@ -2,7 +2,7 @@
 
 Phased workstation setup for Windows 11, macOS, and Ubuntu GNOME.
 
-The current deliverable implements Phases 0 through 2:
+The current deliverable implements Phases 0 through 2, plus the Windows slice of Phase 3:
 
 - repository foundation
 - persistent implementation tracker
@@ -13,9 +13,10 @@ The current deliverable implements Phases 0 through 2:
 - Unix-style command availability checks
 - phase-aware doctor command
 - WezTerm baseline with tmux-style bindings
+- Windows Quake-mode adapter using AutoHotkey v2
 - initial portable tests
 
-Later phases for Quake mode, Neovim, Yazi, Rider, worktrees, agents, model tooling, and hardening are documented in [PLAN.md](PLAN.md), but they are not implemented yet except as placeholders.
+Later phases for macOS/Ubuntu Quake mode, Neovim, Yazi, Rider, worktrees, agents, model tooling, and hardening are documented in [PLAN.md](PLAN.md), but they are not implemented yet except as placeholders.
 
 Windows remains native. Git for Windows Bash is the shell target. WSL is not installed or required. Git for Windows is a prerequisite for cloning and running this repository; setup verifies it but does not install it.
 
@@ -41,6 +42,7 @@ Windows, from PowerShell:
 ./setup.ps1 -Phase shell -DryRun
 ./setup.ps1 -Phase shell
 ./setup.ps1 -Phase wezterm
+./setup.ps1 -Phase quake
 ```
 
 On Windows, install Git for Windows first, clone this repository, then run `setup.ps1 -Phase shell`. Setup verifies Git and Git Bash, installs or verifies chezmoi and Phase 1 CLI tools with `winget`, backs up known Phase 1 shell targets, applies chezmoi, then validates the configured Git Bash shell automatically. It never installs WSL or Git.
@@ -52,6 +54,7 @@ Windows, from Git Bash:
 ./setup --phase shell --dry-run
 ./setup --phase shell --install-missing
 ./setup --phase wezterm --install-missing
+./setup.sh --phase quake --dry-run
 ```
 
 macOS / Ubuntu:
@@ -78,6 +81,7 @@ Run the phase-aware doctor:
 ./scripts/doctor --phase foundation
 ./scripts/doctor --phase shell
 ./scripts/doctor --phase wezterm
+./scripts/doctor --phase quake
 ```
 
 After setup completes, these helpers should be available in a fresh Git Bash session:

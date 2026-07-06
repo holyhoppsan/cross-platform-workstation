@@ -15,6 +15,9 @@ assert_contains "$shell_output" 'install_missing: false' 'setup.sh reports insta
 wezterm_output=$("$repo_root/setup.sh" --phase wezterm --dry-run)
 assert_contains "$wezterm_output" 'phase: wezterm' 'setup.sh parses wezterm phase'
 
+quake_output=$("$repo_root/setup.sh" --phase quake --dry-run)
+assert_contains "$quake_output" 'phase: quake' 'setup.sh parses quake phase'
+
 default_output=$("$repo_root/setup.sh" --dry-run)
 assert_contains "$default_output" 'phase: shell' 'setup.sh defaults to current implemented phase'
 
@@ -24,19 +27,26 @@ assert_contains "$install_output" 'install_missing: true' 'setup.sh parses insta
 powershell_setup=$(cat "$repo_root/setup.ps1")
 assert_contains "$powershell_setup" "[string]\$Phase = 'shell'" 'setup.ps1 defaults to shell phase'
 assert_contains "$powershell_setup" "'wezterm'" 'setup.ps1 accepts wezterm phase'
+assert_contains "$powershell_setup" "'quake'" 'setup.ps1 accepts quake phase'
 assert_contains "$powershell_setup" 'Ensure-WindowsPhaseOneTools' 'setup.ps1 verifies Windows Phase 1 prerequisites'
 assert_contains "$powershell_setup" 'Ensure-WindowsWezTerm' 'setup.ps1 verifies Windows WezTerm'
+assert_contains "$powershell_setup" 'Ensure-WindowsAutoHotkey' 'setup.ps1 verifies Windows AutoHotkey for Quake phase'
+assert_contains "$powershell_setup" 'Register-WindowsQuakeStartup' 'setup.ps1 registers Windows Quake startup shortcut'
 assert_contains "$powershell_setup" 'Invoke-ChezmoiApply' 'setup.ps1 applies chezmoi'
 assert_contains "$powershell_setup" 'Invoke-WindowsShellValidation' 'setup.ps1 validates configured Git Bash'
 assert_contains "$powershell_setup" 'Invoke-WindowsWezTermValidation' 'setup.ps1 validates WezTerm phase'
+assert_contains "$powershell_setup" 'Invoke-WindowsQuakeValidation' 'setup.ps1 validates Quake phase'
 
 reset_windows=$(cat "$repo_root/scripts/setup/reset-windows.ps1")
 assert_contains "$reset_windows" '[switch]$Apply' 'reset-windows requires explicit apply switch'
 assert_contains "$reset_windows" '[switch]$RemovePackages' 'reset-windows makes package removal explicit'
 assert_contains "$reset_windows" "'wezterm'" 'reset-windows accepts wezterm phase'
+assert_contains "$reset_windows" "'quake'" 'reset-windows accepts quake phase'
 assert_contains "$reset_windows" ".config/wezterm" 'reset-windows removes WezTerm config for Phase 2'
 assert_contains "$reset_windows" 'winget package $Id' 'reset-windows package uninstall function remains parameterized'
 assert_contains "$reset_windows" "wez.wezterm" 'reset-windows can uninstall setup-managed WezTerm package'
+assert_contains "$reset_windows" "AutoHotkey.AutoHotkey" 'reset-windows can uninstall setup-managed AutoHotkey package'
+assert_contains "$reset_windows" 'Get-WindowsQuakeStartupShortcutPath' 'reset-windows removes Windows Quake startup shortcut'
 assert_not_contains "$reset_windows" 'RemoveGit' 'reset-windows has no Git removal switch'
 assert_not_contains "$reset_windows" "Git.Git" 'reset-windows never uninstalls Git'
 
@@ -48,7 +58,13 @@ assert_contains "$common_ps1" 'Backup-ChezmoiManagedTargets' 'setup.ps1 backs up
 assert_contains "$common_ps1" 'apply --force' 'setup.ps1 forces chezmoi apply after backup'
 assert_contains "$common_ps1" ".config/wezterm" 'setup.ps1 backs up WezTerm config before chezmoi apply'
 assert_contains "$common_ps1" "PackageId 'wez.wezterm'" 'Windows bootstrap knows WezTerm package'
+assert_contains "$common_ps1" "PackageId 'AutoHotkey.AutoHotkey'" 'Windows bootstrap knows AutoHotkey package'
+assert_contains "$common_ps1" "AutoHotkey\\v2" 'Windows bootstrap searches standard AutoHotkey v2 install path'
 assert_contains "$common_ps1" 'Write-WorkstationEnv' 'setup.ps1 writes machine-local repo root env'
+assert_contains "$common_ps1" 'Get-WindowsQuakeStartupShortcutPath' 'Windows bootstrap resolves Quake startup shortcut path'
+assert_contains "$common_ps1" 'cross-platform-workstation-quake.lnk' 'Windows bootstrap names Quake startup shortcut'
+assert_contains "$common_ps1" 'Register-WindowsQuakeStartup' 'Windows bootstrap can register Quake startup shortcut'
+assert_contains "$common_ps1" 'WScript.Shell' 'Windows bootstrap creates startup shortcut with WScript shell'
 
 common_sh=$(cat "$repo_root/scripts/setup/common.sh")
 assert_contains "$common_sh" 'setup_apply_chezmoi' 'setup.sh has chezmoi apply helper'
