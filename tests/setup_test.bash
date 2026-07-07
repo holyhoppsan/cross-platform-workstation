@@ -18,6 +18,9 @@ assert_contains "$wezterm_output" 'phase: wezterm' 'setup.sh parses wezterm phas
 quake_output=$("$repo_root/setup.sh" --phase quake --dry-run)
 assert_contains "$quake_output" 'phase: quake' 'setup.sh parses quake phase'
 
+neovim_output=$("$repo_root/setup.sh" --phase neovim --dry-run)
+assert_contains "$neovim_output" 'phase: neovim' 'setup.sh parses neovim phase'
+
 default_output=$("$repo_root/setup.sh" --dry-run)
 assert_contains "$default_output" 'phase: shell' 'setup.sh defaults to current implemented phase'
 
@@ -28,24 +31,34 @@ powershell_setup=$(cat "$repo_root/setup.ps1")
 assert_contains "$powershell_setup" "[string]\$Phase = 'shell'" 'setup.ps1 defaults to shell phase'
 assert_contains "$powershell_setup" "'wezterm'" 'setup.ps1 accepts wezterm phase'
 assert_contains "$powershell_setup" "'quake'" 'setup.ps1 accepts quake phase'
+assert_contains "$powershell_setup" "'neovim'" 'setup.ps1 accepts neovim phase'
 assert_contains "$powershell_setup" 'Ensure-WindowsPhaseOneTools' 'setup.ps1 verifies Windows Phase 1 prerequisites'
 assert_contains "$powershell_setup" 'Ensure-WindowsWezTerm' 'setup.ps1 verifies Windows WezTerm'
 assert_contains "$powershell_setup" 'Ensure-WindowsAutoHotkey' 'setup.ps1 verifies Windows AutoHotkey for Quake phase'
+assert_contains "$powershell_setup" 'Ensure-WindowsNeovim' 'setup.ps1 verifies Windows Neovim'
 assert_contains "$powershell_setup" 'Register-WindowsQuakeStartup' 'setup.ps1 registers Windows Quake startup shortcut'
 assert_contains "$powershell_setup" 'Invoke-ChezmoiApply' 'setup.ps1 applies chezmoi'
 assert_contains "$powershell_setup" 'Invoke-WindowsShellValidation' 'setup.ps1 validates configured Git Bash'
 assert_contains "$powershell_setup" 'Invoke-WindowsWezTermValidation' 'setup.ps1 validates WezTerm phase'
 assert_contains "$powershell_setup" 'Invoke-WindowsQuakeValidation' 'setup.ps1 validates Quake phase'
+assert_contains "$powershell_setup" 'Invoke-WindowsNeovimValidation' 'setup.ps1 validates Neovim phase'
 
 reset_windows=$(cat "$repo_root/scripts/setup/reset-windows.ps1")
 assert_contains "$reset_windows" '[switch]$Apply' 'reset-windows requires explicit apply switch'
 assert_contains "$reset_windows" '[switch]$RemovePackages' 'reset-windows makes package removal explicit'
 assert_contains "$reset_windows" "'wezterm'" 'reset-windows accepts wezterm phase'
 assert_contains "$reset_windows" "'quake'" 'reset-windows accepts quake phase'
+assert_contains "$reset_windows" "'neovim'" 'reset-windows accepts neovim phase'
 assert_contains "$reset_windows" ".config/wezterm" 'reset-windows removes WezTerm config for Phase 2'
+assert_contains "$reset_windows" ".config/nvim" 'reset-windows removes Neovim config for Phase 4'
+assert_contains "$reset_windows" 'Stop-SetupManagedProcess' 'reset-windows stops setup-managed processes before package removal'
+assert_contains "$reset_windows" 'wezterm-gui' 'reset-windows stops WezTerm GUI before uninstall'
+assert_contains "$reset_windows" 'wezterm-mux-server' 'reset-windows stops WezTerm mux server before uninstall'
 assert_contains "$reset_windows" 'winget package $Id' 'reset-windows package uninstall function remains parameterized'
+assert_contains "$reset_windows" 'is not installed; skipping uninstall' 'reset-windows tolerates already-removed packages'
 assert_contains "$reset_windows" "wez.wezterm" 'reset-windows can uninstall setup-managed WezTerm package'
 assert_contains "$reset_windows" "AutoHotkey.AutoHotkey" 'reset-windows can uninstall setup-managed AutoHotkey package'
+assert_contains "$reset_windows" "Neovim.Neovim" 'reset-windows can uninstall setup-managed Neovim package'
 assert_contains "$reset_windows" 'Get-WindowsQuakeStartupShortcutPath' 'reset-windows removes Windows Quake startup shortcut'
 assert_not_contains "$reset_windows" 'RemoveGit' 'reset-windows has no Git removal switch'
 assert_not_contains "$reset_windows" "Git.Git" 'reset-windows never uninstalls Git'
@@ -57,8 +70,12 @@ assert_contains "$common_ps1" 'Do not install WSL or Git' 'Windows bootstrap doc
 assert_contains "$common_ps1" 'Backup-ChezmoiManagedTargets' 'setup.ps1 backs up managed dotfiles before chezmoi apply'
 assert_contains "$common_ps1" 'apply --force' 'setup.ps1 forces chezmoi apply after backup'
 assert_contains "$common_ps1" ".config/wezterm" 'setup.ps1 backs up WezTerm config before chezmoi apply'
+assert_contains "$common_ps1" ".config/nvim" 'setup.ps1 backs up Neovim config before chezmoi apply'
 assert_contains "$common_ps1" "PackageId 'wez.wezterm'" 'Windows bootstrap knows WezTerm package'
 assert_contains "$common_ps1" "PackageId 'AutoHotkey.AutoHotkey'" 'Windows bootstrap knows AutoHotkey package'
+assert_contains "$common_ps1" "PackageId 'Neovim.Neovim'" 'Windows bootstrap knows Neovim package'
+assert_contains "$common_ps1" "WezTerm" 'Windows bootstrap searches standard WezTerm install path'
+assert_contains "$common_ps1" "Neovim\\bin" 'Windows bootstrap searches standard Neovim install path'
 assert_contains "$common_ps1" "AutoHotkey\\v2" 'Windows bootstrap searches standard AutoHotkey v2 install path'
 assert_contains "$common_ps1" 'Write-WorkstationEnv' 'setup.ps1 writes machine-local repo root env'
 assert_contains "$common_ps1" 'Get-WindowsQuakeStartupShortcutPath' 'Windows bootstrap resolves Quake startup shortcut path'
@@ -71,11 +88,15 @@ assert_contains "$common_sh" 'setup_apply_chezmoi' 'setup.sh has chezmoi apply h
 assert_contains "$common_sh" 'setup_backup_chezmoi_targets' 'setup.sh backs up managed dotfiles before chezmoi apply'
 assert_contains "$common_sh" 'apply --force' 'setup.sh forces chezmoi apply after backup'
 assert_contains "$common_sh" ".config/wezterm" 'setup.sh backs up WezTerm config before chezmoi apply'
+assert_contains "$common_sh" ".config/nvim" 'setup.sh backs up Neovim config before chezmoi apply'
 assert_contains "$common_sh" 'WORKSTATION_REPO_ROOT' 'setup.sh writes machine-local repo root env'
 assert_contains "$common_sh" 'setup_validate_interactive_shell' 'setup.sh has interactive shell validation helper'
 
 wezterm_phase=$(cat "$repo_root/scripts/setup/phases/wezterm.sh")
 assert_contains "$wezterm_phase" 'wez.wezterm' 'setup.sh WezTerm phase knows Windows package'
+
+neovim_phase=$(cat "$repo_root/scripts/setup/phases/neovim.sh")
+assert_contains "$neovim_phase" 'Neovim.Neovim' 'setup.sh Neovim phase knows Windows package'
 
 detect_output=$("$repo_root/scripts/setup/detect-platform.sh")
 case "$detect_output" in

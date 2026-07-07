@@ -39,7 +39,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$phase" in
-  foundation|shell|wezterm|quake|all) ;;
+  foundation|shell|wezterm|quake|neovim|all) ;;
   *) die "phase is not implemented in this deliverable: $phase" ;;
 esac
 
@@ -85,12 +85,22 @@ case "$phase" in
       die 'Quake setup is currently implemented only for Windows; macOS and Ubuntu adapters are documented stubs.'
     fi
     ;;
+  neovim)
+    "$repo_root/scripts/setup/phases/foundation.sh" "$repo_root"
+    "$repo_root/scripts/setup/phases/shell.sh" "$repo_root" "$install_missing"
+    "$repo_root/scripts/setup/phases/wezterm.sh" "$repo_root" "$install_missing"
+    "$repo_root/scripts/setup/phases/neovim.sh" "$repo_root" "$install_missing"
+    setup_apply_chezmoi "$repo_root"
+    "$repo_root/scripts/doctor" --phase neovim
+    setup_validate_interactive_shell "$repo_root"
+    ;;
   all)
     "$repo_root/scripts/setup/phases/foundation.sh" "$repo_root"
     "$repo_root/scripts/setup/phases/shell.sh" "$repo_root" "$install_missing"
     "$repo_root/scripts/setup/phases/wezterm.sh" "$repo_root" "$install_missing"
+    "$repo_root/scripts/setup/phases/neovim.sh" "$repo_root" "$install_missing"
     setup_apply_chezmoi "$repo_root"
-    "$repo_root/scripts/doctor" --phase wezterm
+    "$repo_root/scripts/doctor" --phase neovim
     setup_validate_interactive_shell "$repo_root"
     ;;
 esac
@@ -99,4 +109,5 @@ cat <<'EOF'
 
 Setup completed. Open a fresh Git Bash session and run:
   doctor --phase wezterm
+  doctor --phase neovim
 EOF

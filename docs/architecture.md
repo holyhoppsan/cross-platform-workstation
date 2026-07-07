@@ -2,7 +2,7 @@
 
 ## Goals and Invariants
 
-This repository builds a workstation in explicit phases. Phase 0 establishes the repository foundation. Phase 1 establishes a common Bash workflow. Phase 2 establishes WezTerm as the terminal layer. Later phases add Quake mode, editor, file manager, IDE, worktree, AI agent, notification, model, and hardening behavior.
+This repository builds a workstation in explicit phases. Phase 0 establishes the repository foundation. Phase 1 establishes a common Bash workflow. Phase 2 establishes WezTerm as the terminal layer. Phase 3 adds the Windows Quake-mode adapter. Phase 4 adds the Neovim baseline. Later phases add the file manager, IDE, worktree, AI agent, notification, model, and hardening behavior.
 
 Windows remains native. Git for Windows Bash is used for the Unix-style interactive workflow, but Windows-native tools keep using Windows-native paths when required. Git for Windows is a prerequisite for cloning the repository; setup verifies it but does not install or remove it. WSL paths and WSL dependencies are outside the design.
 
@@ -42,9 +42,13 @@ Shell helpers must quote variables and preserve paths containing spaces.
 
 `chezmoi/dot_config/wezterm/wezterm.lua` configures WezTerm for Phase 2. It launches Git Bash on Windows and Bash on macOS/Ubuntu, uses `Ctrl+A` as a tmux-style terminal leader, and keeps OS-level Quake behavior deferred.
 
+### Neovim
+
+`chezmoi/dot_config/nvim/` configures Neovim for Phase 4. It is deliberately plugin-free, uses Space as leader, keeps `Ctrl+W` available for Neovim windows, and exposes `nv`, `nvc`, and `edit` through shared shell helpers.
+
 ### Future Phases
 
-Quake mode, Neovim, Yazi, Rider, worktree commands, AI agents, notifications, and model tooling are future phases. Placeholder directories may exist so the repository shape is stable, but functional implementations must wait for their phase.
+Yazi, Rider, worktree commands, AI agents, notifications, and model tooling are future phases. macOS and Ubuntu Quake adapters also remain future platform work. Placeholder directories may exist so the repository shape is stable, but functional implementations must wait for their phase.
 
 ## Verification Policy
 

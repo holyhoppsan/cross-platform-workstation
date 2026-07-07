@@ -50,12 +50,14 @@ Implemented:
 - `croot`
 - `gfind`
 - `fdx`
+- `nv`
+- `nvc`
+- `edit`
 
 Stubbed for future phases:
 
 - `project`
 - `y`
-- `nv`
 - `rider`
 - `wt-create`
 - `wt-list`
@@ -65,4 +67,3 @@ Stubbed for future phases:
 - `agent-notify`
 
 Stubbed helpers return exit code 64 and explain which future phase owns them.
-

@@ -221,7 +221,7 @@ Do not include Yazi in the AI agent list.
 | 1     | Common shell workflow                     | Implemented and validated on Windows; needs macOS/Ubuntu validation |
 | 2     | WezTerm baseline with tmux-style bindings | Implemented and automated validation passed on Windows; needs manual GUI validation |
 | 3     | Quake-mode dropdown                       | Windows validated; macOS/Ubuntu stubbed |
-| 4     | Neovim baseline                           | Not started                               |
+| 4     | Neovim baseline                           | Implemented and validated on Windows; needs macOS/Ubuntu validation |
 | 5     | Yazi baseline                             | Not started                               |
 | 6     | Rider and minimal Unreal launching        | Not started                               |
 | 7     | Project and worktree workflow             | Not started                               |
@@ -797,7 +797,7 @@ Deferred items:
 
 ## Phase 4: Neovim Baseline
 
-Status: Not started
+Status: Implemented and validated on Windows; needs macOS/Ubuntu validation
 
 Goal: Add a restrained, maintainable Neovim setup.
 
@@ -854,32 +854,45 @@ Deliverables:
 
 Tasks:
 
-* [ ] Add Neovim config directory.
-* [ ] Add basic init.lua or equivalent.
-* [ ] Add sensible defaults.
-* [ ] Add Space leader.
-* [ ] Add filetype/editor basics.
-* [ ] Add shell helper `nv`.
-* [ ] Add optional shell helper `nvc`.
-* [ ] Add docs/neovim.md.
-* [ ] Add doctor checks.
+* [x] Add Neovim config directory.
+* [x] Add basic init.lua or equivalent.
+* [x] Add sensible defaults.
+* [x] Add Space leader.
+* [x] Add filetype/editor basics.
+* [x] Add shell helper `nv`.
+* [x] Add optional shell helper `nvc`.
+* [x] Add docs/neovim.md.
+* [x] Add doctor checks.
 
 Validation:
 
-* [ ] `nvim` starts.
-* [ ] `nv` works.
-* [ ] WezTerm Neovim keybindings work.
-* [ ] Neovim does not conflict with Ctrl+A terminal leader.
-* [ ] `doctor --phase neovim` reports status.
+* [x] `nvim` starts. Status: Windows validated headlessly with Neovim 0.12.3.
+* [x] `nv` works. Status: Windows validated with `nv --headless +qa`; interactive editor launch still needs a human smoke test.
+* [x] WezTerm Neovim keybindings work. Status: Windows GUI validated for `Ctrl+A`, `v` and `Ctrl+A`, `V`.
+* [x] Neovim does not conflict with Ctrl+A terminal leader. Status: Windows GUI key chord validation passed.
+* [x] `doctor --phase neovim` reports status.
+* [x] Windows Phase 4 reset/reinstall path works. Status: validated with `reset-windows.ps1 -Phase neovim -Apply -RemovePackages`, `setup.ps1 -Phase neovim`, repo tests, doctor, and interactive Git Bash helper checks.
 
 Notes:
 
-* Existing shell helper stubs may exist, but the phase is not implemented.
+* 2026-07-07: Added a plugin-free Neovim baseline under `chezmoi/dot_config/nvim/` with Space leader, sensible defaults, netrw file navigation, filetype handling, and LSP-ready diagnostics configuration.
+* 2026-07-07: Added real `nv`, `nvc`, and `edit` shell helpers. `nvc` seeds the config `lua/` path explicitly so headless validation works when loading `init.lua` with `-u`, including Windows paths with spaces.
+* 2026-07-07: Added Windows setup support for Neovim using winget package `Neovim.Neovim`; setup verifies Phase 1/2 prerequisites, installs or verifies Neovim, applies chezmoi, and runs `doctor --phase neovim`.
+* 2026-07-07: Added reset support for `-Phase neovim`, including `~/.config/nvim` cleanup and optional Neovim package removal behind `-RemovePackages`.
+* 2026-07-07: Windows validation passed with `setup.ps1 -Phase neovim`, `doctor --phase neovim`, `tests/run.bash`, `git diff --check`, interactive `nvc`, and `nv --headless +qa`.
+* 2026-07-07: Git Bash interactive PATH now includes the standard `C:\Program Files\Neovim\bin` install path. Doctor also checks that path directly for non-interactive validation.
+* 2026-07-07: User reported WezTerm `Ctrl+A`, `V` did not open Neovim in a new pane. Root cause: the binding spawned `nv` through non-interactive `bash -lc`, while `nv` is an interactive shell helper. The binding now spawns an interactive login Bash for `nv` and includes a lowercase shifted `v` binding for WezTerm key matching. `setup.ps1 -Phase neovim` and `tests/run.bash` passed after the fix.
+* 2026-07-07: User manually validated the fixed Windows WezTerm Neovim bindings: `Ctrl+A`, `v` opens Neovim in the current pane, and `Ctrl+A`, `V` opens Neovim in a new pane.
+* 2026-07-07: Windows Phase 4 reset/reinstall validation exposed two setup hardening issues. `reset-windows.ps1 -Phase neovim -Apply -RemovePackages` now stops setup-managed WezTerm processes before uninstalling WezTerm, and winget package removal is idempotent when packages are already absent.
+* 2026-07-07: Fresh Git Bash sessions after reinstall could see Neovim but not `wezterm`. The managed shell PATH now includes the standard `C:\Program Files\WezTerm` path, PowerShell setup searches that directory, and doctor checks `/c/Program Files/WezTerm/wezterm.exe` directly.
+* 2026-07-07: Final Windows Phase 4 reset/reinstall validation passed after hardening. The loop reset managed configs/packages, reinstalled Phase 4 with `setup.ps1 -Phase neovim`, applied chezmoi, passed `tests/run.bash`, passed `doctor --phase neovim`, and passed interactive Git Bash checks for `command -v wezterm`, `command -v nvim`, `nvc`, and `nv --headless +qa`.
 
 Deferred items:
 
 * Complex AI/editor integration.
 * Fragile terminal-pane navigation hacks.
+* Plugin manager decision.
+* macOS and Ubuntu validation.
 
 ## Phase 5: Yazi Baseline
 
@@ -1829,9 +1842,9 @@ This section mirrors and expands the unsupported/deferred policy for quick looku
 
 Current next actions:
 
-1. Commit and push Phase 3 when the Windows behavior is accepted.
-2. Validate Phase 2/3 on macOS and Ubuntu only when those platforms are available.
-3. Begin Phase 4 Neovim baseline after Phase 3 is saved.
+1. Commit and push Phase 4 if accepted.
+2. Validate Phase 2/3/4 on macOS and Ubuntu only when those platforms are available.
+3. Begin Phase 5 Yazi baseline after Phase 4 is saved.
 4. Keep `PLAN.md` updated after each implementation or validation session.
 
 ## PLAN.md Update Rules
@@ -2129,3 +2142,19 @@ Format:
 - Validation performed: User rebooted Windows and confirmed `Ctrl+`` works as intended without manually running `platform/windows/start-quake.ps1`. User then reran `setup.ps1 -Phase quake`; setup recreated/verified the startup shortcut and passed WezTerm plus Quake doctor checks. Final validation passed with `doctor --phase quake`, `tests/run.bash`, and `git diff --check`.
 - Known gaps: Multi-monitor focused placement remains unvalidated. macOS/Ubuntu remain deferred.
 - Next actions: Commit/push Phase 3 if accepted, then begin Phase 4 Neovim baseline.
+
+### 2026-07-07
+
+- Summary of changes: Implemented Phase 4 Neovim baseline. Added plugin-free Neovim Lua config, real `nv`/`nvc`/`edit` helpers, Neovim docs, Windows setup/reset support, doctor checks, and tests.
+- Phases touched: Phase 4, Phase 1 shell helper/PATH hardening, Phase 2 WezTerm docs/binding validation, setup/reset, doctor, docs, tests.
+- Validation performed: `setup.ps1 -Phase neovim -DryRun` passed. `reset-windows.ps1 -Phase neovim` dry-run passed. `setup.ps1 -Phase neovim` installed/verified Neovim 0.12.3, applied chezmoi, and passed `doctor --phase neovim`. `tests/run.bash` passed. `doctor --phase neovim` passed. Interactive Git Bash validation passed for `command -v nvim`, `nvc`, `doctor --phase neovim`, and `nv --headless +qa`. `git diff --check` passed with expected CRLF warnings on PowerShell scripts. User manually validated Windows WezTerm `Ctrl+A`, `v` and `Ctrl+A`, `V` Neovim bindings after the new-pane binding fix.
+- Known gaps: macOS and Ubuntu remain unvalidated. Plugin manager and complex AI/editor integration remain deferred.
+- Next actions: Commit/push Phase 4 if accepted. After Phase 4 is saved, begin Phase 5 Yazi baseline.
+
+### 2026-07-07
+
+- Summary of changes: Validated and hardened the Windows Phase 4 reset/reinstall path. The reset script now stops setup-managed WezTerm processes before package removal and skips winget uninstall for packages that are already absent. Fresh Git Bash PATH and doctor checks now include the standard WezTerm install path after reinstall.
+- Phases touched: Phase 4, Phase 2 PATH/doctor hardening, Phase 11 reset idempotency precursor, setup/reset, tests, tracking.
+- Validation performed: `setup.ps1 -Phase neovim -DryRun`, `reset-windows.ps1 -Phase neovim`, and `reset-windows.ps1 -Phase neovim -RemovePackages` dry-runs passed. A destructive `reset-windows.ps1 -Phase neovim -Apply -RemovePackages` exposed the running-WezTerm partial reinstall issue; after the reset fix and idempotency fix, reset completed cleanly. `setup.ps1 -Phase neovim` reinstalled/verifed WezTerm and Neovim, applied chezmoi, and passed setup doctor checks. `setup.ps1 -Phase neovim -SkipInstall` reapplied the final PATH updates and passed. `tests/run.bash`, `doctor --phase neovim`, and interactive Git Bash checks for `command -v wezterm`, `command -v nvim`, `nvc`, and `nv --headless +qa` passed.
+- Known gaps: macOS and Ubuntu remain unvalidated. This validation used the current Windows machine and included an elevated setup run because the tool's normal context could not execute winget install output reliably; user-run PowerShell remains the intended workflow.
+- Next actions: Run `git diff --check`, review the Phase 4 diff, then commit/push Phase 4 if accepted.

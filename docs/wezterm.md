@@ -16,8 +16,7 @@ Implemented in Phase 2:
 
 Deferred:
 
-- OS-level `Ctrl+`` Quake dropdown behavior
-- real Yazi and Neovim setup
+- real Yazi setup
 - rich agent status integration
 - tmux integration
 
@@ -47,8 +46,8 @@ WezTerm uses an explicit palette matching the default Windows Terminal scheme in
 
 - `Ctrl+`` is reserved for the OS-level Quake adapter in Phase 3.
 - `Ctrl+A` is the WezTerm leader for panes, tabs, and workspaces.
-- Space is reserved for the future Neovim leader.
-- `Ctrl+W` is reserved for future Neovim window actions.
+- Space is the Neovim leader.
+- `Ctrl+W` remains available for Neovim window actions.
 
 ## Bindings
 
@@ -73,10 +72,10 @@ WezTerm uses an explicit palette matching the default Windows Terminal scheme in
 | `Ctrl+A`, `a` | Send literal `Ctrl+A` |
 | `Ctrl+A`, `q` | Switch to `quake` workspace |
 | `Ctrl+A`, `e/E` | Call the Yazi helper stub |
-| `Ctrl+A`, `v/V` | Call the Neovim helper stub |
+| `Ctrl+A`, `v/V` | Open Neovim through the `nv` helper |
 | `Ctrl+A`, `u` | Move to agent pane needing attention, if title metadata is present |
 
-The Yazi and Neovim helpers are intentionally stubs until Phases 4 and 5.
+The Yazi helper remains intentionally stubbed until Phase 5.
 
 ## Clipboard
 

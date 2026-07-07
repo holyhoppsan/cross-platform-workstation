@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('shell', 'wezterm', 'quake', 'all')]
+    [ValidateSet('shell', 'wezterm', 'quake', 'neovim', 'all')]
     [string]$Phase = 'shell',
     [switch]$Apply,
     [switch]$RemovePackages,
@@ -59,9 +59,28 @@ function Uninstall-WingetPackage {
             throw "winget is required to uninstall $Name automatically, but winget was not found."
         }
 
+        & $winget list --id $Id --exact | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            Write-SetupInfo "$Name is not installed; skipping uninstall"
+            return
+        }
+
         & $winget uninstall --id $Id --exact --accept-source-agreements
         if ($LASTEXITCODE -ne 0) {
             throw "winget failed to uninstall $Name ($Id)."
+        }
+    }
+}
+
+function Stop-SetupManagedProcess {
+    param(
+        [Parameter(Mandatory)][string[]]$Names,
+        [Parameter(Mandatory)][string]$Description
+    )
+
+    Invoke-ResetAction "stop $Description processes" {
+        foreach ($name in $Names) {
+            Get-Process -Name $name -ErrorAction SilentlyContinue | Stop-Process -Force
         }
     }
 }
@@ -86,8 +105,12 @@ $targets = @(
     (Join-Path $HOME '.local/share/chezmoi')
 )
 
-if ($Phase -in @('wezterm', 'quake', 'all')) {
+if ($Phase -in @('wezterm', 'quake', 'neovim', 'all')) {
     $targets += Join-Path $HOME '.config/wezterm'
+}
+
+if ($Phase -in @('neovim', 'all')) {
+    $targets += Join-Path $HOME '.config/nvim'
 }
 
 if ($Phase -in @('quake', 'all')) {
@@ -105,13 +128,19 @@ foreach ($target in $targets) {
 }
 
 if ($RemovePackages) {
+    if ($Phase -in @('wezterm', 'quake', 'neovim', 'all')) {
+        Stop-SetupManagedProcess -Names @('wezterm', 'wezterm-gui', 'wezterm-mux-server') -Description 'WezTerm'
+    }
     Uninstall-WingetPackage -Id 'twpayne.chezmoi' -Name 'chezmoi'
     Uninstall-WingetPackage -Id 'BurntSushi.ripgrep.MSVC' -Name 'ripgrep'
     Uninstall-WingetPackage -Id 'sharkdp.fd' -Name 'fd'
     Uninstall-WingetPackage -Id 'jqlang.jq' -Name 'jq'
     Uninstall-WingetPackage -Id 'junegunn.fzf' -Name 'fzf'
-    if ($Phase -in @('wezterm', 'quake', 'all')) {
+    if ($Phase -in @('wezterm', 'quake', 'neovim', 'all')) {
         Uninstall-WingetPackage -Id 'wez.wezterm' -Name 'WezTerm'
+    }
+    if ($Phase -in @('neovim', 'all')) {
+        Uninstall-WingetPackage -Id 'Neovim.Neovim' -Name 'Neovim'
     }
     if ($Phase -in @('quake', 'all')) {
         Uninstall-WingetPackage -Id 'AutoHotkey.AutoHotkey' -Name 'AutoHotkey v2'
