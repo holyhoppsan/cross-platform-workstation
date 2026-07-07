@@ -31,6 +31,9 @@ assert_contains "$wezterm_config" "SwitchToWorkspace { name = 'quake'" 'WezTerm 
 assert_not_contains "$wezterm_config" "SpawnCommandInNewPane" 'WezTerm does not use invalid pane spawn action'
 assert_contains "$wezterm_config" "SplitPane" 'WezTerm can spawn helper panes'
 assert_not_contains "$helper_block" "domain =" 'SplitPane helper does not use invalid domain field'
+assert_contains "$wezterm_config" 'interactive_bash_command' 'WezTerm can spawn interactive helper panes'
+assert_contains "$wezterm_config" "key = 'v', mods = 'LEADER|SHIFT'" 'WezTerm has shifted Neovim new-pane binding'
+assert_contains "$wezterm_config" "spawn_interactive_bash_command('nv')" 'WezTerm launches Neovim new-pane helper in interactive Bash'
 assert_contains "$wezterm_config" 'workstation-next-agent' 'WezTerm has agent attention placeholder event'
 assert_contains "$wezterm_config" "PasteFrom 'Clipboard'" 'WezTerm has explicit clipboard paste binding'
 assert_contains "$wezterm_config" "CopyTo 'Clipboard'" 'WezTerm has explicit clipboard copy binding'
@@ -40,6 +43,7 @@ assert_contains "$wezterm_doc" 'Ctrl+A' 'WezTerm docs record leader key'
 assert_contains "$wezterm_doc" 'Right click' 'WezTerm docs describe right-click paste'
 assert_contains "$wezterm_doc" 'macOS and Ubuntu behavior must remain marked unvalidated' 'WezTerm docs mark unvalidated platforms'
 assert_contains "$doctor" 'check_wezterm' 'doctor implements WezTerm checks'
+assert_contains "$doctor" '/c/Program Files/WezTerm/wezterm.exe' 'doctor checks standard Windows WezTerm path'
 assert_contains "$doctor" 'show-keys --lua' 'doctor validates WezTerm config loading'
 
 finish_tests

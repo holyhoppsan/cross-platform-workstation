@@ -3,7 +3,7 @@ set -u
 
 usage() {
   cat <<'EOF'
-usage: doctor [--phase foundation|shell|wezterm|quake|all] [--help]
+usage: doctor [--phase foundation|shell|wezterm|quake|neovim|all] [--help]
 
 Later phases are documented in PLAN.md but are not implemented yet.
 EOF
@@ -34,8 +34,8 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$phase" in
-  foundation|shell|wezterm|quake|all) ;;
-  neovim|yazi|rider|project|agents|models)
+  foundation|shell|wezterm|quake|neovim|all) ;;
+  yazi|rider|project|agents|models)
     printf '[fail] %-24s %s\n' "phase $phase" 'not implemented yet'
     exit 2
     ;;
@@ -200,7 +200,7 @@ check_shell() {
     warn 'managed shell config' 'not applied with chezmoi yet'
   fi
 
-  warn 'future helpers' 'project, y, nv, rider, wt-*, agent, and agent-notify are stubs'
+  warn 'future helpers' 'project, y, rider, wt-*, agent, and agent-notify are stubs'
 }
 
 check_wezterm() {
@@ -214,6 +214,11 @@ check_wezterm() {
   fi
 
   wezterm_cmd=$(find_command wezterm wezterm.exe || true)
+  if [ -z "$wezterm_cmd" ] && [ "$WORKSTATION_OS" = windows ]; then
+    wezterm_cmd=$(find_windows_file \
+      '/c/Program Files/WezTerm/wezterm.exe' \
+      "$HOME/AppData/Local/Programs/WezTerm/wezterm.exe" || true)
+  fi
   if [ -n "$wezterm_cmd" ]; then
     ok 'wezterm' "$("$wezterm_cmd" --version 2>/dev/null | head -n 1)"
   else
@@ -240,7 +245,7 @@ check_wezterm() {
   if [ "$phase" = wezterm ]; then
     warn 'Quake mode' 'deferred to Phase 3'
   fi
-  warn 'Yazi/Neovim bindings' 'bindings call helper stubs until Phases 4 and 5'
+  warn 'Yazi binding' 'Yazi bindings call helper stubs until Phase 5'
 }
 
 check_quake() {
@@ -307,11 +312,93 @@ check_quake() {
   fi
 }
 
+check_neovim() {
+  check_wezterm
+
+  local root nvim_cmd config_path
+  root=$(repo_root)
+  config_path="${XDG_CONFIG_HOME:-$HOME/.config}/nvim/init.lua"
+  if [ ! -r "$config_path" ] && [ -r "$root/chezmoi/dot_config/nvim/init.lua" ]; then
+    config_path="$root/chezmoi/dot_config/nvim/init.lua"
+  fi
+
+  nvim_cmd=$(find_command nvim nvim.exe || true)
+  if [ -z "$nvim_cmd" ] && [ "$WORKSTATION_OS" = windows ]; then
+    nvim_cmd=$(find_windows_file \
+      '/c/Program Files/Neovim/bin/nvim.exe' \
+      "$HOME/AppData/Local/Programs/Neovim/bin/nvim.exe" || true)
+  fi
+  if [ -n "$nvim_cmd" ]; then
+    ok 'neovim' "$("$nvim_cmd" --version 2>/dev/null | head -n 1)"
+  else
+    fail 'neovim' 'not found'
+  fi
+
+  if [ -r "$config_path" ]; then
+    ok 'Neovim config' "$config_path"
+    grep -Fq "vim.g.mapleader = ' '" "$config_path" && ok 'Neovim leader' 'Space' || fail 'Neovim leader' 'Space leader missing'
+  else
+    fail 'Neovim config' 'init.lua missing'
+  fi
+
+  if [ -r "$root/chezmoi/dot_config/nvim/lua/workstation/options.lua" ]; then
+    ok 'Neovim modules' 'workstation Lua modules present'
+  else
+    fail 'Neovim modules' 'workstation Lua modules missing'
+  fi
+
+  if command -v nv >/dev/null 2>&1; then
+    ok 'nv helper' 'available'
+  else
+    fail 'nv helper' 'not loaded'
+  fi
+
+  if command -v nvc >/dev/null 2>&1; then
+    ok 'nvc helper' 'available'
+  else
+    fail 'nvc helper' 'not loaded'
+  fi
+
+  if [ -n "$nvim_cmd" ] && [ -r "$config_path" ]; then
+    local config_dir
+    config_dir=$(dirname -- "$config_path")
+    local nvim_config_path=$config_path
+    local nvim_config_dir=$config_dir
+    if [ "$WORKSTATION_OS" = windows ] && command -v cygpath >/dev/null 2>&1; then
+      nvim_config_path=$(cygpath -aw "$config_path")
+      nvim_config_dir=$(cygpath -aw "$config_dir")
+    fi
+    local nvim_output nvim_status
+    nvim_output=$("$nvim_cmd" --headless --cmd "lua package.path = [[$nvim_config_dir/lua/?.lua;$nvim_config_dir/lua/?/init.lua;]] .. package.path; vim.opt.rtp:prepend([[$nvim_config_dir]])" -u "$nvim_config_path" +qa 2>&1)
+    nvim_status=$?
+    if [ "$nvim_status" -eq 0 ] && ! printf '%s\n' "$nvim_output" | grep -Eq 'Error in|E5113'; then
+      ok 'Neovim config load' 'nvim --headless succeeded'
+    else
+      fail 'Neovim config load' 'nvim --headless failed'
+    fi
+  fi
+
+  local wezterm_config="${XDG_CONFIG_HOME:-$HOME/.config}/wezterm/wezterm.lua"
+  if [ ! -r "$wezterm_config" ] && [ -r "$root/chezmoi/dot_config/wezterm/wezterm.lua" ]; then
+    wezterm_config="$root/chezmoi/dot_config/wezterm/wezterm.lua"
+  fi
+  if [ -r "$wezterm_config" ] && grep -q "spawn_interactive_bash_command('nv')" "$wezterm_config" && grep -q "SendString 'nv" "$wezterm_config"; then
+    ok 'WezTerm Neovim keys' 'configured'
+  else
+    fail 'WezTerm Neovim keys' 'missing'
+  fi
+}
+
 case "$phase" in
   foundation) check_foundation ;;
   shell) check_shell ;;
   wezterm) check_wezterm ;;
-  quake|all) check_quake ;;
+  quake) check_quake ;;
+  neovim) check_neovim ;;
+  all)
+    check_quake
+    check_neovim
+    ;;
 esac
 
 if [ "$failures" -gt 0 ]; then

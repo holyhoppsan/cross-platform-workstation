@@ -154,8 +154,13 @@ function Resolve-InstalledCommand {
     }
     if ($Env:ProgramFiles) {
         $candidateRoots += Join-Path $Env:ProgramFiles 'WinGet\Packages'
+        $candidateRoots += Join-Path $Env:ProgramFiles 'WezTerm'
+        $candidateRoots += Join-Path $Env:ProgramFiles 'Neovim\bin'
         $candidateRoots += Join-Path $Env:ProgramFiles 'AutoHotkey\v2'
         $candidateRoots += Join-Path $Env:ProgramFiles 'AutoHotkey'
+    }
+    if (${Env:ProgramFiles(x86)}) {
+        $candidateRoots += Join-Path ${Env:ProgramFiles(x86)} 'Neovim\bin'
     }
     if (${Env:ProgramFiles(x86)}) {
         $candidateRoots += Join-Path ${Env:ProgramFiles(x86)} 'AutoHotkey\v2'
@@ -257,6 +262,12 @@ function Ensure-WindowsAutoHotkey {
     Ensure-WindowsPackageCommand -Command 'AutoHotkey64.exe' -PackageId 'AutoHotkey.AutoHotkey' -Name 'AutoHotkey v2' -DryRun:$DryRun
 }
 
+function Ensure-WindowsNeovim {
+    param([switch]$DryRun)
+
+    Ensure-WindowsPackageCommand -Command 'nvim.exe' -PackageId 'Neovim.Neovim' -Name 'Neovim' -DryRun:$DryRun
+}
+
 function Get-WindowsQuakeStartupShortcutPath {
     $startup = [Environment]::GetFolderPath('Startup')
     if (-not $startup) {
@@ -315,6 +326,7 @@ function Backup-ChezmoiManagedTargets {
         (Join-Path $HOME '.bash_profile'),
         (Join-Path $HOME '.config/workstation'),
         (Join-Path $HOME '.config/wezterm'),
+        (Join-Path $HOME '.config/nvim'),
         (Join-Path $HOME '.local/bin/workstation-doctor')
     )
 
@@ -516,6 +528,27 @@ function Invoke-WindowsQuakeValidation {
 
     Write-SetupInfo 'validating Quake phase through Git Bash'
     Invoke-GitBash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase quake'
+}
+
+function Invoke-WindowsNeovimValidation {
+    param(
+        [Parameter(Mandatory)][string]$RepoRoot,
+        [switch]$DryRun
+    )
+
+    Update-ProcessPathFromRegistry
+    $bash = Get-WindowsGitBashPath
+    if (-not $bash) {
+        throw 'Git Bash was not found for Neovim validation.'
+    }
+
+    if ($DryRun) {
+        Write-SetupInfo 'would run doctor --phase neovim through Git Bash'
+        return
+    }
+
+    Write-SetupInfo 'validating Neovim phase through Git Bash'
+    Invoke-GitBash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase neovim'
 }
 
 function Test-ShellPhase {

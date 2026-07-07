@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('foundation', 'shell', 'wezterm', 'quake', 'all')]
+    [ValidateSet('foundation', 'shell', 'wezterm', 'quake', 'neovim', 'all')]
     [string]$Phase = 'shell',
     [switch]$DryRun,
     [switch]$SkipInstall,
@@ -21,7 +21,7 @@ Write-SetupInfo "skip_apply: $($SkipApply.IsPresent)"
 
 Test-FoundationPhase -RepoRoot $RepoRoot
 
-if ($Phase -in @('shell', 'wezterm', 'quake', 'all')) {
+if ($Phase -in @('shell', 'wezterm', 'quake', 'neovim', 'all')) {
     if ($Platform -eq 'windows') {
         if ($SkipInstall) {
             Test-ShellPhase -RepoRoot $RepoRoot -Platform $Platform
@@ -48,7 +48,7 @@ if ($Phase -in @('shell', 'wezterm', 'quake', 'all')) {
     }
 }
 
-if ($Phase -in @('wezterm', 'quake', 'all')) {
+if ($Phase -in @('wezterm', 'quake', 'neovim', 'all')) {
     if ($Platform -eq 'windows') {
         if ($SkipInstall) {
             Write-SetupInfo 'skipping WezTerm install/verify by request'
@@ -68,6 +68,31 @@ if ($Phase -in @('wezterm', 'quake', 'all')) {
             throw 'WezTerm is required for Phase 2. Install it with your platform package manager, then rerun setup.'
         }
         if (-not $SkipApply -and $Phase -in @('wezterm', 'quake')) {
+            Invoke-ChezmoiApply -RepoRoot $RepoRoot -DryRun:$DryRun
+        }
+    }
+}
+
+if ($Phase -in @('neovim', 'all')) {
+    if ($Platform -eq 'windows') {
+        if ($SkipInstall) {
+            Write-SetupInfo 'skipping Neovim install/verify by request'
+        } else {
+            Ensure-WindowsNeovim -DryRun:$DryRun
+        }
+
+        if ($SkipApply) {
+            Write-SetupInfo 'skipping Neovim config apply by request'
+        } elseif ($Phase -eq 'neovim') {
+            Invoke-ChezmoiApply -RepoRoot $RepoRoot -DryRun:$DryRun
+        }
+
+        Invoke-WindowsNeovimValidation -RepoRoot $RepoRoot -DryRun:$DryRun
+    } else {
+        if (-not (Get-Command nvim -ErrorAction SilentlyContinue)) {
+            throw 'Neovim is required for Phase 4. Install it with your platform package manager, then rerun setup.'
+        }
+        if (-not $SkipApply -and $Phase -eq 'neovim') {
             Invoke-ChezmoiApply -RepoRoot $RepoRoot -DryRun:$DryRun
         }
     }

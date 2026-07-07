@@ -54,7 +54,7 @@ assert_contains "$doctor" 'WinMinimize' 'doctor checks current Quake dismiss beh
 assert_not_contains "$doctor" 'Quake hide behavior' 'doctor no longer requires old WinHide behavior'
 assert_contains "$doctor" 'Quake startup' 'doctor checks Quake startup registration'
 assert_contains "$doctor" 'cross-platform-workstation-quake.lnk' 'doctor checks expected Quake startup shortcut'
-assert_not_contains "$doctor" '/?' 'doctor does not invoke AutoHotkey GUI help'
+assert_not_contains "$doctor" 'AutoHotkey64.exe /?' 'doctor does not invoke AutoHotkey GUI help'
 assert_contains "$doctor" '//Validate' 'doctor validates AutoHotkey syntax from Git Bash'
 assert_contains "$doctor" 'Quake manual validation' 'doctor marks Quake GUI behavior manual'
 assert_contains "$doctor" 'focused-monitor placement and multi-monitor movement require manual GUI validation' 'doctor warning only calls out unvalidated Quake GUI behavior'

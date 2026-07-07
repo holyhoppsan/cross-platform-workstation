@@ -29,10 +29,24 @@ local function bash_command(command)
   return { 'bash', '-lc', command }
 end
 
+local function interactive_bash_command(command)
+  if default_shell then
+    return { default_shell, '--login', '-i', '-c', command }
+  end
+  return { 'bash', '--login', '-i', '-c', command }
+end
+
 local function spawn_bash_command(command)
   return act.SplitPane {
     direction = 'Right',
     command = { args = bash_command(command) },
+  }
+end
+
+local function spawn_interactive_bash_command(command)
+  return act.SplitPane {
+    direction = 'Right',
+    command = { args = interactive_bash_command(command) },
   }
 end
 
@@ -141,7 +155,8 @@ config.keys = {
   { key = 'e', mods = 'LEADER', action = spawn_bash_command('y') },
   { key = 'E', mods = 'LEADER|SHIFT', action = act.SendString 'y\n' },
   { key = 'v', mods = 'LEADER', action = act.SendString 'nv\n' },
-  { key = 'V', mods = 'LEADER|SHIFT', action = spawn_bash_command('nv') },
+  { key = 'v', mods = 'LEADER|SHIFT', action = spawn_interactive_bash_command('nv') },
+  { key = 'V', mods = 'LEADER|SHIFT', action = spawn_interactive_bash_command('nv') },
   { key = 'u', mods = 'LEADER', action = act.EmitEvent 'workstation-next-agent' },
 }
 

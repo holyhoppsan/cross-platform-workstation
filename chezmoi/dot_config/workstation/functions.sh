@@ -83,7 +83,56 @@ doctor() {
 
 project() { printf 'project: stubbed until Phase 7\n' >&2; return 64; }
 y() { printf 'y: Yazi helper is stubbed until Phase 5\n' >&2; return 64; }
-nv() { printf 'nv: Neovim helper is stubbed until Phase 4\n' >&2; return 64; }
+
+nv() {
+  if ! has nvim; then
+    printf 'nv: nvim is not installed or not on PATH\n' >&2
+    return 127
+  fi
+
+  if [ "$#" -eq 0 ]; then
+    nvim .
+  else
+    nvim "$@"
+  fi
+}
+
+nvc() {
+  if ! has nvim; then
+    printf 'nvc: nvim is not installed or not on PATH\n' >&2
+    return 127
+  fi
+
+  local config_path="${XDG_CONFIG_HOME:-$HOME/.config}/nvim/init.lua"
+  if [ ! -r "$config_path" ]; then
+    workstation_load_env
+    if [ -n "${WORKSTATION_REPO_ROOT:-}" ] && [ -r "$WORKSTATION_REPO_ROOT/chezmoi/dot_config/nvim/init.lua" ]; then
+      config_path="$WORKSTATION_REPO_ROOT/chezmoi/dot_config/nvim/init.lua"
+    fi
+  fi
+
+  local config_dir
+  config_dir=$(dirname -- "$config_path")
+  local nvim_config_path=$config_path
+  local nvim_config_dir=$config_dir
+  if [ "${WORKSTATION_OS:-}" = windows ] && command -v cygpath >/dev/null 2>&1; then
+    nvim_config_path=$(winpath "$config_path")
+    nvim_config_dir=$(winpath "$config_dir")
+  fi
+  local output status
+  output=$(nvim --headless --cmd "lua package.path = [[$nvim_config_dir/lua/?.lua;$nvim_config_dir/lua/?/init.lua;]] .. package.path; vim.opt.rtp:prepend([[$nvim_config_dir]])" -u "$nvim_config_path" +qa 2>&1)
+  status=$?
+  if [ -n "$output" ]; then
+    printf '%s\n' "$output" >&2
+    case "$output" in
+      *"Error in"*|*"E5113"*) return 1 ;;
+    esac
+  fi
+  return "$status"
+}
+
+edit() { nv "$@"; }
+
 rider() { printf 'rider: Rider helper is stubbed until Phase 6\n' >&2; return 64; }
 wt-create() { printf 'wt-create: worktree helpers are stubbed until Phase 7\n' >&2; return 64; }
 wt-list() { printf 'wt-list: worktree helpers are stubbed until Phase 7\n' >&2; return 64; }

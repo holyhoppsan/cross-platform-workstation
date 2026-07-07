@@ -2,7 +2,7 @@
 
 Phased workstation setup for Windows 11, macOS, and Ubuntu GNOME.
 
-The current deliverable implements Phases 0 through 2, plus the Windows slice of Phase 3:
+The current deliverable implements Phases 0 through 2, the Windows slice of Phase 3, and Phase 4:
 
 - repository foundation
 - persistent implementation tracker
@@ -14,9 +14,10 @@ The current deliverable implements Phases 0 through 2, plus the Windows slice of
 - phase-aware doctor command
 - WezTerm baseline with tmux-style bindings
 - Windows Quake-mode adapter using AutoHotkey v2
+- Neovim baseline
 - initial portable tests
 
-Later phases for macOS/Ubuntu Quake mode, Neovim, Yazi, Rider, worktrees, agents, model tooling, and hardening are documented in [PLAN.md](PLAN.md), but they are not implemented yet except as placeholders.
+Later phases for macOS/Ubuntu Quake mode, Yazi, Rider, worktrees, agents, model tooling, and hardening are documented in [PLAN.md](PLAN.md), but they are not implemented yet except as placeholders.
 
 Windows remains native. Git for Windows Bash is the shell target. WSL is not installed or required. Git for Windows is a prerequisite for cloning and running this repository; setup verifies it but does not install it.
 
@@ -32,6 +33,7 @@ Useful docs:
 - [provisioning](docs/provisioning.md)
 - [shell workflow](docs/shell.md)
 - [WezTerm](docs/wezterm.md)
+- [Neovim](docs/neovim.md)
 
 ## Phase 0 and Phase 1 Setup
 
@@ -43,6 +45,7 @@ Windows, from PowerShell:
 ./setup.ps1 -Phase shell
 ./setup.ps1 -Phase wezterm
 ./setup.ps1 -Phase quake
+./setup.ps1 -Phase neovim
 ```
 
 On Windows, install Git for Windows first, clone this repository, then run `setup.ps1 -Phase shell`. Setup verifies Git and Git Bash, installs or verifies chezmoi and Phase 1 CLI tools with `winget`, backs up known Phase 1 shell targets, applies chezmoi, then validates the configured Git Bash shell automatically. It never installs WSL or Git.
@@ -55,6 +58,7 @@ Windows, from Git Bash:
 ./setup --phase shell --install-missing
 ./setup --phase wezterm --install-missing
 ./setup.sh --phase quake --dry-run
+./setup.sh --phase neovim --install-missing
 ```
 
 macOS / Ubuntu:
@@ -63,6 +67,7 @@ macOS / Ubuntu:
 ./setup.sh --phase foundation --dry-run
 ./setup.sh --phase shell --dry-run
 ./setup.sh --phase wezterm --dry-run
+./setup.sh --phase neovim --dry-run
 ```
 
 Dry-run mode reports what would happen. Non-dry-run mode verifies prerequisites and prints the next manual steps; it does not install package managers, does not install WSL, and does not overwrite user configuration.
@@ -82,6 +87,7 @@ Run the phase-aware doctor:
 ./scripts/doctor --phase shell
 ./scripts/doctor --phase wezterm
 ./scripts/doctor --phase quake
+./scripts/doctor --phase neovim
 ```
 
 After setup completes, these helpers should be available in a fresh Git Bash session:

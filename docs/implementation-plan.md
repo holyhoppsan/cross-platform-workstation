@@ -10,11 +10,11 @@ Phase 0 creates the repository foundation: docs, examples, setup entrypoints, sk
 
 Phase 1 creates the shared Bash workflow: Git Bash support on Windows, conservative Bash defaults, platform detection, path conversion helpers, Unix-style command checks, and stubs for future commands.
 
-Phase 2 adds the WezTerm baseline. Phases 3 through 11 are intentionally deferred. Their requirements are recorded in `PLAN.md` so future sessions can continue without chat context.
+Phase 2 adds the WezTerm baseline. Phase 3 adds the Windows Quake-mode adapter. Phase 4 adds a restrained Neovim baseline. Later phases remain tracked in `PLAN.md` so future sessions can continue without chat context.
 
 ## Current Deliverable
 
-The current deliverable implements Phases 0 through 2.
+The current deliverable implements Phases 0 through 4 on Windows, with macOS/Ubuntu validation still tracked separately where applicable.
 
 Implemented:
 
@@ -31,12 +31,14 @@ Implemented:
 - automated Windows Git Bash validation after setup
 - WezTerm baseline configuration
 - WezTerm setup and doctor phase support
+- Windows Quake-mode adapter and startup registration
+- Neovim baseline configuration
+- Neovim setup and doctor phase support
 - initial tests
 
 Not implemented:
 
-- Quake adapters
-- Neovim configuration
+- macOS/Ubuntu Quake adapters
 - Yazi configuration
 - Rider launch helpers
 - project/worktree workflow

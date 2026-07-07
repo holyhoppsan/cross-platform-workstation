@@ -5,9 +5,9 @@ die() { printf '[setup] error: %s\n' "$*" >&2; exit 2; }
 
 setup_usage() {
   cat <<'EOF'
-usage: setup.sh [--phase foundation|shell|wezterm|all] [--dry-run] [--install-missing]
+usage: setup.sh [--phase foundation|shell|wezterm|quake|neovim|all] [--dry-run] [--install-missing]
 
-Phases 0, 1, 2, and Windows Phase 3 are implemented.
+Phases 0, 1, 2, Windows Phase 3, and Phase 4 are implemented.
 EOF
 }
 
@@ -60,7 +60,7 @@ setup_backup_chezmoi_targets() {
   timestamp=$(date +%Y%m%d-%H%M%S)
   backup_root="$HOME/.workstation-setup-backup/$timestamp"
 
-  for target in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.config/workstation" "$HOME/.config/wezterm" "$HOME/.local/bin/workstation-doctor"; do
+  for target in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.config/workstation" "$HOME/.config/wezterm" "$HOME/.config/nvim" "$HOME/.local/bin/workstation-doctor"; do
     [ -e "$target" ] || continue
     relative=${target#/}
     relative=${relative//\//_}
