@@ -224,15 +224,15 @@ Do not include Yazi in the AI agent list.
 | 4     | Neovim baseline                           | Implemented and validated on Windows; needs macOS/Ubuntu validation |
 | 5     | Yazi baseline                             | Implemented and automated validation passed on Windows; needs manual GUI validation |
 | 5.5   | Windows MSYS2 and Mosh remote access      | LAN phone connection validated; Mosh roaming validation pending |
-| 5.6   | Tailscale remote access                   | Planned                                  |
-| 5.7   | macOS bootstrap and agent validation      | Planned                                  |
-| 5.8   | `just` command runner                     | Planned; awaiting workflow examples      |
-| 6     | Rider and minimal Unreal launching        | Not started                               |
-| 7     | Project and worktree workflow             | Not started                               |
-| 8     | AI agent launcher                         | Not started                               |
-| 9     | Agent notifications and status            | Not started                               |
-| 10    | Optional model tooling                    | Not started                               |
-| 11    | Polish and hardening                      | Not started                               |
+| 6     | macOS bootstrap and agent validation      | Planned                                  |
+| 7     | `just` command runner                     | Planned; awaiting workflow examples      |
+| 8     | Tailscale remote access                   | Planned                                  |
+| 9     | Rider and minimal Unreal launching        | Not started                               |
+| 10    | Project and worktree workflow             | Not started                               |
+| 11    | AI agent launcher                         | Not started                               |
+| 12    | Agent notifications and status            | Not started                               |
+| 13    | Optional model tooling                    | Not started                               |
+| 14    | Polish and hardening                      | Not started                               |
 
 Current repository state note: this tracker was added after an initial portable slice already existed. Existing files and behavior still need to be audited against the detailed checklist before broad checkboxes are marked complete.
 
@@ -1062,48 +1062,14 @@ Validation:
 * [x] ShadowTerm resolves `mosh-server` on the remote session.
 * [x] ShadowTerm establishes a Mosh session on UDP 60001 on the LAN.
 * [x] `msys2_sshd` starts after a Windows reboot.
-* [ ] ShadowTerm Mosh session survives an off-LAN network transition after Phase 5.6 Tailscale reachability is validated.
+* [ ] ShadowTerm Mosh session survives an off-LAN network transition after Phase 8 Tailscale reachability is validated.
 
 Security and network decisions still required:
 
 * LAN-only access is validated. Add Tailscale as a separate private VPN transport before enabling off-LAN use.
 * Do not expose SSH or Mosh directly to the public internet from this repository.
 
-## Phase 5.6: Tailscale Remote Access
-
-Status: Planned
-
-Goal: Extend the validated MSYS2 SSH/Mosh service beyond the LAN through the user's private tailnet, without router port forwarding or Tailscale SSH.
-
-Requirements:
-
-* Install and authenticate Tailscale on the Windows laptop and iPhone using the same tailnet.
-* Keep MSYS2 `msys2_sshd` plus Mosh as the application services; Tailscale provides only private network transport.
-* Do not enable public-internet router port forwarding.
-* Add separate Windows firewall rules limited to Tailscale source addresses and the required TCP 22 / UDP 60001 ports; preserve the existing LAN-only rules.
-* Use the laptop's Tailscale IP or MagicDNS name in a separate ShadowTerm host entry.
-* Keep tailnet access policy restricted to the user's devices before testing from an external network.
-
-Validation:
-
-* [ ] Laptop and iPhone appear in the same tailnet.
-* [ ] Tailnet policy permits the phone to reach the laptop on TCP 22 and UDP 60001 only.
-* [ ] ShadowTerm connects by Tailscale IP or MagicDNS while off the LAN.
-* [ ] Mosh resumes after a phone network transition.
-
-## MSYS2 Migration Workstream
-
-Status: Completed on Windows on 2026-08-14; the validated MSYS2 SSH/Mosh path remains independent from pending Tailscale work.
-
-Implementation order:
-
-1. Make MSYS2 UCRT64 the default Windows interactive shell in WezTerm and repository validation.
-2. Retain Git for Windows as a clone/bootstrap dependency only; do not require its Bash executable after migration.
-3. Update shared shell detection, doctor output, setup/reset verification, tests, and user documentation together.
-4. Apply changes without terminating existing WezTerm, Herdr, agent, or ShadowTerm sessions; validate in newly opened UCRT64 shells.
-5. Mark Windows Phase 1-5 UCRT64 validation only after those phases are actually rerun under MSYS2.
-
-## Phase 5.7: macOS Bootstrap and Agent Validation
+## Phase 6: macOS Bootstrap and Agent Validation
 
 Status: Planned
 
@@ -1140,7 +1106,7 @@ Validation:
 * [ ] User manually confirms WezTerm, clipboard, pane bindings, Neovim, and Yazi behavior.
 * [ ] macOS platform-specific behavior is marked validated only after these checks.
 
-## Phase 5.8: `just` Command Runner
+## Phase 7: `just` Command Runner
 
 Status: Planned; awaiting the user's IndyDevDan workflow examples
 
@@ -1162,7 +1128,41 @@ Tasks:
 * [ ] Add safe recipes, tests, and docs.
 * [ ] Validate the chosen recipes on each supported platform before claiming portability.
 
-## Phase 6: Rider and Minimal Unreal Launching
+## Phase 8: Tailscale Remote Access
+
+Status: Planned
+
+Goal: Extend the validated MSYS2 SSH/Mosh service beyond the LAN through the user's private tailnet, without router port forwarding or Tailscale SSH.
+
+Requirements:
+
+* Install and authenticate Tailscale on the Windows laptop and iPhone using the same tailnet.
+* Keep MSYS2 `msys2_sshd` plus Mosh as the application services; Tailscale provides only private network transport.
+* Do not enable public-internet router port forwarding.
+* Add separate Windows firewall rules limited to Tailscale source addresses and the required TCP 22 / UDP 60001 ports; preserve the existing LAN-only rules.
+* Use the laptop's Tailscale IP or MagicDNS name in a separate ShadowTerm host entry.
+* Keep tailnet access policy restricted to the user's devices before testing from an external network.
+
+Validation:
+
+* [ ] Laptop and iPhone appear in the same tailnet.
+* [ ] Tailnet policy permits the phone to reach the laptop on TCP 22 and UDP 60001 only.
+* [ ] ShadowTerm connects by Tailscale IP or MagicDNS while off the LAN.
+* [ ] Mosh resumes after a phone network transition.
+
+## MSYS2 Migration Workstream
+
+Status: Completed on Windows on 2026-08-14; the validated MSYS2 SSH/Mosh path remains independent from pending Tailscale work.
+
+Implementation order:
+
+1. Make MSYS2 UCRT64 the default Windows interactive shell in WezTerm and repository validation.
+2. Retain Git for Windows as a clone/bootstrap dependency only; do not require its Bash executable after migration.
+3. Update shared shell detection, doctor output, setup/reset verification, tests, and user documentation together.
+4. Apply changes without terminating existing WezTerm, Herdr, agent, or ShadowTerm sessions; validate in newly opened UCRT64 shells.
+5. Mark Windows Phase 1-5 UCRT64 validation only after those phases are actually rerun under MSYS2.
+
+## Phase 9: Rider and Minimal Unreal Launching
 
 Status: Not started
 
@@ -1258,7 +1258,7 @@ Deferred items:
 * Unreal Editor launching.
 * Visual Studio integration.
 
-## Phase 7: Project and Worktree Workflow
+## Phase 10: Project and Worktree Workflow
 
 Status: Not started
 
@@ -1335,7 +1335,7 @@ Deferred items:
 
 * Automated project workspace orchestration until command behavior is tested.
 
-## Phase 8: AI Agent Launcher
+## Phase 11: AI Agent Launcher
 
 Status: Not started
 
@@ -1465,7 +1465,7 @@ Deferred items:
 
 * Automatic installation of optional agents until the policy is decided.
 
-## Phase 9: Agent Notifications and Status
+## Phase 12: Agent Notifications and Status
 
 Status: Not started
 
@@ -1526,7 +1526,7 @@ Deferred items:
 
 * Rich desktop notification behavior if portable support is not reliable.
 
-## Phase 10: Optional Model Tooling
+## Phase 13: Optional Model Tooling
 
 Status: Not started
 
@@ -1587,7 +1587,7 @@ Deferred items:
 * Full model gateway provisioning.
 * Automatic cloud credential setup.
 
-## Phase 11: Polish and Hardening
+## Phase 14: Polish and Hardening
 
 Status: Not started
 
@@ -2030,12 +2030,12 @@ This section mirrors and expands the unsupported/deferred policy for quick looku
 Current next actions:
 
 1. Review the current tracked changes, run final checks, and commit the validated Windows/MSYS2/Mosh/Yazi work.
-2. Complete Phase 5.7 macOS bootstrap and agent-validation preparation before giving an agent access to the MacBook Pro.
-3. Use the Phase 5.7 runbook to validate macOS only when the MacBook Pro is available.
-4. Review IndyDevDan `just` examples and scope Phase 5.8 recipes.
+2. Complete Phase 6 macOS bootstrap and agent-validation preparation before giving an agent access to the MacBook Pro.
+3. Use the Phase 6 runbook to validate macOS only when the MacBook Pro is available.
+4. Review IndyDevDan `just` examples and scope Phase 7 recipes.
 5. Manually validate remaining Windows GUI-only checks: Quake focused-monitor behavior and WezTerm Yazi key chords.
-6. Implement Phase 5.6 Tailscale only when off-LAN ShadowTerm/Mosh access becomes the priority.
-7. Begin Phase 6 Rider baseline after the relevant preceding work is accepted.
+6. Implement Phase 8 Tailscale only when off-LAN ShadowTerm/Mosh access becomes the priority.
+7. Begin Phase 9 Rider baseline after the relevant preceding work is accepted.
 8. Keep `PLAN.md` updated after each implementation or validation session.
 
 ## PLAN.md Update Rules
@@ -2396,14 +2396,14 @@ Format:
 - Phases touched: Phase 5.5 Windows MSYS2 and Mosh remote access.
 - Validation performed: User restarted the laptop, then reconnected successfully from ShadowTerm and confirmed the UCRT64 shell plus `herdr` were available. This validates `msys2_sshd` automatic startup and the persisted remote-shell PATH configuration.
 - Known gaps: Mosh roaming through a phone network transition remains unvalidated. The desktop Windows workflow is still Git Bash pending the planned repository migration to MSYS2 UCRT64.
-- Next actions: Optionally validate reconnection after a brief Wi-Fi interruption on the LAN. A true Wi-Fi-to-cellular Mosh roaming test requires Phase 5.6 Tailscale reachability first. Begin the Git-Bash-to-MSYS2 migration across WezTerm, setup, doctor, and tests before enabling off-LAN Tailscale access.
+- Next actions: Optionally validate reconnection after a brief Wi-Fi interruption on the LAN. A true Wi-Fi-to-cellular Mosh roaming test requires Phase 8 Tailscale reachability first. Begin the Git-Bash-to-MSYS2 migration across WezTerm, setup, doctor, and tests before enabling off-LAN Tailscale access.
 
 ### 2026-08-14
 
 - Summary of changes: Recorded successful LAN-only Mosh reconnection validation.
 - Phases touched: Phase 5.5 Windows MSYS2 and Mosh remote access.
 - Validation performed: User disabled phone Wi-Fi while connected through ShadowTerm, observed that the LAN-only session could not accept input without a route to the laptop, restored Wi-Fi, and confirmed the same session resumed with the expected current time. This validates recovery from a temporary LAN interruption.
-- Known gaps: This is not an off-LAN cellular roaming test; cellular cannot reach the private LAN address until Phase 5.6 Tailscale is configured.
+- Known gaps: This is not an off-LAN cellular roaming test; cellular cannot reach the private LAN address until Phase 8 Tailscale is configured.
 - Next actions: Begin the Git-Bash-to-MSYS2 migration across WezTerm, setup, doctor, and tests; add Tailscale afterward for true off-LAN Mosh roaming.
 
 ### 2026-08-14
@@ -2411,7 +2411,7 @@ Format:
 - Summary of changes: Migrated the active Windows workstation shell configuration from Git Bash to MSYS2 UCRT64. WezTerm now launches `C:/msys64/usr/bin/bash.exe` with `MSYSTEM=UCRT64`; setup, verification, doctor, shell helpers, tests, documentation, and the durable Windows constraint now use the same target. Git for Windows remains a clone/bootstrap compatibility prerequisite only. The MSYS2 package set includes `git`, `jq`, `unzip`, UCRT64 `ripgrep`, `fd`, and `fzf`.
 - Phases touched: Windows Phase 1 shell; Phase 2 WezTerm configuration; shared documentation and test coverage.
 - Validation performed: Installed the MSYS2 package set. Applied managed dotfiles with `chezmoi apply --force` after automatic backups. `setup.ps1 -Phase shell -DryRun` passed. `setup.ps1 -Phase shell -SkipInstall -SkipApply` passed end to end: all 319 repository checks passed under MSYS2 UCRT64 and the configured interactive UCRT64 shell passed `doctor --phase shell` with only the existing optional `fdfind` and future-helper warnings. PowerShell parsing and `git diff --check` passed before the final correction; the complete test/doctor validation was rerun after it.
-- Known gaps: Existing terminals and WezTerm panes deliberately remain untouched. Open a new WezTerm window to manually confirm it starts UCRT64 and that Phase 2-5 workflows still behave as expected; do not mark those phases revalidated until tested. Tailscale/off-LAN Mosh remains Phase 5.6 work.
+- Known gaps: Existing terminals and WezTerm panes deliberately remain untouched. Open a new WezTerm window to manually confirm it starts UCRT64 and that Phase 2-5 workflows still behave as expected; do not mark those phases revalidated until tested. Tailscale/off-LAN Mosh remains Phase 8 work.
 - Next actions: Manually validate a fresh WezTerm UCRT64 pane (`echo "$MSYSTEM"`, `doctor --phase wezterm`, and normal Herdr/Yazi/Neovim use), then revalidate the remaining Windows phases in order. Configure Tailscale after that validation.
 
 ### 2026-08-14
@@ -2427,13 +2427,20 @@ Format:
 - Summary of changes: Completed manual Windows workflow revalidation after the MSYS2 UCRT64 desktop-shell migration.
 - Phases touched: Windows Phases 1-5.
 - Validation performed: User confirmed `herdr`, `y` (Yazi), and `nvim` all work from a newly opened MSYS2 UCRT64 WezTerm pane, following successful UCRT64 shell and WezTerm doctor validation.
-- Known gaps: This validation is Windows-only. The existing macOS and Ubuntu validation status is unchanged. Tailscale/off-LAN Mosh reachability remains Phase 5.6 work.
+- Known gaps: This validation is Windows-only. The existing macOS and Ubuntu validation status is unchanged. Tailscale/off-LAN Mosh reachability remains Phase 8 work.
 - Next actions: Configure Tailscale, then test ShadowTerm Mosh through the tailnet from outside the home LAN.
 
 ### 2026-08-16
 
-- Summary of changes: Reconciled the active roadmap with the completed Windows MSYS2/UCRT64, Yazi, and ShadowTerm/Mosh work. Added Phase 5.7 for safe macOS bootstrap and agent-led validation, and Phase 5.8 for the optional `just` command runner, pending user-supplied workflow examples. Updated the implementation-plan narrative and current next actions.
-- Phases touched: Plan maintenance; Phase 5.7 macOS bootstrap and agent validation; Phase 5.8 `just`; future Phase 6 Windows shell wording.
+- Summary of changes: Reconciled the active roadmap with the completed Windows MSYS2/UCRT64, Yazi, and ShadowTerm/Mosh work. Added the planned macOS bootstrap/agent-validation and optional `just` work, pending user-supplied workflow examples. Updated the implementation-plan narrative and current next actions.
+- Phases touched: Plan maintenance; future macOS bootstrap, `just`, and Windows shell wording.
 - Validation performed: Planning/documentation change only; no macOS behavior or `just` recipes were implemented or validated.
 - Known gaps: macOS and Ubuntu remain untested. Windows focused-monitor Quake behavior and WezTerm Yazi key chords still need explicit manual validation. Tailscale remains planned rather than selected as the immediate next implementation task.
-- Next actions: Review and commit the current validated Windows changes; then prepare the Phase 5.7 macOS runbook before agent-led testing on the MacBook Pro.
+- Next actions: Review and commit the current validated Windows changes; then prepare the macOS runbook before agent-led testing on the MacBook Pro.
+
+### 2026-08-16
+
+- Summary of changes: Renumbered all planned work after Phase 5.5 into a linear sequence: Phase 6 macOS bootstrap and agent validation, Phase 7 `just`, Phase 8 Tailscale, and Phases 9-14 for Rider through hardening.
+- Phases touched: Plan numbering and implementation-plan narrative only.
+- Validation performed: Planning/documentation change only; no platform behavior changed or was retested.
+- Next actions: Start Phase 6 macOS bootstrap and agent-validation preparation when ready.
