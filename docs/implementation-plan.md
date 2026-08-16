@@ -13,10 +13,10 @@ The repository is implemented in independently testable slices. A phase may add 
 - Phase 4 adds the restrained, plugin-free Neovim baseline.
 - Phase 5 adds Yazi as a terminal file manager only.
 - Phase 5.5 adds the Windows MSYS2 SSH/Mosh and ShadowTerm LAN path.
-- Phase 5.6 is optional Tailscale transport for off-LAN ShadowTerm/Mosh access.
-- Phase 5.7 prepares and validates the existing workstation stack on the MacBook Pro using an agent-led runbook plus user GUI checks.
-- Phase 5.8 evaluates `just` after the user supplies representative workflow examples.
-- Phases 6 through 11 add Rider/Unreal launching, project/worktree workflow, agent adapters, notifications, optional model tooling, and hardening.
+- Phase 6 prepares and validates the existing workstation stack on the MacBook Pro using an agent-led runbook plus user GUI checks.
+- Phase 7 evaluates `just` after the user supplies representative workflow examples.
+- Phase 8 is optional Tailscale transport for off-LAN ShadowTerm/Mosh access.
+- Phases 9 through 14 add Rider/Unreal launching, project/worktree workflow, agent adapters, notifications, optional model tooling, and hardening.
 
 ## Current State
 
@@ -41,7 +41,7 @@ Not yet validated:
 
 ## macOS Agent Validation Model
 
-Phase 5.7 makes the MacBook Pro test repeatable and safe. The agent can perform repository checkout, prerequisite inspection, dry runs, setup, doctor, and non-GUI test commands. It must stop rather than silently install Homebrew, alter security settings, or claim GUI behavior.
+Phase 6 makes the MacBook Pro test repeatable and safe. The agent can perform repository checkout, prerequisite inspection, dry runs, setup, doctor, and non-GUI test commands. It must stop rather than silently install Homebrew, alter security settings, or claim GUI behavior.
 
 The user performs the final interactive validation: WezTerm launch, clipboard behavior, pane bindings, Neovim, Yazi, and any platform-specific desktop integration. Results are then recorded in `PLAN.md`.
 
