@@ -20,6 +20,10 @@ if ! has_command yazi && ! has_command yazi.exe; then
     else
       die 'Yazi is missing. Rerun with ./setup.sh --phase yazi --install-missing, or install with: winget install --id sxyazi.yazi --exact'
     fi
+  elif [ "$platform" = macos ] && [ "$install_missing" = true ]; then
+    macos_install_formulae yazi
+  elif [ "$platform" = macos ]; then
+    die 'Yazi is missing. Rerun with ./setup.sh --phase yazi --install-missing after Homebrew is available.'
   else
     die 'Yazi is missing. Install it with your platform package manager, then rerun setup.'
   fi
