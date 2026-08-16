@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('shell', 'wezterm', 'quake', 'neovim', 'all')]
+    [ValidateSet('shell', 'wezterm', 'quake', 'neovim', 'yazi', 'all')]
     [string]$Phase = 'shell',
     [switch]$Apply,
     [switch]$RemovePackages,
@@ -50,7 +50,8 @@ function Backup-ThenRemove {
 function Uninstall-WingetPackage {
     param(
         [Parameter(Mandatory)][string]$Id,
-        [Parameter(Mandatory)][string]$Name
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][string]$Command
     )
 
     Invoke-ResetAction "uninstall $Name with winget package $Id" {
@@ -59,14 +60,24 @@ function Uninstall-WingetPackage {
             throw "winget is required to uninstall $Name automatically, but winget was not found."
         }
 
+        $listedByWinget = $true
         & $winget list --id $Id --exact | Out-Null
         if ($LASTEXITCODE -ne 0) {
-            Write-SetupInfo "$Name is not installed; skipping uninstall"
-            return
+            if (-not (Resolve-InstalledCommand -Name $Command)) {
+                Write-SetupInfo "$Name is not installed; skipping uninstall"
+                return
+            }
+
+            $listedByWinget = $false
+            Write-SetupInfo "$Name package was not listed by winget, but $Command is present; attempting uninstall"
         }
 
         & $winget uninstall --id $Id --exact --accept-source-agreements
         if ($LASTEXITCODE -ne 0) {
+            if (-not $listedByWinget) {
+                Write-SetupWarn "$Name could not be uninstalled by winget package ID after list miss; continuing"
+                return
+            }
             throw "winget failed to uninstall $Name ($Id)."
         }
     }
@@ -89,6 +100,10 @@ if ((Get-WorkstationPlatform) -ne 'windows') {
     throw 'reset-windows.ps1 only supports Windows.'
 }
 
+if ($Apply -and $RemovePackages -and (Test-WindowsProcessElevated)) {
+    throw 'Do not run reset-windows.ps1 with -Apply -RemovePackages from an elevated/Admin PowerShell. Winget cannot uninstall user-scope packages from an elevated process. Open a normal user PowerShell and rerun the command.'
+}
+
 $timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $backupRoot = Join-Path $HOME ".workstation-reset-backup\$timestamp"
 
@@ -105,12 +120,16 @@ $targets = @(
     (Join-Path $HOME '.local/share/chezmoi')
 )
 
-if ($Phase -in @('wezterm', 'quake', 'neovim', 'all')) {
+if ($Phase -in @('wezterm', 'quake', 'neovim', 'yazi', 'all')) {
     $targets += Join-Path $HOME '.config/wezterm'
 }
 
 if ($Phase -in @('neovim', 'all')) {
     $targets += Join-Path $HOME '.config/nvim'
+}
+
+if ($Phase -in @('yazi', 'all')) {
+    $targets += Join-Path $HOME '.config/yazi'
 }
 
 if ($Phase -in @('quake', 'all')) {
@@ -128,22 +147,25 @@ foreach ($target in $targets) {
 }
 
 if ($RemovePackages) {
-    if ($Phase -in @('wezterm', 'quake', 'neovim', 'all')) {
+    if ($Phase -in @('wezterm', 'quake', 'neovim', 'yazi', 'all')) {
         Stop-SetupManagedProcess -Names @('wezterm', 'wezterm-gui', 'wezterm-mux-server') -Description 'WezTerm'
     }
-    Uninstall-WingetPackage -Id 'twpayne.chezmoi' -Name 'chezmoi'
-    Uninstall-WingetPackage -Id 'BurntSushi.ripgrep.MSVC' -Name 'ripgrep'
-    Uninstall-WingetPackage -Id 'sharkdp.fd' -Name 'fd'
-    Uninstall-WingetPackage -Id 'jqlang.jq' -Name 'jq'
-    Uninstall-WingetPackage -Id 'junegunn.fzf' -Name 'fzf'
-    if ($Phase -in @('wezterm', 'quake', 'neovim', 'all')) {
-        Uninstall-WingetPackage -Id 'wez.wezterm' -Name 'WezTerm'
+    Uninstall-WingetPackage -Id 'twpayne.chezmoi' -Name 'chezmoi' -Command 'chezmoi.exe'
+    Uninstall-WingetPackage -Id 'BurntSushi.ripgrep.MSVC' -Name 'ripgrep' -Command 'rg.exe'
+    Uninstall-WingetPackage -Id 'sharkdp.fd' -Name 'fd' -Command 'fd.exe'
+    Uninstall-WingetPackage -Id 'jqlang.jq' -Name 'jq' -Command 'jq.exe'
+    Uninstall-WingetPackage -Id 'junegunn.fzf' -Name 'fzf' -Command 'fzf.exe'
+    if ($Phase -in @('wezterm', 'quake', 'neovim', 'yazi', 'all')) {
+        Uninstall-WingetPackage -Id 'wez.wezterm' -Name 'WezTerm' -Command 'wezterm.exe'
     }
     if ($Phase -in @('neovim', 'all')) {
-        Uninstall-WingetPackage -Id 'Neovim.Neovim' -Name 'Neovim'
+        Uninstall-WingetPackage -Id 'Neovim.Neovim' -Name 'Neovim' -Command 'nvim.exe'
     }
     if ($Phase -in @('quake', 'all')) {
-        Uninstall-WingetPackage -Id 'AutoHotkey.AutoHotkey' -Name 'AutoHotkey v2'
+        Uninstall-WingetPackage -Id 'AutoHotkey.AutoHotkey' -Name 'AutoHotkey v2' -Command 'AutoHotkey64.exe'
+    }
+    if ($Phase -in @('yazi', 'all')) {
+        Uninstall-WingetPackage -Id 'sxyazi.yazi' -Name 'Yazi' -Command 'yazi.exe'
     }
 }
 

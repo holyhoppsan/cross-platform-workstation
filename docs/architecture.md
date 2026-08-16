@@ -2,9 +2,9 @@
 
 ## Goals and Invariants
 
-This repository builds a workstation in explicit phases. Phase 0 establishes the repository foundation. Phase 1 establishes a common Bash workflow. Phase 2 establishes WezTerm as the terminal layer. Phase 3 adds the Windows Quake-mode adapter. Phase 4 adds the Neovim baseline. Later phases add the file manager, IDE, worktree, AI agent, notification, model, and hardening behavior.
+This repository builds a workstation in explicit phases. Phase 0 establishes the repository foundation. Phase 1 establishes a common Bash workflow. Phase 2 establishes WezTerm as the terminal layer. Phase 3 adds the Windows Quake-mode adapter. Phase 4 adds the Neovim baseline. Phase 5 adds the Yazi terminal file manager. Later phases add the IDE, worktree, AI agent, notification, model, and hardening behavior.
 
-Windows remains native. Git for Windows Bash is used for the Unix-style interactive workflow, but Windows-native tools keep using Windows-native paths when required. Git for Windows is a prerequisite for cloning the repository; setup verifies it but does not install or remove it. WSL paths and WSL dependencies are outside the design.
+Windows remains native. MSYS2 UCRT64 Bash is the intended Unix-style interactive workflow; Git for Windows may remain only as a temporary clone/bootstrap dependency while that migration is validated. Windows-native tools keep using Windows-native paths when required. WSL paths and WSL dependencies are outside the design.
 
 Shared behavior belongs in `chezmoi/`. Operating-system automation belongs in `platform/`. Optional tools and future integrations may have placeholders, but they must not become required before their phase is implemented.
 
@@ -24,7 +24,7 @@ The setup layer is intentionally conservative in Phase 0/1. It verifies and repo
 
 `chezmoi/dot_bashrc` and `chezmoi/dot_bash_profile` load modules from `~/.config/workstation/` after chezmoi applies them:
 
-- `platform.sh`: platform, shell, and Git Bash detection
+- `platform.sh`: platform, shell, and MSYS2 UCRT64 detection
 - `shell.sh`: safe interactive defaults, aliases, PATH handling, tool availability checks
 - `functions.sh`: helpers and future-phase stubs
 
@@ -40,15 +40,23 @@ Shell helpers must quote variables and preserve paths containing spaces.
 
 ### WezTerm
 
-`chezmoi/dot_config/wezterm/wezterm.lua` configures WezTerm for Phase 2. It launches Git Bash on Windows and Bash on macOS/Ubuntu, uses `Ctrl+A` as a tmux-style terminal leader, and keeps OS-level Quake behavior deferred.
+`chezmoi/dot_config/wezterm/wezterm.lua` configures WezTerm for Phase 2. It launches MSYS2 UCRT64 Bash on Windows and Bash on macOS/Ubuntu, uses `Ctrl+A` as a tmux-style terminal leader, and keeps OS-level Quake behavior deferred.
 
 ### Neovim
 
 `chezmoi/dot_config/nvim/` configures Neovim for Phase 4. It is deliberately plugin-free, uses Space as leader, keeps `Ctrl+W` available for Neovim windows, and exposes `nv`, `nvc`, and `edit` through shared shell helpers.
 
+### Yazi
+
+`chezmoi/dot_config/yazi/` configures Yazi for Phase 5. Yazi is only a terminal file manager. It is exposed through the `y` shell helper and WezTerm file-manager bindings, and it must not be added to AI agent adapters or model tooling.
+
+### Windows MSYS2 SSH and Mosh
+
+Phase 5.5 uses MSYS2's own `msys2_sshd` service, not native Windows OpenSSH or WSL. `platform/windows/setup-msys2-mosh.ps1` runs an adapted version of MSYS2's published service recipe, installs a supplied public key for the selected Windows account, and can separately create `LocalSubnet`/Private-profile firewall rules for SSH TCP 22 and Mosh UDP 60001. The initial reachability scope is LAN only. ShadowTerm performs the SSH bootstrap and launches `mosh-server`; Herdr, rather than tmux, owns session persistence.
+
 ### Future Phases
 
-Yazi, Rider, worktree commands, AI agents, notifications, and model tooling are future phases. macOS and Ubuntu Quake adapters also remain future platform work. Placeholder directories may exist so the repository shape is stable, but functional implementations must wait for their phase.
+Rider, worktree commands, AI agents, notifications, and model tooling are future phases. macOS and Ubuntu Quake adapters also remain future platform work. Placeholder directories may exist so the repository shape is stable, but functional implementations must wait for their phase.
 
 ## Verification Policy
 

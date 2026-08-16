@@ -28,6 +28,22 @@ assert_eq 64 "$?" 'project helper is an explicit stub'
 agent >/tmp/agent-stub.out 2>&1
 assert_eq 64 "$?" 'agent helper is an explicit stub'
 
+yazi_target=$(mktemp -d)
+yazi() {
+  printf 'yazi'
+  local arg
+  for arg in "$@"; do
+    printf ' <%s>' "$arg"
+    case "$arg" in
+      --cwd-file=*) printf '%s\n' "$yazi_target" >"${arg#--cwd-file=}" ;;
+    esac
+  done
+  printf '\n'
+}
+y_output=$(y projects)
+assert_contains "$y_output" 'yazi <projects>' 'y helper passes arguments to Yazi'
+assert_contains "$y_output" '--cwd-file=' 'y helper requests directory-changing cwd file'
+
 nvim() {
   printf 'nvim'
   local arg
@@ -50,10 +66,16 @@ assert_contains "$shell_config" 'WezTerm' 'Windows shell adds standard WezTerm i
 assert_contains "$shell_config" 'Neovim/bin' 'Windows shell adds standard Neovim install directory'
 assert_contains "$shell_config" "/c/Program Files/WezTerm" 'Windows shell has WezTerm path fallback'
 assert_contains "$shell_config" "/c/Program Files/Neovim/bin" 'Windows shell has Neovim path fallback'
+assert_contains "$shell_config" 'AppData/Local/Programs/Herdr/bin' 'Windows shell adds the per-user Herdr directory'
 assert_contains "$shell_config" 'workstation/env.sh' 'shell loads machine-local workstation env'
 
 functions_config=$(cat "$repo_root/chezmoi/dot_config/workstation/functions.sh")
+assert_contains "$functions_config" 'msystem=%s' 'platform-info reports the MSYS2 environment on Windows'
+assert_contains "$functions_config" 'workstation_windows_bash_path' 'platform-info uses the generic Windows Bash path helper'
 assert_contains "$functions_config" 'workstation_load_env' 'functions can load machine-local workstation env'
+assert_contains "$functions_config" 'workstation_find_yazi' 'functions include Yazi command resolver'
+assert_contains "$functions_config" 'sxyazi.yazi_' 'Yazi resolver checks WinGet package install tree'
+assert_contains "$functions_config" '"$yazi_cmd" "$@" --cwd-file="$tmp"' 'functions include Yazi cwd-file helper'
 assert_contains "$functions_config" 'nvc()' 'functions include Neovim config check helper'
 assert_contains "$functions_config" 'edit() { nv "$@"; }' 'edit delegates to Neovim helper'
 

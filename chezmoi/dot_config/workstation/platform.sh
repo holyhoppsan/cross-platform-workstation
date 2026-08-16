@@ -20,14 +20,14 @@ workstation_detect_platform() {
   esac
 }
 
-workstation_is_git_bash() {
-  case "$(uname -s 2>/dev/null || printf unknown)" in
-    MINGW*|MSYS*) return 0 ;;
+workstation_is_msys2_ucrt64() {
+  case "$(uname -s 2>/dev/null || printf unknown):${MSYSTEM:-}" in
+    MSYS*:UCRT64|MINGW*:UCRT64) return 0 ;;
     *) return 1 ;;
   esac
 }
 
-workstation_git_bash_path() {
+workstation_windows_bash_path() {
   if [ "${WORKSTATION_OS:-$(workstation_detect_platform)}" != windows ]; then
     return 1
   fi

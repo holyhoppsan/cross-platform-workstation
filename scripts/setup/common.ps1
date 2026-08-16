@@ -15,6 +15,16 @@ function Get-WorkstationPlatform {
     return 'unknown'
 }
 
+function Test-WindowsProcessElevated {
+    if (-not ($IsWindows -or $Env:OS -eq 'Windows_NT')) {
+        return $false
+    }
+
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = [Security.Principal.WindowsPrincipal]::new($identity)
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
 function Test-RequiredPath {
     param([Parameter(Mandatory)][string]$Path)
     if (-not (Test-Path $Path)) {
@@ -43,26 +53,17 @@ function Test-FoundationPhase {
     }
 }
 
-function Get-WindowsGitBashPath {
-    $roots = @($Env:ProgramFiles, ${Env:ProgramFiles(x86)}) | Where-Object { $_ }
-    if ($Env:LocalAppData) {
-        $roots += Join-Path $Env:LocalAppData 'Programs'
+function Get-WindowsMsys2BashPath {
+    $roots = @('C:\msys64')
+    if ($Env:MSYS2_ROOT) {
+        $roots = @($Env:MSYS2_ROOT) + $roots
     }
 
-    $candidates = @()
-    foreach ($root in $roots) {
-        $candidates += Join-Path $root 'Git\bin\bash.exe'
-        $candidates += Join-Path $root 'Git\usr\bin\bash.exe'
-    }
-    $candidates = $candidates | Where-Object { $_ -and (Test-Path $_) }
-
-    if ($candidates.Count -gt 0) {
-        return $candidates[0]
-    }
-
-    $bash = Get-Command bash.exe -ErrorAction SilentlyContinue
-    if ($bash -and $bash.Source -notlike "$env:WINDIR\System32\bash.exe") {
-        return $bash.Source
+    foreach ($root in ($roots | Select-Object -Unique)) {
+        $candidate = Join-Path $root 'usr\bin\bash.exe'
+        if (Test-Path -LiteralPath $candidate) {
+            return $candidate
+        }
     }
 
     return $null
@@ -156,6 +157,7 @@ function Resolve-InstalledCommand {
         $candidateRoots += Join-Path $Env:ProgramFiles 'WinGet\Packages'
         $candidateRoots += Join-Path $Env:ProgramFiles 'WezTerm'
         $candidateRoots += Join-Path $Env:ProgramFiles 'Neovim\bin'
+        $candidateRoots += Join-Path $Env:ProgramFiles 'Yazi'
         $candidateRoots += Join-Path $Env:ProgramFiles 'AutoHotkey\v2'
         $candidateRoots += Join-Path $Env:ProgramFiles 'AutoHotkey'
     }
@@ -224,30 +226,61 @@ function Ensure-WindowsPackageCommand {
     }
 }
 
-function Ensure-WindowsGitBash {
-    $bash = Get-WindowsGitBashPath
+function Ensure-WindowsMsys2Ucrt64 {
+    $bash = Get-WindowsMsys2BashPath
     if ($bash) {
-        Write-SetupInfo "Git Bash already available: $bash"
+        Write-SetupInfo "MSYS2 UCRT64 Bash already available: $bash"
         return $bash
     }
 
-    throw 'Git for Windows Bash is required before setup. Install Git for Windows, clone this repository, then rerun setup.'
+    throw 'MSYS2 is required before Windows shell setup. Install MSYS2 at C:\msys64, open the UCRT64 environment, install required packages with pacman, then rerun setup.'
+}
+
+function Ensure-Msys2Ucrt64Packages {
+    param(
+        [Parameter(Mandatory)][string[]]$Packages,
+        [switch]$DryRun
+    )
+
+    $bash = Ensure-WindowsMsys2Ucrt64
+    $packageArguments = $Packages -join ' '
+    if ($DryRun) {
+        Write-SetupInfo "would install or verify MSYS2 UCRT64 packages: $packageArguments"
+        return
+    }
+
+    $previousMsystem = $Env:MSYSTEM
+    try {
+        $Env:MSYSTEM = 'UCRT64'
+        Write-SetupInfo "installing or verifying MSYS2 UCRT64 packages: $packageArguments"
+        & $bash --login -c "pacman -S --needed --noconfirm $packageArguments"
+        if ($LASTEXITCODE -ne 0) {
+            throw "MSYS2 pacman failed while installing: $packageArguments"
+        }
+    } finally {
+        $Env:MSYSTEM = $previousMsystem
+    }
 }
 
 function Ensure-WindowsPhaseOneTools {
     param([switch]$DryRun)
 
-    # Do not install WSL or Git. Windows Phase 1 assumes this repo was cloned with Git for Windows.
-    Ensure-WindowsGitBash | Out-Null
+    # Do not install WSL. Git for Windows may be used only to clone the repository;
+    # the configured workstation shell is MSYS2 UCRT64 Bash.
+    Ensure-WindowsMsys2Ucrt64 | Out-Null
     if (-not (Test-CommandAvailable -Name 'git.exe')) {
         throw 'Git is required before setup. Install Git for Windows, clone this repository, then rerun setup.'
     }
     Write-SetupInfo 'Git already available'
     Ensure-WindowsPackageCommand -Command 'chezmoi.exe' -PackageId 'twpayne.chezmoi' -Name 'chezmoi' -DryRun:$DryRun
-    Ensure-WindowsPackageCommand -Command 'rg.exe' -PackageId 'BurntSushi.ripgrep.MSVC' -Name 'ripgrep' -DryRun:$DryRun
-    Ensure-WindowsPackageCommand -Command 'fd.exe' -PackageId 'sharkdp.fd' -Name 'fd' -DryRun:$DryRun
-    Ensure-WindowsPackageCommand -Command 'jq.exe' -PackageId 'jqlang.jq' -Name 'jq' -DryRun:$DryRun
-    Ensure-WindowsPackageCommand -Command 'fzf.exe' -PackageId 'junegunn.fzf' -Name 'fzf' -DryRun:$DryRun
+    Ensure-Msys2Ucrt64Packages -Packages @(
+        'git',
+        'jq',
+        'unzip',
+        'mingw-w64-ucrt-x86_64-ripgrep',
+        'mingw-w64-ucrt-x86_64-fd',
+        'mingw-w64-ucrt-x86_64-fzf'
+    ) -DryRun:$DryRun
 }
 
 function Ensure-WindowsWezTerm {
@@ -266,6 +299,12 @@ function Ensure-WindowsNeovim {
     param([switch]$DryRun)
 
     Ensure-WindowsPackageCommand -Command 'nvim.exe' -PackageId 'Neovim.Neovim' -Name 'Neovim' -DryRun:$DryRun
+}
+
+function Ensure-WindowsYazi {
+    param([switch]$DryRun)
+
+    Ensure-WindowsPackageCommand -Command 'yazi.exe' -PackageId 'sxyazi.yazi' -Name 'Yazi' -DryRun:$DryRun
 }
 
 function Get-WindowsQuakeStartupShortcutPath {
@@ -327,6 +366,7 @@ function Backup-ChezmoiManagedTargets {
         (Join-Path $HOME '.config/workstation'),
         (Join-Path $HOME '.config/wezterm'),
         (Join-Path $HOME '.config/nvim'),
+        (Join-Path $HOME '.config/yazi'),
         (Join-Path $HOME '.local/bin/workstation-doctor')
     )
 
@@ -415,7 +455,7 @@ function Invoke-ChezmoiApply {
     Write-WorkstationEnv -RepoRoot $RepoRoot
 }
 
-function Invoke-GitBash {
+function Invoke-Msys2Bash {
     param(
         [Parameter(Mandatory)][string]$BashPath,
         [Parameter(Mandatory)][string]$Command,
@@ -424,16 +464,19 @@ function Invoke-GitBash {
 
     Push-Location $WorkingDirectory
     try {
-        & $BashPath -lc $Command
+        $previousMsystem = $Env:MSYSTEM
+        $Env:MSYSTEM = 'UCRT64'
+        & $BashPath --login -c $Command
         if ($LASTEXITCODE -ne 0) {
-            throw "Git Bash command failed with exit code $LASTEXITCODE`: $Command"
+            throw "MSYS2 Bash command failed with exit code $LASTEXITCODE`: $Command"
         }
     } finally {
+        $Env:MSYSTEM = $previousMsystem
         Pop-Location
     }
 }
 
-function Invoke-GitBashInteractive {
+function Invoke-Msys2BashInteractive {
     param(
         [Parameter(Mandatory)][string]$BashPath,
         [Parameter(Mandatory)][string]$Command,
@@ -442,11 +485,14 @@ function Invoke-GitBashInteractive {
 
     Push-Location $WorkingDirectory
     try {
-        & $BashPath -i -c $Command
+        $previousMsystem = $Env:MSYSTEM
+        $Env:MSYSTEM = 'UCRT64'
+        & $BashPath --login -i -c $Command
         if ($LASTEXITCODE -ne 0) {
-            throw "Interactive Git Bash command failed with exit code $LASTEXITCODE`: $Command"
+            throw "Interactive MSYS2 Bash command failed with exit code $LASTEXITCODE`: $Command"
         }
     } finally {
+        $Env:MSYSTEM = $previousMsystem
         Pop-Location
     }
 }
@@ -458,21 +504,21 @@ function Invoke-WindowsShellValidation {
     )
 
     Update-ProcessPathFromRegistry
-    $bash = Get-WindowsGitBashPath
+    $bash = Get-WindowsMsys2BashPath
     if (-not $bash) {
-        throw 'Git Bash was not found for validation.'
+        throw 'MSYS2 UCRT64 Bash was not found for validation.'
     }
 
     if ($DryRun) {
-        Write-SetupInfo 'would run repository tests through Git Bash'
-        Write-SetupInfo 'would run doctor --phase shell through configured interactive Git Bash'
+        Write-SetupInfo 'would run repository tests through MSYS2 UCRT64 Bash'
+        Write-SetupInfo 'would run doctor --phase shell through configured interactive MSYS2 UCRT64 Bash'
         return
     }
 
-    Write-SetupInfo 'running repository tests through Git Bash'
-    Invoke-GitBash -BashPath $bash -WorkingDirectory $RepoRoot -Command './tests/run.bash'
+    Write-SetupInfo 'running repository tests through MSYS2 UCRT64 Bash'
+    Invoke-Msys2Bash -BashPath $bash -WorkingDirectory $RepoRoot -Command './tests/run.bash'
 
-    Write-SetupInfo 'validating configured interactive Git Bash shell'
+    Write-SetupInfo 'validating configured interactive MSYS2 UCRT64 Bash shell'
     $validation = @'
 set -e
 export WORKSTATION_REPO_ROOT="$PWD"
@@ -485,7 +531,7 @@ test -n "$unix_path"
 project >/tmp/workstation-project-stub.out 2>&1 && exit 1 || test "$?" -eq 64
 agent >/tmp/workstation-agent-stub.out 2>&1 && exit 1 || test "$?" -eq 64
 '@
-    Invoke-GitBashInteractive -BashPath $bash -WorkingDirectory $RepoRoot -Command $validation
+    Invoke-Msys2BashInteractive -BashPath $bash -WorkingDirectory $RepoRoot -Command $validation
 }
 
 function Invoke-WindowsWezTermValidation {
@@ -495,18 +541,18 @@ function Invoke-WindowsWezTermValidation {
     )
 
     Update-ProcessPathFromRegistry
-    $bash = Get-WindowsGitBashPath
+    $bash = Get-WindowsMsys2BashPath
     if (-not $bash) {
-        throw 'Git Bash was not found for WezTerm validation.'
+        throw 'MSYS2 UCRT64 Bash was not found for WezTerm validation.'
     }
 
     if ($DryRun) {
-        Write-SetupInfo 'would run doctor --phase wezterm through Git Bash'
+        Write-SetupInfo 'would run doctor --phase wezterm through MSYS2 UCRT64 Bash'
         return
     }
 
-    Write-SetupInfo 'validating WezTerm phase through Git Bash'
-    Invoke-GitBash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase wezterm'
+    Write-SetupInfo 'validating WezTerm phase through MSYS2 UCRT64 Bash'
+    Invoke-Msys2Bash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase wezterm'
 }
 
 function Invoke-WindowsQuakeValidation {
@@ -516,18 +562,18 @@ function Invoke-WindowsQuakeValidation {
     )
 
     Update-ProcessPathFromRegistry
-    $bash = Get-WindowsGitBashPath
+    $bash = Get-WindowsMsys2BashPath
     if (-not $bash) {
-        throw 'Git Bash was not found for Quake validation.'
+        throw 'MSYS2 UCRT64 Bash was not found for Quake validation.'
     }
 
     if ($DryRun) {
-        Write-SetupInfo 'would run doctor --phase quake through Git Bash'
+        Write-SetupInfo 'would run doctor --phase quake through MSYS2 UCRT64 Bash'
         return
     }
 
-    Write-SetupInfo 'validating Quake phase through Git Bash'
-    Invoke-GitBash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase quake'
+    Write-SetupInfo 'validating Quake phase through MSYS2 UCRT64 Bash'
+    Invoke-Msys2Bash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase quake'
 }
 
 function Invoke-WindowsNeovimValidation {
@@ -537,18 +583,39 @@ function Invoke-WindowsNeovimValidation {
     )
 
     Update-ProcessPathFromRegistry
-    $bash = Get-WindowsGitBashPath
+    $bash = Get-WindowsMsys2BashPath
     if (-not $bash) {
-        throw 'Git Bash was not found for Neovim validation.'
+        throw 'MSYS2 UCRT64 Bash was not found for Neovim validation.'
     }
 
     if ($DryRun) {
-        Write-SetupInfo 'would run doctor --phase neovim through Git Bash'
+        Write-SetupInfo 'would run doctor --phase neovim through MSYS2 UCRT64 Bash'
         return
     }
 
-    Write-SetupInfo 'validating Neovim phase through Git Bash'
-    Invoke-GitBash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase neovim'
+    Write-SetupInfo 'validating Neovim phase through MSYS2 UCRT64 Bash'
+    Invoke-Msys2Bash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase neovim'
+}
+
+function Invoke-WindowsYaziValidation {
+    param(
+        [Parameter(Mandatory)][string]$RepoRoot,
+        [switch]$DryRun
+    )
+
+    Update-ProcessPathFromRegistry
+    $bash = Get-WindowsMsys2BashPath
+    if (-not $bash) {
+        throw 'MSYS2 UCRT64 Bash was not found for Yazi validation.'
+    }
+
+    if ($DryRun) {
+        Write-SetupInfo 'would run doctor --phase yazi through MSYS2 UCRT64 Bash'
+        return
+    }
+
+    Write-SetupInfo 'validating Yazi phase through MSYS2 UCRT64 Bash'
+    Invoke-Msys2Bash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase yazi'
 }
 
 function Test-ShellPhase {
@@ -558,9 +625,9 @@ function Test-ShellPhase {
     )
     Test-FoundationPhase -RepoRoot $RepoRoot
     if ($Platform -eq 'windows') {
-        $bash = Get-WindowsGitBashPath
+        $bash = Get-WindowsMsys2BashPath
         if (-not $bash -or -not (Test-Path $bash)) {
-            throw 'Git for Windows Bash was not found.'
+            throw 'MSYS2 UCRT64 Bash was not found.'
         }
     }
 }

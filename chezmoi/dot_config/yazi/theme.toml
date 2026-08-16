@@ -1,0 +1,8 @@
+[manager]
+cwd = { fg = "cyan" }
+hovered = { fg = "black", bg = "blue" }
+preview_hovered = { underline = true }
+
+[status]
+separator_open = ""
+separator_close = ""

@@ -18,7 +18,7 @@ macOS / Ubuntu, from Bash:
 ./setup.sh --phase neovim
 ```
 
-On Windows, setup verifies Git/Git Bash, Phase 1 tools, WezTerm, and Neovim. If Neovim is missing, setup installs it with `winget` package `Neovim.Neovim`.
+On Windows, setup verifies MSYS2 UCRT64, Phase 1 tools, WezTerm, and Neovim. If Neovim is missing, setup installs it with `winget` package `Neovim.Neovim`.
 
 ## Shell Helpers
 
@@ -71,7 +71,7 @@ nv
 
 Windows GUI validation should also confirm:
 
-1. WezTerm opens Git Bash.
+1. WezTerm opens MSYS2 UCRT64 Bash.
 2. `Ctrl+A`, `v` opens Neovim in the current pane.
 3. `Ctrl+A`, `V` opens Neovim in a new pane.
 4. Space leader mappings work inside Neovim.

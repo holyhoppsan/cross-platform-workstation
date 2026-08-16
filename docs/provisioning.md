@@ -17,7 +17,7 @@ Supported entrypoints:
 ./setup.ps1 -Phase wezterm
 ```
 
-On Windows, install Git for Windows first, clone this repository, then use `setup.ps1` as the primary bootstrap entrypoint. `setup.sh` is useful after Git Bash exists, but it cannot bootstrap a machine before Bash exists.
+On Windows, install MSYS2 at `C:\msys64`, use its UCRT64 environment, and use `setup.ps1` as the primary bootstrap entrypoint. Git for Windows may be used to clone the repository, but `setup.sh` is run from MSYS2 UCRT64 Bash.
 
 ## Phase 0
 
@@ -33,22 +33,22 @@ Expected behavior:
 
 ## Phase 1
 
-Phase 1 provisions and verifies the common shell workflow for the selected platform. On Windows it assumes Git for Windows is already present, installs required setup-managed Phase 1 tools, applies chezmoi-managed dotfiles, and validates the configured Git Bash shell.
+Phase 1 provisions and verifies the common shell workflow for the selected platform. On Windows it requires MSYS2 UCRT64, verifies required MSYS2 CLI packages, applies chezmoi-managed dotfiles, and validates the configured UCRT64 shell.
 
 Expected behavior:
 
 - detect platform
 - verify Bash
-- require Git and Git Bash when running on Windows
-- verify Git for Windows and Git Bash on Windows
+- require MSYS2 UCRT64 Bash when running on Windows
+- verify Git is available for repository use and MSYS2 packages provide the interactive CLI tools
 - install or verify `chezmoi` on Windows
-- install or verify Phase 1 CLI tools on Windows: `ripgrep`, `fd`, `jq`, and `fzf`
+- install or verify Phase 1 MSYS2 CLI tools on Windows: `git`, `ripgrep`, `fd`, `jq`, `fzf`, and `unzip`
 - back up known Phase 1 managed dotfiles to `~/.workstation-setup-backup/<timestamp>`
 - apply chezmoi dotfiles with `--force` so setup does not block on interactive overwrite prompts
 - verify common Unix-style commands
 - report optional commands such as `rg`, `fd`, `jq`, and `fzf`
 - run `scripts/doctor --phase shell`
-- launch Git Bash non-interactively to validate configured shell helpers
+- launch MSYS2 UCRT64 Bash non-interactively to validate configured shell helpers
 
 Windows validation after setup:
 

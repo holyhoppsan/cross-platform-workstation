@@ -1,4 +1,5 @@
-# Yazi Placeholder
+# Yazi
 
-Yazi configuration is deferred to Phase 5.
+Phase 5 manages Yazi configuration here.
 
+Yazi is a terminal file manager, not an AI agent.

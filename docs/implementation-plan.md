@@ -1,51 +1,54 @@
 # Implementation Plan Narrative
 
-The actionable tracker is [../PLAN.md](../PLAN.md). This document explains the implementation order and rationale.
+The actionable tracker is [PLAN.md](../PLAN.md). It is the source of truth for requirements, checklists, validation, and next actions. This document explains the intended sequence and the boundaries between phases.
 
 ## Phase Strategy
 
-The repository is implemented in slices. Each phase should leave the repo usable and testable without requiring later phases.
+The repository is implemented in independently testable slices. A phase may add configuration, automation, documentation, and tests, but it must not claim platform validation until it has been tested on the relevant operating system.
 
-Phase 0 creates the repository foundation: docs, examples, setup entrypoints, skeleton directories, and doctor/test infrastructure.
+- Phase 0 establishes repository structure, setup entrypoints, documentation, and doctor/test infrastructure.
+- Phase 1 establishes the shared Bash workflow. Windows uses MSYS2 UCRT64 Bash; macOS and Ubuntu use native Bash.
+- Phase 2 establishes WezTerm as the terminal, pane, tab, and workspace layer.
+- Phase 3 adds the Windows Quake-mode adapter; macOS and Ubuntu adapters remain separate platform work.
+- Phase 4 adds the restrained, plugin-free Neovim baseline.
+- Phase 5 adds Yazi as a terminal file manager only.
+- Phase 5.5 adds the Windows MSYS2 SSH/Mosh and ShadowTerm LAN path.
+- Phase 5.6 is optional Tailscale transport for off-LAN ShadowTerm/Mosh access.
+- Phase 5.7 prepares and validates the existing workstation stack on the MacBook Pro using an agent-led runbook plus user GUI checks.
+- Phase 5.8 evaluates `just` after the user supplies representative workflow examples.
+- Phases 6 through 11 add Rider/Unreal launching, project/worktree workflow, agent adapters, notifications, optional model tooling, and hardening.
 
-Phase 1 creates the shared Bash workflow: Git Bash support on Windows, conservative Bash defaults, platform detection, path conversion helpers, Unix-style command checks, and stubs for future commands.
+## Current State
 
-Phase 2 adds the WezTerm baseline. Phase 3 adds the Windows Quake-mode adapter. Phase 4 adds a restrained Neovim baseline. Later phases remain tracked in `PLAN.md` so future sessions can continue without chat context.
+Windows is the only platform with completed validation so far. The active interactive shell is MSYS2 UCRT64 Bash, and Git for Windows may remain available only for clone/bootstrap compatibility.
 
-## Current Deliverable
+Implemented and validated on Windows:
 
-The current deliverable implements Phases 0 through 4 on Windows, with macOS/Ubuntu validation still tracked separately where applicable.
+- repository foundation and phase-aware setup/doctor framework;
+- shared shell configuration and common CLI tools under MSYS2 UCRT64;
+- WezTerm baseline, including UCRT64 startup and core pane/tab bindings;
+- Windows Quake-mode adapter, subject to its remaining multi-monitor check;
+- Neovim baseline;
+- Yazi configuration and the `y` shell workflow;
+- key-only MSYS2 SSH, LAN-scoped Mosh, ShadowTerm access, reboot persistence, and temporary LAN interruption recovery.
 
-Implemented:
+Not yet validated:
 
-- root tracker and docs
-- setup entrypoints with phase parsing and dry-run support
-- Windows Phase 1 bootstrap through PowerShell
-- setup helper skeleton
-- example config files
-- Bash startup modules
-- platform detection
-- Git Bash detection
-- Unix-style command availability checks
-- phase-aware doctor
-- automated Windows Git Bash validation after setup
-- WezTerm baseline configuration
-- WezTerm setup and doctor phase support
-- Windows Quake-mode adapter and startup registration
-- Neovim baseline configuration
-- Neovim setup and doctor phase support
-- initial tests
+- macOS and Ubuntu behavior;
+- Windows Quake focused-monitor behavior and explicit WezTerm Yazi key chords;
+- Tailscale/off-LAN Mosh reachability;
+- Rider, project/worktree commands, agent launcher/status, model endpoint tooling, and polish/hardening.
 
-Not implemented:
+## macOS Agent Validation Model
 
-- macOS/Ubuntu Quake adapters
-- Yazi configuration
-- Rider launch helpers
-- project/worktree workflow
-- AI agent launcher
-- agent notifications
-- model endpoint detection
+Phase 5.7 makes the MacBook Pro test repeatable and safe. The agent can perform repository checkout, prerequisite inspection, dry runs, setup, doctor, and non-GUI test commands. It must stop rather than silently install Homebrew, alter security settings, or claim GUI behavior.
 
-## Why Keep Placeholders
+The user performs the final interactive validation: WezTerm launch, clipboard behavior, pane bindings, Neovim, Yazi, and any platform-specific desktop integration. Results are then recorded in `PLAN.md`.
 
-The final repository shape is known early, so placeholder directories reduce churn and make future phases easier to discover. Placeholders must remain clearly labeled and must not be represented as working behavior.
+## `just` Boundary
+
+`just` is a future convenience layer, not a replacement for `setup.sh`, `setup.ps1`, or `scripts/doctor`. No recipes should be designed until the user provides real examples of their desired workflow. Recipes must not contain secrets, machine-specific paths, or unsafe destructive defaults.
+
+## Why Placeholders Remain
+
+The repository shape includes future components early so each later phase has a clear home. A placeholder or example file is not working behavior and must be labeled accordingly. This keeps the plan honest while avoiding needless structural churn.

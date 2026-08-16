@@ -8,7 +8,7 @@ This file is the canonical implementation tracker and requirements record for th
 
 Repository: cross-platform-workstation
 
-Goal: Build a phased, version-controlled workstation setup for Windows 11, macOS, and Ubuntu GNOME, using Git Bash/Bash, WezTerm, Neovim, Yazi, Rider, and AI coding agents while keeping Windows native and WSL-free.
+Goal: Build a phased, version-controlled workstation setup for Windows 11, macOS, and Ubuntu GNOME, using MSYS2 UCRT64 Bash/Bash, WezTerm, Neovim, Yazi, Rider, and AI coding agents while keeping Windows native and WSL-free.
 
 This repository should eventually allow the user to:
 
@@ -30,8 +30,8 @@ This repository should eventually allow the user to:
 
 * [ ] Do not require WSL.
 * [ ] Windows development must remain native.
-* [ ] Windows shell workflow uses Git Bash.
-* [ ] Windows setup assumes Git for Windows is already installed because Git is required to clone this repository.
+* [ ] Windows shell workflow uses MSYS2 UCRT64 Bash.
+* [ ] Windows setup may retain Git for Windows only for clone/bootstrap compatibility; interactive workflow must not require its Bash executable.
 * [ ] Common CLI workflow should use Unix-style commands across platforms.
 * [ ] Avoid requiring Windows-specific shell habits such as `dir`.
 * [ ] Prefer `ls`, `cd`, `pwd`, `cat`, `less`, `grep`, `rg`, `fd`, `jq`, `git`, `curl`, `tar`, `unzip`, `mkdir`, `rm`, `cp`, and `mv` across all platforms.
@@ -67,7 +67,7 @@ This repository should eventually allow the user to:
 ## Core Stack
 
 * WezTerm as the terminal emulator, pane, tab, workspace, and Quake-window layer
-* Git Bash on Windows
+* MSYS2 UCRT64 Bash on Windows
 * Bash on macOS and Ubuntu
 * chezmoi for dotfile management
 * Git for version control
@@ -91,7 +91,7 @@ This repository should eventually allow the user to:
 
 Use WezTerm as the universal terminal and pane/workspace layer.
 
-Use Git Bash on Windows to provide a Unix-like command-line workflow without WSL.
+Use MSYS2 UCRT64 Bash on Windows to provide a Unix-like command-line workflow without WSL. Git for Windows may remain available only for clone/bootstrap compatibility.
 
 Use Bash as the common shell layer on all platforms.
 
@@ -222,7 +222,11 @@ Do not include Yazi in the AI agent list.
 | 2     | WezTerm baseline with tmux-style bindings | Implemented and automated validation passed on Windows; needs manual GUI validation |
 | 3     | Quake-mode dropdown                       | Windows validated; macOS/Ubuntu stubbed |
 | 4     | Neovim baseline                           | Implemented and validated on Windows; needs macOS/Ubuntu validation |
-| 5     | Yazi baseline                             | Not started                               |
+| 5     | Yazi baseline                             | Implemented and automated validation passed on Windows; needs manual GUI validation |
+| 5.5   | Windows MSYS2 and Mosh remote access      | LAN phone connection validated; Mosh roaming validation pending |
+| 5.6   | Tailscale remote access                   | Planned                                  |
+| 5.7   | macOS bootstrap and agent validation      | Planned                                  |
+| 5.8   | `just` command runner                     | Planned; awaiting workflow examples      |
 | 6     | Rider and minimal Unreal launching        | Not started                               |
 | 7     | Project and worktree workflow             | Not started                               |
 | 8     | AI agent launcher                         | Not started                               |
@@ -362,7 +366,7 @@ Goal: Create a shared Bash-first workflow across Windows, macOS, and Ubuntu.
 
 Scope:
 
-* Windows must use Git Bash, not WSL.
+* Windows must use MSYS2 UCRT64 Bash, not WSL.
 * Day-to-day commands should feel similar across all platforms.
 * Prefer Unix-style commands everywhere.
 * Add platform and tool detection.
@@ -372,15 +376,15 @@ Requirements:
 
 Windows:
 
-* Use Git for Windows Bash.
-* Assume Git for Windows is already installed before setup runs.
-* Detect the Git Bash executable robustly.
+* Use MSYS2 UCRT64 Bash for interactive work.
+* Git for Windows may remain available only for cloning/bootstrap compatibility.
+* Detect the MSYS2 UCRT64 Bash executable robustly.
 * Support calling native Windows applications from Bash.
 * Preserve Windows-native paths where native tools require them.
 * Provide helper functions for path conversion using `cygpath` where necessary.
 * Do not assume Linux-only paths.
 * Do not require WSL.
-* Do not require MSYS2 tmux or Cygwin.
+* Do not require tmux or Cygwin.
 * Be careful with quoting for Windows paths containing spaces.
 * Support calling `cmd.exe` and PowerShell safely from Bash only when needed.
 
@@ -429,7 +433,7 @@ Deliverables:
 * platform detection
 * PATH handling
 * tool detection
-* Git Bash detection on Windows
+* MSYS2 UCRT64 detection on Windows
 * Unix-style command availability checks
 * documentation for shell behavior
 * initial helper stubs
@@ -480,7 +484,7 @@ Tasks:
 * [x] Add platform detection.
 * [x] Add PATH handling.
 * [x] Add tool detection.
-* [x] Add Git Bash detection on Windows.
+* [x] Add MSYS2 UCRT64 detection on Windows.
 * [x] Add Unix-style command availability checks.
 * [x] Add shell documentation.
 * [x] Add `platform-info` helper.
@@ -495,8 +499,8 @@ Tasks:
 
 Validation:
 
-* [x] Windows Git Bash opens and loads shared config.
-* [x] `ls`, `git`, `rg`, `fd`, and `jq` work from Git Bash when installed.
+* [x] Windows MSYS2 UCRT64 Bash opens and loads shared config.
+* [x] `ls`, `git`, `rg`, `fd`, and `jq` work from MSYS2 UCRT64 Bash.
 * [ ] macOS Bash loads shared config.
 * [ ] Ubuntu Bash loads shared config.
 * [x] `platform-info` identifies the platform.
@@ -505,7 +509,7 @@ Validation:
 
 Notes:
 
-* Existing tests cover platform and helper behavior under Git for Windows Bash.
+* Existing tests cover platform and helper behavior; Windows UCRT64 validation passed on 2026-08-14.
 * Do not mark platform behavior as validated until tested on that platform.
 * 2026-07-05: `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 4 setup tests.
 * 2026-07-05: `scripts/doctor --phase foundation` and `scripts/doctor --phase shell` passed under Git for Windows Bash.
@@ -559,7 +563,7 @@ Requirements:
 * platform-aware shell startup
 * sensible font fallback without requiring proprietary font files
 * no platform-specific Cmd-based primary workflow on macOS
-* clean integration with Git Bash on Windows
+* clean integration with MSYS2 UCRT64 Bash on Windows
 * no requirement for tmux
 
 Keybinding hierarchy:
@@ -617,7 +621,7 @@ Tasks:
 * [x] Add WezTerm config directory placeholder.
 * [x] Add base wezterm.lua.
 * [x] Add platform-aware shell startup.
-* [x] Configure Git Bash startup on Windows.
+* [x] Configure MSYS2 UCRT64 Bash startup on Windows.
 * [x] Configure Bash startup on macOS/Ubuntu.
 * [x] Add tmux-style leader key.
 * [x] Add split bindings.
@@ -634,8 +638,8 @@ Tasks:
 Validation:
 
 * [x] WezTerm starts successfully on Windows.
-* [ ] It launches the correct shell. Status: Windows Git Bash validated; macOS/Ubuntu pending.
-* [x] On Windows, WezTerm launches Git Bash.
+* [x] It launches the correct shell. Status: Windows MSYS2 UCRT64 validated; macOS/Ubuntu pending.
+* [x] On Windows, WezTerm launches MSYS2 UCRT64 Bash.
 * [ ] On macOS and Ubuntu, WezTerm launches Bash.
 * [x] Ctrl+A bindings work on Windows. Status: macOS/Ubuntu pending.
 * [x] Pane splits and navigation work on Windows. Status: macOS/Ubuntu pending.
@@ -655,6 +659,7 @@ Notes:
 * 2026-07-05: Manual WezTerm launch found `SpawnCommandInNewPane` is not a valid key assignment in stable WezTerm 20240203. Replaced it with `SplitPane` for helper panes, added a regression test, reapplied chezmoi, and verified the installed config with `wezterm --config-file ~/.config/wezterm/wezterm.lua show-keys`.
 * 2026-07-05: Manual WezTerm launch then found `domain` is not a valid top-level `SplitPane` field. Removed the invalid field from the helper-pane wrapper and changed doctor validation to use `show-keys --lua` so configured leader keys are included in validation output.
 * 2026-07-05: Manual WezTerm use showed copy/paste ergonomics were unclear and there is no Windows-style context menu. Added explicit `Ctrl+Shift+C`, `Ctrl+Shift+V`, `Ctrl+Insert`, `Shift+Insert`, and right-click paste bindings.
+* 2026-07-30: Added a portable `Ctrl+V` WezTerm paste binding after Windows Codex CLI received the raw key event and attempted image paste instead of inserting clipboard text. The binding makes WezTerm paste system clipboard text before the CLI sees the key. `setup.ps1 -Phase wezterm -SkipInstall` applied the managed configuration and passed the WezTerm doctor/config-load checks; Windows live validation remains required, and macOS/Ubuntu behavior remains unvalidated.
 * 2026-07-05: Manual WezTerm validation confirmed Git Bash starts, but `doctor --phase wezterm` failed from `~` because the repository root was not known outside the worktree. Setup now writes machine-local `~/.config/workstation/env.sh` with `WORKSTATION_REPO_ROOT`; shell startup, `workstation-root`, and `doctor` all load it so validation works from home.
 * 2026-07-05: User manually validated a WezTerm-launched Git Bash session from `~`: `echo "$WORKSTATION_REPO_ROOT"` and `workstation-root` both returned `C:/work/cross-platform-workstation`, and `doctor --phase wezterm` passed with only expected warnings for optional `fdfind` and deferred future-phase helpers.
 * 2026-07-05: User reported `Ctrl+A`, `|` did not split panes on Windows. Added an equivalent `Ctrl+A`, `Shift+\` binding for the same horizontal split action, documented it as the Windows fallback, reapplied setup, and added a regression test.
@@ -896,7 +901,7 @@ Deferred items:
 
 ## Phase 5: Yazi Baseline
 
-Status: Not started
+Status: Implemented and automated validation passed on Windows; needs manual GUI validation
 
 Goal: Add Yazi as the terminal file manager.
 
@@ -950,30 +955,212 @@ Deliverables:
 
 Tasks:
 
-* [ ] Add Yazi config directory.
-* [ ] Add yazi.toml.
-* [ ] Add keymap.toml.
-* [ ] Add theme.toml.
-* [ ] Add `y` shell helper.
-* [ ] Add WezTerm bindings.
-* [ ] Add docs/yazi.md.
-* [ ] Add doctor checks.
+* [x] Add Yazi config directory.
+* [x] Add yazi.toml.
+* [x] Add keymap.toml.
+* [x] Add theme.toml.
+* [x] Add `y` shell helper.
+* [x] Add WezTerm bindings.
+* [x] Add docs/yazi.md.
+* [x] Add doctor checks.
 
 Validation:
 
-* [ ] `yazi` starts.
-* [ ] `y` opens Yazi.
-* [ ] Directory-changing-on-exit works where supported.
-* [ ] WezTerm Yazi keybindings work.
-* [ ] `doctor --phase yazi` reports status.
+* [x] `yazi` starts. Status: Windows command/version validated with Yazi 26.5.6; full TUI use still needs manual smoke test in WezTerm.
+* [x] `y` opens Yazi. Status: Windows Git Bash live validation passed.
+* [x] Directory-changing-on-exit works where supported. Status: Windows Git Bash live validation passed; user selected `/tmp/yazi-cwd-test/target` and `pwd` changed to that path after exit.
+* [ ] WezTerm Yazi keybindings work. Status: configured and doctor/static tests pass; Windows GUI key chords need manual validation.
+* [x] `doctor --phase yazi` reports status.
+* [x] `setup.ps1 -Phase yazi` installs or verifies Yazi and applies managed config on Windows.
+* [x] `reset-windows.ps1 -Phase yazi -Apply -RemovePackages` fully removes setup-managed packages. Status: validated from normal user PowerShell; elevated/Admin PowerShell is now blocked before package removal.
 
 Notes:
 
 * Yazi must not be listed as an AI agent.
+* 2026-07-07: Implemented Phase 5 Yazi baseline with managed `yazi.toml`, `keymap.toml`, `theme.toml`, real `y` helper, WezTerm Yazi bindings, setup/reset/verify support, doctor checks, docs, and tests.
+* 2026-07-07: Windows setup validation passed. `setup.ps1 -Phase yazi` installed or verified Yazi package `sxyazi.yazi`, applied chezmoi, and passed `doctor --phase yazi`.
+* 2026-07-07: Yazi is explicitly not an AI agent. Tests assert there is no `[agents.yazi]` or `[agents.yasi]`, docs state the boundary, and doctor reports `Yazi agent status: not an AI agent`.
+* 2026-07-07: Interactive Git Bash validation passed for `command -v yazi`, `command -v ya`, `type y`, and `doctor --phase yazi`.
+* 2026-07-07: Automated tests passed with Yazi coverage. Optional preview dependencies `ffmpeg`, `7z`/`7zz`, and `magick` are warnings only.
+* 2026-07-07: Reset validation found that elevated/Admin PowerShell can remove managed files but cannot uninstall user-scope winget packages. Reset now blocks elevated `-Apply -RemovePackages` before file cleanup and continues with warnings in ambiguous winget list-miss states.
+* 2026-07-07: User manually validated the `y` helper and Yazi directory-changing-on-exit from Windows Git Bash. Test path changed from `/tmp/yazi-cwd-test` to `/tmp/yazi-cwd-test/target` after selecting `target` in Yazi and quitting.
+* 2026-07-07: User ran `reset-windows.ps1 -Phase yazi -Apply -RemovePackages` from an elevated/Admin PowerShell. Winget refused to uninstall user-scope package `twpayne.chezmoi`. Reset now has an early guard to block elevated `-Apply -RemovePackages` before managed files are removed.
+* 2026-07-07: User reran the Phase 5 reset/reinstall loop from normal user PowerShell. `reset-windows.ps1 -Phase yazi -Apply -RemovePackages` successfully uninstalled setup-managed packages `chezmoi`, `ripgrep`, `fd`, `jq`, `fzf`, `WezTerm`, and `Yazi` without removing Git. `setup.ps1 -Phase yazi` then reinstalled/verifed the setup-managed stack, applied chezmoi, and passed `doctor --phase yazi`.
+* 2026-07-07: Windows setup now also blocks non-dry elevated/Admin PowerShell runs. Setup configures the current user profile and winget user-scope packages, so normal user PowerShell is the supported path; dry-runs remain allowed from elevated shells.
+* 2026-07-07: Final static validation for the setup elevation guard passed. `setup.ps1 -Phase yazi -DryRun` still works, and an elevated `setup.ps1 -Phase yazi -SkipInstall -SkipApply` stopped at the guard before making changes.
 
 Deferred items:
 
-* Advanced previews and theme customization may be deferred if the baseline is useful.
+* Advanced previews and theme customization.
+* Manual Windows GUI validation for `Ctrl+A`, `e` and `Ctrl+A`, `E`.
+* macOS and Ubuntu validation.
+
+## Phase 5.5: Windows MSYS2 and Mosh Remote Access
+
+Status: LAN phone connection validated on Windows; Mosh roaming and Tailscale reachability remain pending.
+
+Goal: Replace the Windows interactive Git Bash workflow with MSYS2 UCRT64 Bash and provide a ShadowTerm-compatible Mosh entry path without WSL or tmux.
+
+Architecture:
+
+```text
+ShadowTerm native Mosh client
+  -> MSYS2 OpenSSH service (msys2_sshd)
+  -> MSYS2 UCRT64 Bash
+  -> Herdr persistent agent session
+  -> agents and tools
+```
+
+Herdr, not tmux, owns persistent panes and agent processes. Mosh provides the roaming terminal transport only.
+
+Requirements:
+
+* Do not install or require WSL.
+* Use MSYS2 installed at `C:\msys64` and launch the UCRT64 environment for interactive terminals.
+* Do not install GCC or `base-devel` solely for this phase.
+* Install Mosh from the MSYS repository; it must be available from UCRT64 as `/usr/bin/mosh-server`.
+* Configure MSYS2's own OpenSSH daemon as a Windows service named `msys2_sshd`; do not use native Windows OpenSSH for the ShadowTerm Mosh route.
+* Configure the service's user sessions to launch the UCRT64 environment.
+* Require key-based SSH authentication before allowing remote access. ShadowTerm requires an OpenSSH-format Ed25519 or RSA key; Ed25519 is preferred.
+* Configure the Mosh server path explicitly in ShadowTerm if non-interactive SSH cannot resolve `mosh-server`.
+* Start with UDP port 60001 only. Do not open the full Mosh port range unless validation requires it.
+* Scope firewall access to the selected connectivity model (LAN or approved VPN); do not create public-internet port forwarding as part of this repository.
+* Keep Git for Windows compatibility during migration; do not claim the MSYS2 shell replacement is validated until all Phase 1-5 checks pass under UCRT64.
+
+Deliverables:
+
+* MSYS2 UCRT64 detection and WezTerm shell launch support.
+* MSYS2 shell-aware setup, doctor, and test adapters.
+* A reviewed, idempotent Windows MSYS2 SSH service setup path.
+* A documented single-port Mosh firewall configuration and reversal path.
+* ShadowTerm connection and validation documentation.
+
+Tasks:
+
+* [x] Install MSYS2 at `C:\msys64` manually.
+* [x] Verify the UCRT64 environment.
+* [x] Install and verify `mosh`, `openssh`, `cygrunsrv`, and `mingw-w64-ucrt-x86_64-editrights`.
+* [x] Define and implement the UCRT64-aware `msys2_sshd` service setup.
+* [x] Configure and validate SSH host keys and key-only user access.
+* [x] Configure UCRT64 as the remote SSH shell environment.
+* [x] Validate remote `mosh-server` resolution through ShadowTerm.
+* [x] Configure the single-port UDP 60001 LAN firewall rule with a reversal path.
+* [x] Validate ShadowTerm Mosh on the selected LAN.
+* [x] Migrate WezTerm, setup, doctor, documentation, and tests from Git Bash-specific assumptions to MSYS2-aware Windows shell detection. Status: source and managed configuration applied; shell validation passed on 2026-08-14.
+* [x] Revalidate the Windows shell, WezTerm, Herdr, Yazi command, and Neovim workflows under UCRT64. Status: validated on 2026-08-14; explicit Quake multi-monitor and Yazi key-chord checks remain tracked in their own phases.
+
+Validation:
+
+* [x] `MSYSTEM` reports `UCRT64`.
+* [x] `mosh --version` reports 1.4.0.
+* [x] `command -v mosh-server` reports `/usr/bin/mosh-server`.
+* [x] `command -v sshd` reports `/usr/bin/sshd`.
+* [x] `command -v cygrunsrv` reports `/usr/bin/cygrunsrv`.
+* [x] `command -v editrights` reports `/ucrt64/bin/editrights`.
+* [x] `msys2_sshd` runs.
+* [x] Key-only SSH reaches UCRT64 Bash through ShadowTerm.
+* [x] ShadowTerm resolves `mosh-server` on the remote session.
+* [x] ShadowTerm establishes a Mosh session on UDP 60001 on the LAN.
+* [x] `msys2_sshd` starts after a Windows reboot.
+* [ ] ShadowTerm Mosh session survives an off-LAN network transition after Phase 5.6 Tailscale reachability is validated.
+
+Security and network decisions still required:
+
+* LAN-only access is validated. Add Tailscale as a separate private VPN transport before enabling off-LAN use.
+* Do not expose SSH or Mosh directly to the public internet from this repository.
+
+## Phase 5.6: Tailscale Remote Access
+
+Status: Planned
+
+Goal: Extend the validated MSYS2 SSH/Mosh service beyond the LAN through the user's private tailnet, without router port forwarding or Tailscale SSH.
+
+Requirements:
+
+* Install and authenticate Tailscale on the Windows laptop and iPhone using the same tailnet.
+* Keep MSYS2 `msys2_sshd` plus Mosh as the application services; Tailscale provides only private network transport.
+* Do not enable public-internet router port forwarding.
+* Add separate Windows firewall rules limited to Tailscale source addresses and the required TCP 22 / UDP 60001 ports; preserve the existing LAN-only rules.
+* Use the laptop's Tailscale IP or MagicDNS name in a separate ShadowTerm host entry.
+* Keep tailnet access policy restricted to the user's devices before testing from an external network.
+
+Validation:
+
+* [ ] Laptop and iPhone appear in the same tailnet.
+* [ ] Tailnet policy permits the phone to reach the laptop on TCP 22 and UDP 60001 only.
+* [ ] ShadowTerm connects by Tailscale IP or MagicDNS while off the LAN.
+* [ ] Mosh resumes after a phone network transition.
+
+## MSYS2 Migration Workstream
+
+Status: Completed on Windows on 2026-08-14; the validated MSYS2 SSH/Mosh path remains independent from pending Tailscale work.
+
+Implementation order:
+
+1. Make MSYS2 UCRT64 the default Windows interactive shell in WezTerm and repository validation.
+2. Retain Git for Windows as a clone/bootstrap dependency only; do not require its Bash executable after migration.
+3. Update shared shell detection, doctor output, setup/reset verification, tests, and user documentation together.
+4. Apply changes without terminating existing WezTerm, Herdr, agent, or ShadowTerm sessions; validate in newly opened UCRT64 shells.
+5. Mark Windows Phase 1-5 UCRT64 validation only after those phases are actually rerun under MSYS2.
+
+## Phase 5.7: macOS Bootstrap and Agent Validation
+
+Status: Planned
+
+Goal: Prepare the MacBook Pro for an agent-led, evidence-backed validation of the existing common shell, WezTerm, Neovim, and Yazi configuration without claiming macOS behavior before it is tested.
+
+Requirements:
+
+* Use native macOS; do not introduce Windows/MSYS2 paths or dependencies.
+* The bootstrap instructions must use official, version-specific documentation where package or operating-system behavior is relevant.
+* Do not silently install Homebrew. If Homebrew is absent, the plan must stop with explicit user instructions and resume only after the user installs or approves it.
+* Define one safe agent-run command sequence for clone/bootstrap, setup dry-run, setup/apply, doctor, and repository tests.
+* Separate automated checks from user-performed GUI checks: WezTerm launch and shell, clipboard behavior, pane bindings, Neovim interaction, Yazi interaction, and any future Quake adapter.
+* Preserve user configuration through the existing backup/forced-chezmoi contract and do not require SSH, Mosh, ShadowTerm, or Tailscale for the initial macOS validation.
+
+Deliverables:
+
+* Updated macOS installation and provisioning instructions.
+* A macOS agent-validation runbook with exact commands, expected evidence, and explicit stop conditions.
+* Phase-specific doctor/test expectations and a manual validation checklist.
+
+Tasks:
+
+* [ ] Audit the existing macOS branches in setup, doctor, shell, and WezTerm configuration against current official documentation.
+* [ ] Define macOS prerequisites and package ownership without automatic Homebrew installation.
+* [ ] Add the agent-run bootstrap and validation runbook.
+* [ ] Test the dry-run and non-destructive validation sequence on the MacBook Pro.
+* [ ] Apply managed configuration on the MacBook Pro only after dry-run review.
+* [ ] Record automated and manual validation results separately in this plan.
+
+Validation:
+
+* [ ] A coding agent can run the documented non-GUI checks without needing chat context.
+* [ ] `setup.sh` dry-run, repository tests, and `doctor` complete on the MacBook Pro.
+* [ ] User manually confirms WezTerm, clipboard, pane bindings, Neovim, and Yazi behavior.
+* [ ] macOS platform-specific behavior is marked validated only after these checks.
+
+## Phase 5.8: `just` Command Runner
+
+Status: Planned; awaiting the user's IndyDevDan workflow examples
+
+Goal: Evaluate and, if suitable, add [`just`](https://github.com/casey/just) as a documented command runner for repeatable repository tasks without replacing the existing setup entrypoints.
+
+Requirements:
+
+* Do not implement recipes until the user supplies representative workflow examples.
+* `just` must remain optional until the documented bootstrap path can install or verify it safely on every supported platform.
+* Do not put credentials, machine-specific paths, or destructive defaults in a `justfile`.
+* Preserve `setup.sh`, `setup.ps1`, and `scripts/doctor` as the authoritative bootstrap and validation interfaces.
+* Each recipe must have clear arguments, dry-run or confirmation behavior where appropriate, and test/documentation coverage.
+
+Tasks:
+
+* [ ] Review the user's reference workflow examples and decide which commands belong in recipes.
+* [ ] Decide installation/detection policy for Windows, macOS, and Ubuntu.
+* [ ] Add a documented `justfile` only after that review.
+* [ ] Add safe recipes, tests, and docs.
+* [ ] Validate the chosen recipes on each supported platform before claiming portability.
 
 ## Phase 6: Rider and Minimal Unreal Launching
 
@@ -985,7 +1172,7 @@ Scope:
 
 * Do not build full Unreal automation yet.
 * Only implement launching Rider with the `.uproject` or project folder.
-* Ensure this works from Git Bash on Windows.
+* Ensure this works from MSYS2 UCRT64 Bash on Windows.
 
 Requirements:
 
@@ -995,7 +1182,7 @@ The helper should:
 2. Detect a `.uproject` file nearby where practical.
 3. Launch Rider with the `.uproject` file if found.
 4. Otherwise launch Rider with the current directory or provided path.
-5. Work from Git Bash on Windows.
+5. Work from MSYS2 UCRT64 Bash on Windows.
 6. Work from Bash on macOS and Ubuntu where Rider is installed.
 7. Preserve quoting for paths containing spaces.
 8. Allow a configured Rider executable path.
@@ -1013,7 +1200,7 @@ Possible commands:
 
 Windows-specific requirements:
 
-* The command must work from Git Bash.
+* The command must work from MSYS2 UCRT64 Bash.
 * It may call native Windows executables.
 * It should support `.uproject` paths with spaces.
 * It should not require WSL.
@@ -1048,14 +1235,14 @@ Tasks:
 * [ ] Add `.uproject` detection.
 * [ ] Add Rider path config.
 * [ ] Add dry-run support.
-* [ ] Add Windows Git Bash support.
+* [ ] Add Windows MSYS2 UCRT64 support.
 * [ ] Add docs/rider.md.
 * [ ] Add docs/unreal-minimal.md.
 * [ ] Add doctor checks.
 
 Validation:
 
-* [ ] From Git Bash on Windows, `rider-uproject` can locate the nearest `.uproject`.
+* [ ] From MSYS2 UCRT64 Bash on Windows, `rider-uproject` can locate the nearest `.uproject`.
 * [ ] It prints the command it intends to run in dry-run mode.
 * [ ] It handles spaces in paths.
 * [ ] It gives a clear error if Rider is not configured or detected.
@@ -1842,10 +2029,14 @@ This section mirrors and expands the unsupported/deferred policy for quick looku
 
 Current next actions:
 
-1. Commit and push Phase 4 if accepted.
-2. Validate Phase 2/3/4 on macOS and Ubuntu only when those platforms are available.
-3. Begin Phase 5 Yazi baseline after Phase 4 is saved.
-4. Keep `PLAN.md` updated after each implementation or validation session.
+1. Review the current tracked changes, run final checks, and commit the validated Windows/MSYS2/Mosh/Yazi work.
+2. Complete Phase 5.7 macOS bootstrap and agent-validation preparation before giving an agent access to the MacBook Pro.
+3. Use the Phase 5.7 runbook to validate macOS only when the MacBook Pro is available.
+4. Review IndyDevDan `just` examples and scope Phase 5.8 recipes.
+5. Manually validate remaining Windows GUI-only checks: Quake focused-monitor behavior and WezTerm Yazi key chords.
+6. Implement Phase 5.6 Tailscale only when off-LAN ShadowTerm/Mosh access becomes the priority.
+7. Begin Phase 6 Rider baseline after the relevant preceding work is accepted.
+8. Keep `PLAN.md` updated after each implementation or validation session.
 
 ## PLAN.md Update Rules
 
@@ -2158,3 +2349,91 @@ Format:
 - Validation performed: `setup.ps1 -Phase neovim -DryRun`, `reset-windows.ps1 -Phase neovim`, and `reset-windows.ps1 -Phase neovim -RemovePackages` dry-runs passed. A destructive `reset-windows.ps1 -Phase neovim -Apply -RemovePackages` exposed the running-WezTerm partial reinstall issue; after the reset fix and idempotency fix, reset completed cleanly. `setup.ps1 -Phase neovim` reinstalled/verifed WezTerm and Neovim, applied chezmoi, and passed setup doctor checks. `setup.ps1 -Phase neovim -SkipInstall` reapplied the final PATH updates and passed. `tests/run.bash`, `doctor --phase neovim`, and interactive Git Bash checks for `command -v wezterm`, `command -v nvim`, `nvc`, and `nv --headless +qa` passed.
 - Known gaps: macOS and Ubuntu remain unvalidated. This validation used the current Windows machine and included an elevated setup run because the tool's normal context could not execute winget install output reliably; user-run PowerShell remains the intended workflow.
 - Next actions: Run `git diff --check`, review the Phase 4 diff, then commit/push Phase 4 if accepted.
+
+### 2026-07-07
+
+- Summary of changes: Implemented the Phase 5 Yazi baseline as a terminal file-manager integration only. Added managed Yazi config files, the real `y` helper with `--cwd-file` directory handoff, WezTerm Yazi bindings, Windows setup/reset/verify support, `doctor --phase yazi`, `docs/yazi.md`, README/docs updates, and tests protecting that Yazi is not an AI agent.
+- Phases touched: Phase 5, Phase 2 WezTerm bindings/docs, Phase 1 shell helper docs, setup/reset/verify, doctor, tests, tracking.
+- Validation performed: `winget search yazi` identified package `sxyazi.yazi`. `tests/run.bash` passed. `setup.ps1 -Phase yazi -DryRun`, `reset-windows.ps1 -Phase yazi`, and `reset-windows.ps1 -Phase yazi -RemovePackages` dry-runs passed. `setup.ps1 -Phase yazi` installed or verified Yazi 26.5.6, applied chezmoi, and passed `doctor --phase yazi`. Interactive Git Bash validated `command -v yazi`, `command -v ya`, `type y`, and `doctor --phase yazi`. `doctor --phase yazi` also passed in non-interactive Git Bash when rerun in isolation. User validated `y` live and confirmed directory-changing-on-exit moved `pwd` to `/tmp/yazi-cwd-test/target`. User validated normal PowerShell `reset-windows.ps1 -Phase yazi -Apply -RemovePackages` and reinstall via `setup.ps1 -Phase yazi`. Setup and reset now block the elevated/Admin PowerShell paths that conflict with winget user-scope packages. Final validation reran `tests/run.bash`, direct `doctor --phase yazi`, `setup.ps1 -Phase yazi -DryRun`, elevated setup guard validation, and `git diff --check`.
+- Known gaps: Manual Windows GUI validation is still required for `Ctrl+A`, `e` and `Ctrl+A`, `E`. macOS and Ubuntu remain unvalidated. Elevated/Admin PowerShell setup/reset package operations are intentionally blocked because this repository configures user-profile files and winget user-scope packages.
+- Next actions: Manually validate Yazi WezTerm bindings, update `PLAN.md` with results, then commit/push Phase 5 if accepted.
+
+### 2026-08-08
+
+- Summary of changes: Added the planned Phase 5.5 Windows MSYS2 and Mosh remote-access migration. The target Windows stack is MSYS2 UCRT64 Bash, MSYS2 `msys2_sshd`, Mosh, ShadowTerm, and Herdr; WSL and tmux remain out of scope. Recorded user-performed prerequisite validation only.
+- Phases touched: Phase 1 Windows shell direction, Phase 5.5 planning, future WezTerm/setup/doctor migration.
+- Validation performed: User installed MSYS2 at `C:\msys64`; `MSYSTEM` reported `UCRT64`; `mosh --version` reported 1.4.0; `mosh-server`, `sshd`, `cygrunsrv`, and UCRT64 `editrights` resolved at their expected paths. No SSH service, firewall rule, or ShadowTerm connection was created or tested.
+- Known gaps: The existing implemented Windows path remains Git for Windows Bash. The UCRT64-aware `msys2_sshd` service setup, key-only authentication, Mosh UDP firewall scope, ShadowTerm proof of concept, and all migrated setup/doctor/tests remain unimplemented.
+- Next actions: Implement and locally validate the MSYS2 SSH service before switching WezTerm or the active provisioning path; choose LAN-only or VPN-only reachability before any firewall change.
+
+### 2026-08-08
+
+- Summary of changes: Added a Phase 5.5 MSYS2 `msys2_sshd` installer, explicit LAN-only firewall option, rollback script, and operating instructions for the ShadowTerm proof of concept.
+- Phases touched: Phase 5.5 Windows-only automation and architecture documentation.
+- Validation performed: Bash syntax, PowerShell parsing, targeted setup tests, installer dry run, and `git diff --check` passed. Initial live service installation exposed that current MSYS2 places `sshd_config` at `/etc/ssh/sshd_config`, rather than the older `/etc/sshd_config` path in the published wiki script; the installer now uses the packaged path. No service, firewall rule, localhost SSH connection, or ShadowTerm/Mosh connection has yet been validated on Windows.
+- Known gaps: The installer must be executed from elevated PowerShell with the user’s ShadowTerm public key. Verify localhost SSH first, then apply the `LocalSubnet` firewall rules and connect from the phone. The active WezTerm/provisioning shell is still Git Bash until this proof is accepted and subsequent migration work is implemented.
+- Next actions: Export ShadowTerm’s public key; dry-run and apply `platform/windows/setup-msys2-mosh.ps1`; confirm `ssh` and `mosh-server` locally; apply LAN firewall rules; then prove ShadowTerm Mosh access from the same Wi-Fi network.
+
+### 2026-08-08
+
+- Summary of changes: Installed the MSYS2 `msys2_sshd` Windows service using the ShadowTerm-generated public key. Corrected the installer for the current MSYS2 packaged configuration location, `/etc/ssh/sshd_config`, after the initial attempt exposed the older wiki path assumption.
+- Phases touched: Phase 5.5 Windows SSH/Mosh proof of concept.
+- Validation performed: On this Windows laptop, `msys2_sshd` is running and listening on TCP 22; effective SSH configuration reports public-key authentication enabled, password and keyboard-interactive authentication disabled, `MSYSTEM=UCRT64`, and `AuthorizedKeysFile .ssh/authorized_keys`; `/usr/bin/mosh-server` resolves; and the installed authorized-key fingerprint matches the ShadowTerm Ed25519 public key. User confirmed `Tele2_9128D6` is the shared network; it is now Private. The LAN firewall rules are enabled and restricted to the Private profile plus `LocalSubnet`: TCP 22 for SSH and UDP 60001 for Mosh. The laptop IPv4 address on that network is `192.168.0.74`. User connected from ShadowTerm on the phone and confirmed the remote session reports `MSYSTEM=UCRT64` and `/usr/bin/mosh-server`.
+- Known gaps: Mosh roaming has not yet been validated by changing the phone network and returning. The active desktop WezTerm/provisioning shell remains Git Bash until the separately planned migration work is completed.
+- Next actions: Briefly change the phone from `Tele2_9128D6` to cellular and back, then verify the same session resumes. If successful, record the Mosh roaming proof; future work can then connect this validated remote entry point to the Herdr workflow and complete the broader MSYS2-shell migration.
+
+### 2026-08-08
+
+- Summary of changes: Added the existing per-user Herdr binary directory to the managed Windows Bash PATH so the MSYS2 UCRT64 login shell used by ShadowTerm can resolve `herdr`.
+- Phases touched: Phase 1 shared shell PATH and Phase 5.5 ShadowTerm/Herdr entry point.
+- Validation performed: Applied only the managed shell file through chezmoi. A fresh interactive MSYS2 UCRT64 login shell resolves `herdr` at the per-user Herdr install path and reports `0.7.5-preview.2026-07-21-0f10e1453a7f`.
+- Known gaps: Herdr has not yet been launched from the actual ShadowTerm remote shell. Mosh roaming remains unvalidated.
+- Next actions: Disconnect/reconnect the ShadowTerm host to start a fresh login shell, run `command -v herdr`, then run `herdr` to start or attach to its persistent session.
+
+### 2026-08-14
+
+- Summary of changes: Recorded successful Windows reboot validation for the MSYS2 SSH/Mosh service.
+- Phases touched: Phase 5.5 Windows MSYS2 and Mosh remote access.
+- Validation performed: User restarted the laptop, then reconnected successfully from ShadowTerm and confirmed the UCRT64 shell plus `herdr` were available. This validates `msys2_sshd` automatic startup and the persisted remote-shell PATH configuration.
+- Known gaps: Mosh roaming through a phone network transition remains unvalidated. The desktop Windows workflow is still Git Bash pending the planned repository migration to MSYS2 UCRT64.
+- Next actions: Optionally validate reconnection after a brief Wi-Fi interruption on the LAN. A true Wi-Fi-to-cellular Mosh roaming test requires Phase 5.6 Tailscale reachability first. Begin the Git-Bash-to-MSYS2 migration across WezTerm, setup, doctor, and tests before enabling off-LAN Tailscale access.
+
+### 2026-08-14
+
+- Summary of changes: Recorded successful LAN-only Mosh reconnection validation.
+- Phases touched: Phase 5.5 Windows MSYS2 and Mosh remote access.
+- Validation performed: User disabled phone Wi-Fi while connected through ShadowTerm, observed that the LAN-only session could not accept input without a route to the laptop, restored Wi-Fi, and confirmed the same session resumed with the expected current time. This validates recovery from a temporary LAN interruption.
+- Known gaps: This is not an off-LAN cellular roaming test; cellular cannot reach the private LAN address until Phase 5.6 Tailscale is configured.
+- Next actions: Begin the Git-Bash-to-MSYS2 migration across WezTerm, setup, doctor, and tests; add Tailscale afterward for true off-LAN Mosh roaming.
+
+### 2026-08-14
+
+- Summary of changes: Migrated the active Windows workstation shell configuration from Git Bash to MSYS2 UCRT64. WezTerm now launches `C:/msys64/usr/bin/bash.exe` with `MSYSTEM=UCRT64`; setup, verification, doctor, shell helpers, tests, documentation, and the durable Windows constraint now use the same target. Git for Windows remains a clone/bootstrap compatibility prerequisite only. The MSYS2 package set includes `git`, `jq`, `unzip`, UCRT64 `ripgrep`, `fd`, and `fzf`.
+- Phases touched: Windows Phase 1 shell; Phase 2 WezTerm configuration; shared documentation and test coverage.
+- Validation performed: Installed the MSYS2 package set. Applied managed dotfiles with `chezmoi apply --force` after automatic backups. `setup.ps1 -Phase shell -DryRun` passed. `setup.ps1 -Phase shell -SkipInstall -SkipApply` passed end to end: all 319 repository checks passed under MSYS2 UCRT64 and the configured interactive UCRT64 shell passed `doctor --phase shell` with only the existing optional `fdfind` and future-helper warnings. PowerShell parsing and `git diff --check` passed before the final correction; the complete test/doctor validation was rerun after it.
+- Known gaps: Existing terminals and WezTerm panes deliberately remain untouched. Open a new WezTerm window to manually confirm it starts UCRT64 and that Phase 2-5 workflows still behave as expected; do not mark those phases revalidated until tested. Tailscale/off-LAN Mosh remains Phase 5.6 work.
+- Next actions: Manually validate a fresh WezTerm UCRT64 pane (`echo "$MSYSTEM"`, `doctor --phase wezterm`, and normal Herdr/Yazi/Neovim use), then revalidate the remaining Windows phases in order. Configure Tailscale after that validation.
+
+### 2026-08-14
+
+- Summary of changes: Manually validated the migrated Windows WezTerm startup path.
+- Phases touched: Phase 2 WezTerm.
+- Validation performed: User opened a new WezTerm pane, confirmed `MSYSTEM=UCRT64`, and ran `doctor --phase wezterm`. Required checks passed: MSYS2 UCRT64 detection, MSYS2 Bash path, shared CLI tools, installed WezTerm, managed WezTerm config location, and `show-keys --lua` configuration loading.
+- Known gaps: `fdfind` remains an optional warning because Windows provides `fd`; Quake mode remains deferred to Phase 3. Herdr, Yazi, and Neovim workflows are not yet manually revalidated in a newly opened UCRT64 WezTerm pane.
+- Next actions: Manually exercise `herdr`, `y`, and `nvim` in the new UCRT64 WezTerm pane, then record the respective phase validation. Configure Tailscale afterward for off-LAN Mosh reachability.
+
+### 2026-08-14
+
+- Summary of changes: Completed manual Windows workflow revalidation after the MSYS2 UCRT64 desktop-shell migration.
+- Phases touched: Windows Phases 1-5.
+- Validation performed: User confirmed `herdr`, `y` (Yazi), and `nvim` all work from a newly opened MSYS2 UCRT64 WezTerm pane, following successful UCRT64 shell and WezTerm doctor validation.
+- Known gaps: This validation is Windows-only. The existing macOS and Ubuntu validation status is unchanged. Tailscale/off-LAN Mosh reachability remains Phase 5.6 work.
+- Next actions: Configure Tailscale, then test ShadowTerm Mosh through the tailnet from outside the home LAN.
+
+### 2026-08-16
+
+- Summary of changes: Reconciled the active roadmap with the completed Windows MSYS2/UCRT64, Yazi, and ShadowTerm/Mosh work. Added Phase 5.7 for safe macOS bootstrap and agent-led validation, and Phase 5.8 for the optional `just` command runner, pending user-supplied workflow examples. Updated the implementation-plan narrative and current next actions.
+- Phases touched: Plan maintenance; Phase 5.7 macOS bootstrap and agent validation; Phase 5.8 `just`; future Phase 6 Windows shell wording.
+- Validation performed: Planning/documentation change only; no macOS behavior or `just` recipes were implemented or validated.
+- Known gaps: macOS and Ubuntu remain untested. Windows focused-monitor Quake behavior and WezTerm Yazi key chords still need explicit manual validation. Tailscale remains planned rather than selected as the immediate next implementation task.
+- Next actions: Review and commit the current validated Windows changes; then prepare the Phase 5.7 macOS runbook before agent-led testing on the MacBook Pro.

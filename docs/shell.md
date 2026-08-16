@@ -4,7 +4,7 @@ Phase 1 creates a Bash-first workflow across Windows, macOS, and Ubuntu.
 
 ## Windows
 
-Use Git for Windows Bash. Do not use WSL for this repository.
+Use the MSYS2 **UCRT64** Bash environment. Do not use WSL. Git for Windows may remain installed only to clone the repository.
 
 Windows-native tools may still require Windows paths. Use:
 
@@ -14,6 +14,8 @@ unixpath 'C:\work\cross-platform-workstation'
 ```
 
 Both helpers preserve spaces by accepting one path argument and quoting it internally.
+
+Install the shared CLI tools inside MSYS2 with `pacman`: `git`, `jq`, `unzip`, `mingw-w64-ucrt-x86_64-ripgrep`, `mingw-w64-ucrt-x86_64-fd`, and `mingw-w64-ucrt-x86_64-fzf`. The Windows setup path verifies these packages rather than relying on the old Git Bash PATH.
 
 ## macOS
 
@@ -53,11 +55,13 @@ Implemented:
 - `nv`
 - `nvc`
 - `edit`
+- `y`
+
+`y` opens Yazi as the terminal file manager and changes the shell directory on exit when Yazi writes a valid selected directory through `--cwd-file`.
 
 Stubbed for future phases:
 
 - `project`
-- `y`
 - `rider`
 - `wt-create`
 - `wt-list`
