@@ -103,3 +103,7 @@ Expected behavior:
 - run `doctor --phase wezterm`
 
 On macOS and Ubuntu, setup currently verifies that WezTerm is installed; automatic package installation is deferred until platform validation.
+
+## Phase 6 macOS readiness
+
+Use [the macOS agent validation runbook](macos-agent-validation.md) when preparing the MacBook Pro. It defines the required preflight, user-approved Homebrew packages, safe setup sequence, and manual GUI validation boundary. It deliberately does not install Homebrew or use curl-to-shell.

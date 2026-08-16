@@ -1092,9 +1092,9 @@ Deliverables:
 
 Tasks:
 
-* [ ] Audit the existing macOS branches in setup, doctor, shell, and WezTerm configuration against current official documentation.
-* [ ] Define macOS prerequisites and package ownership without automatic Homebrew installation.
-* [ ] Add the agent-run bootstrap and validation runbook.
+* [x] Audit the existing macOS branches in setup, doctor, shell, and WezTerm configuration against current official documentation. Status: Windows-side audit completed on 2026-08-16; no macOS behavior has been tested.
+* [x] Define macOS prerequisites and package ownership without automatic Homebrew installation. Status: documented on 2026-08-16; user approval remains required before package installation.
+* [x] Add the agent-run bootstrap and validation runbook. Status: `docs/macos-agent-validation.md` added on 2026-08-16.
 * [ ] Test the dry-run and non-destructive validation sequence on the MacBook Pro.
 * [ ] Apply managed configuration on the MacBook Pro only after dry-run review.
 * [ ] Record automated and manual validation results separately in this plan.
@@ -2444,3 +2444,11 @@ Format:
 - Phases touched: Plan numbering and implementation-plan narrative only.
 - Validation performed: Planning/documentation change only; no platform behavior changed or was retested.
 - Next actions: Start Phase 6 macOS bootstrap and agent-validation preparation when ready.
+
+### 2026-08-16
+
+- Summary of changes: Completed the Windows-side Phase 6 preparation. Added the macOS agent-validation runbook, documented safe Homebrew/Xcode stop conditions and user-approved package ownership, and added static coverage for the runbook.
+- Phases touched: Phase 6 macOS bootstrap and agent validation; installation, provisioning, README, and test documentation.
+- Validation performed: Windows-side source audit and official-documentation review completed. The runbook is covered by repository static tests. No commands were run on a MacBook Pro, so macOS remains unvalidated.
+- Known gaps: MacBook Pro preflight, package installation, setup/apply, doctor/test execution, and GUI validation remain outstanding. The macOS Quake adapter is still out of scope.
+- Next actions: Run the Phase 6 runbook on the MacBook Pro in a separate agent session, beginning with the read-only preflight.

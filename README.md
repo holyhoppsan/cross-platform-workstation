@@ -36,6 +36,7 @@ Useful docs:
 - [WezTerm](docs/wezterm.md)
 - [Neovim](docs/neovim.md)
 - [Yazi](docs/yazi.md)
+- [macOS agent validation](docs/macos-agent-validation.md)
 
 ## Phase 0 and Phase 1 Setup
 
