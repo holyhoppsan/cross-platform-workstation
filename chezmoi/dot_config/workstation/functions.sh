@@ -21,7 +21,7 @@ winpath() {
   elif command -v cygpath >/dev/null 2>&1; then
     cygpath -aw -- "$1"
   else
-    printf 'winpath: cygpath is required in Git Bash\n' >&2
+    printf 'winpath: cygpath is required in the Windows Bash environment\n' >&2
     return 1
   fi
 }
@@ -33,7 +33,7 @@ unixpath() {
   elif command -v cygpath >/dev/null 2>&1; then
     cygpath -au -- "$1"
   else
-    printf 'unixpath: cygpath is required in Git Bash\n' >&2
+    printf 'unixpath: cygpath is required in the Windows Bash environment\n' >&2
     return 1
   fi
 }
@@ -44,10 +44,11 @@ platform-info() {
   printf 'machine=%s\n' "$(uname -m 2>/dev/null || printf unknown)"
   printf 'shell=%s\n' "${SHELL:-${COMSPEC:-unknown}}"
   if [ "${WORKSTATION_OS:-}" = windows ]; then
-    if workstation_git_bash_path >/dev/null 2>&1; then
-      printf 'git_bash=%s\n' "$(workstation_git_bash_path)"
+    printf 'msystem=%s\n' "${MSYSTEM:-unknown}"
+    if workstation_windows_bash_path >/dev/null 2>&1; then
+      printf 'windows_bash=%s\n' "$(workstation_windows_bash_path)"
     else
-      printf 'git_bash=not-found\n'
+      printf 'windows_bash=not-found\n'
     fi
   fi
 }
@@ -82,7 +83,62 @@ doctor() {
 }
 
 project() { printf 'project: stubbed until Phase 7\n' >&2; return 64; }
-y() { printf 'y: Yazi helper is stubbed until Phase 5\n' >&2; return 64; }
+
+workstation_find_yazi() {
+  if command -v yazi >/dev/null 2>&1; then
+    command -v yazi
+    return 0
+  fi
+  if command -v yazi.exe >/dev/null 2>&1; then
+    command -v yazi.exe
+    return 0
+  fi
+
+  if [ "${WORKSTATION_OS:-}" = windows ]; then
+    local candidate package_root found
+    for candidate in \
+      '/c/Program Files/Yazi/yazi.exe' \
+      "$HOME/AppData/Local/Microsoft/WinGet/Links/yazi.exe" \
+      "$HOME/AppData/Local/Programs/Yazi/yazi.exe"; do
+      if [ -x "$candidate" ] || [ -r "$candidate" ]; then
+        printf '%s\n' "$candidate"
+        return 0
+      fi
+    done
+
+    package_root="$HOME/AppData/Local/Microsoft/WinGet/Packages"
+    if [ -d "$package_root" ]; then
+      found=$(find "$package_root" -path '*/sxyazi.yazi_*/*/yazi.exe' -type f 2>/dev/null | head -n 1)
+      if [ -n "$found" ]; then
+        printf '%s\n' "$found"
+        return 0
+      fi
+    fi
+  fi
+
+  return 1
+}
+
+y() {
+  local yazi_cmd
+  yazi_cmd=$(workstation_find_yazi) || {
+    printf 'y: yazi is not installed or not on PATH\n' >&2
+    return 127
+  }
+
+  local tmp cwd
+  tmp=$(mktemp "${TMPDIR:-/tmp}/workstation-yazi-cwd.XXXXXX") || return 1
+  "$yazi_cmd" "$@" --cwd-file="$tmp"
+  local status=$?
+  if [ -r "$tmp" ]; then
+    cwd=$(cat -- "$tmp")
+    if [ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && [ -d "$cwd" ]; then
+      cd -- "$cwd" || status=$?
+    fi
+  fi
+  rm -f -- "$tmp"
+  return "$status"
+}
 
 nv() {
   if ! has nvim; then

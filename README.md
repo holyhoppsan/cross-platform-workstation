@@ -2,24 +2,25 @@
 
 Phased workstation setup for Windows 11, macOS, and Ubuntu GNOME.
 
-The current deliverable implements Phases 0 through 2, the Windows slice of Phase 3, and Phase 4:
+The current deliverable implements Phases 0 through 2, the Windows slice of Phase 3, Phase 4, and Phase 5:
 
 - repository foundation
 - persistent implementation tracker
 - setup entrypoints
 - shared Bash configuration
 - platform detection
-- Git Bash detection on Windows
+- MSYS2 UCRT64 detection on Windows
 - Unix-style command availability checks
 - phase-aware doctor command
 - WezTerm baseline with tmux-style bindings
 - Windows Quake-mode adapter using AutoHotkey v2
 - Neovim baseline
+- Yazi baseline terminal file manager
 - initial portable tests
 
-Later phases for macOS/Ubuntu Quake mode, Yazi, Rider, worktrees, agents, model tooling, and hardening are documented in [PLAN.md](PLAN.md), but they are not implemented yet except as placeholders.
+Later phases for macOS/Ubuntu Quake mode, Rider, worktrees, agents, model tooling, and hardening are documented in [PLAN.md](PLAN.md), but they are not implemented yet except as placeholders. Yazi is implemented only as a terminal file manager, not as an AI agent.
 
-Windows remains native. Git for Windows Bash is the shell target. WSL is not installed or required. Git for Windows is a prerequisite for cloning and running this repository; setup verifies it but does not install it.
+Windows remains native. MSYS2 UCRT64 Bash is the shell target. WSL is not installed or required. Git for Windows may be used to clone the repository, but it is not the configured interactive shell.
 
 ## Start Here
 
@@ -34,6 +35,7 @@ Useful docs:
 - [shell workflow](docs/shell.md)
 - [WezTerm](docs/wezterm.md)
 - [Neovim](docs/neovim.md)
+- [Yazi](docs/yazi.md)
 
 ## Phase 0 and Phase 1 Setup
 
@@ -46,11 +48,12 @@ Windows, from PowerShell:
 ./setup.ps1 -Phase wezterm
 ./setup.ps1 -Phase quake
 ./setup.ps1 -Phase neovim
+./setup.ps1 -Phase yazi
 ```
 
-On Windows, install Git for Windows first, clone this repository, then run `setup.ps1 -Phase shell`. Setup verifies Git and Git Bash, installs or verifies chezmoi and Phase 1 CLI tools with `winget`, backs up known Phase 1 shell targets, applies chezmoi, then validates the configured Git Bash shell automatically. It never installs WSL or Git.
+On Windows, install MSYS2 at `C:\msys64`, open the UCRT64 environment, and install its `git`, `jq`, `mingw-w64-ucrt-x86_64-ripgrep`, `mingw-w64-ucrt-x86_64-fd`, and `mingw-w64-ucrt-x86_64-fzf` packages. Git for Windows may be used to clone this repository. `setup.ps1 -Phase shell` verifies MSYS2 UCRT64, installs or verifies chezmoi, backs up known Phase 1 shell targets, applies chezmoi, then validates the configured UCRT64 shell automatically. It never installs WSL or Git for Windows.
 
-Windows, from Git Bash:
+Windows, from MSYS2 UCRT64 Bash:
 
 ```bash
 ./setup --phase foundation --dry-run
@@ -59,6 +62,7 @@ Windows, from Git Bash:
 ./setup --phase wezterm --install-missing
 ./setup.sh --phase quake --dry-run
 ./setup.sh --phase neovim --install-missing
+./setup.sh --phase yazi --install-missing
 ```
 
 macOS / Ubuntu:
@@ -68,13 +72,14 @@ macOS / Ubuntu:
 ./setup.sh --phase shell --dry-run
 ./setup.sh --phase wezterm --dry-run
 ./setup.sh --phase neovim --dry-run
+./setup.sh --phase yazi --dry-run
 ```
 
 Dry-run mode reports what would happen. Non-dry-run mode verifies prerequisites and prints the next manual steps; it does not install package managers, does not install WSL, and does not overwrite user configuration.
 
 ## Validate
 
-Run portable tests from Git Bash, macOS Bash, or Ubuntu Bash:
+Run portable tests from MSYS2 UCRT64 Bash, macOS Bash, or Ubuntu Bash:
 
 ```bash
 ./tests/run.bash
@@ -88,16 +93,17 @@ Run the phase-aware doctor:
 ./scripts/doctor --phase wezterm
 ./scripts/doctor --phase quake
 ./scripts/doctor --phase neovim
+./scripts/doctor --phase yazi
 ```
 
-After setup completes, these helpers should be available in a fresh Git Bash session:
+After setup completes, these helpers should be available in a fresh MSYS2 UCRT64 session:
 
 ```bash
 platform-info
 workstation-root
 doctor --phase shell
-winpath "$PWD"      # Windows Git Bash only; passthrough elsewhere
-unixpath 'C:\work'  # Windows Git Bash only; passthrough elsewhere
+winpath "$PWD"      # Windows MSYS2 only; passthrough elsewhere
+unixpath 'C:\work'  # Windows MSYS2 only; passthrough elsewhere
 ```
 
 Automated post-setup validation:

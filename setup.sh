@@ -39,7 +39,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$phase" in
-  foundation|shell|wezterm|quake|neovim|all) ;;
+  foundation|shell|wezterm|quake|neovim|yazi|all) ;;
   *) die "phase is not implemented in this deliverable: $phase" ;;
 esac
 
@@ -94,20 +94,31 @@ case "$phase" in
     "$repo_root/scripts/doctor" --phase neovim
     setup_validate_interactive_shell "$repo_root"
     ;;
+  yazi)
+    "$repo_root/scripts/setup/phases/foundation.sh" "$repo_root"
+    "$repo_root/scripts/setup/phases/shell.sh" "$repo_root" "$install_missing"
+    "$repo_root/scripts/setup/phases/wezterm.sh" "$repo_root" "$install_missing"
+    "$repo_root/scripts/setup/phases/yazi.sh" "$repo_root" "$install_missing"
+    setup_apply_chezmoi "$repo_root"
+    "$repo_root/scripts/doctor" --phase yazi
+    setup_validate_interactive_shell "$repo_root"
+    ;;
   all)
     "$repo_root/scripts/setup/phases/foundation.sh" "$repo_root"
     "$repo_root/scripts/setup/phases/shell.sh" "$repo_root" "$install_missing"
     "$repo_root/scripts/setup/phases/wezterm.sh" "$repo_root" "$install_missing"
     "$repo_root/scripts/setup/phases/neovim.sh" "$repo_root" "$install_missing"
+    "$repo_root/scripts/setup/phases/yazi.sh" "$repo_root" "$install_missing"
     setup_apply_chezmoi "$repo_root"
-    "$repo_root/scripts/doctor" --phase neovim
+    "$repo_root/scripts/doctor" --phase yazi
     setup_validate_interactive_shell "$repo_root"
     ;;
 esac
 
 cat <<'EOF'
 
-Setup completed. Open a fresh Git Bash session and run:
+Setup completed. On Windows, open a fresh MSYS2 UCRT64 Bash session and run:
   doctor --phase wezterm
   doctor --phase neovim
+  doctor --phase yazi
 EOF

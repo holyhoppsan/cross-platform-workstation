@@ -11,8 +11,8 @@ require_command bash
 require_command git
 
 if [ "$WORKSTATION_OS" = windows ]; then
-  workstation_is_git_bash || die 'Phase 1 shell setup must be run from Git for Windows Bash on Windows'
-  workstation_git_bash_path >/dev/null 2>&1 || die 'Git Bash path could not be detected'
+  workstation_is_msys2_ucrt64 || die 'Phase 1 shell setup must be run from MSYS2 UCRT64 Bash on Windows'
+  workstation_windows_bash_path >/dev/null 2>&1 || die 'MSYS2 Bash path could not be detected'
 fi
 
 if ! has_command chezmoi; then

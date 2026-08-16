@@ -3,7 +3,7 @@ set -u
 
 usage() {
   cat <<'EOF'
-usage: doctor [--phase foundation|shell|wezterm|quake|neovim|all] [--help]
+usage: doctor [--phase foundation|shell|wezterm|quake|neovim|yazi|all] [--help]
 
 Later phases are documented in PLAN.md but are not implemented yet.
 EOF
@@ -34,8 +34,8 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$phase" in
-  foundation|shell|wezterm|quake|neovim|all) ;;
-  yazi|rider|project|agents|models)
+  foundation|shell|wezterm|quake|neovim|yazi|all) ;;
+  rider|project|agents|models)
     printf '[fail] %-24s %s\n' "phase $phase" 'not implemented yet'
     exit 2
     ;;
@@ -169,10 +169,10 @@ check_shell() {
   check_foundation
 
   if [ "$WORKSTATION_OS" = windows ]; then
-    if workstation_is_git_bash; then ok 'Git Bash session' 'detected'; else fail 'Git Bash session' 'not detected; run from Git for Windows Bash'; fi
-    local git_bash
-    git_bash=$(workstation_git_bash_path 2>/dev/null || true)
-    [ -n "$git_bash" ] && ok 'Git Bash path' "$git_bash" || fail 'Git Bash path' 'not detected'
+    if workstation_is_msys2_ucrt64; then ok 'MSYS2 UCRT64 session' 'detected'; else fail 'MSYS2 UCRT64 session' 'not detected; launch the UCRT64 environment'; fi
+    local windows_bash
+    windows_bash=$(workstation_windows_bash_path 2>/dev/null || true)
+    [ -n "$windows_bash" ] && ok 'MSYS2 Bash path' "$windows_bash" || fail 'MSYS2 Bash path' 'not detected'
   elif [ "$WORKSTATION_OS" = ubuntu ]; then
     ok 'session type' "$(workstation_session_type)"
     if command -v gnome-shell >/dev/null 2>&1; then ok 'GNOME Shell' "$(gnome-shell --version 2>/dev/null)"; else warn 'GNOME Shell' 'not detected'; fi
@@ -200,7 +200,7 @@ check_shell() {
     warn 'managed shell config' 'not applied with chezmoi yet'
   fi
 
-  warn 'future helpers' 'project, y, rider, wt-*, agent, and agent-notify are stubs'
+  warn 'future helpers' 'project, rider, wt-*, agent, and agent-notify are stubs'
 }
 
 check_wezterm() {
@@ -245,7 +245,6 @@ check_wezterm() {
   if [ "$phase" = wezterm ]; then
     warn 'Quake mode' 'deferred to Phase 3'
   fi
-  warn 'Yazi binding' 'Yazi bindings call helper stubs until Phase 5'
 }
 
 check_quake() {
@@ -389,15 +388,65 @@ check_neovim() {
   fi
 }
 
+check_yazi() {
+  check_wezterm
+
+  local root yazi_cmd config_dir
+  root=$(repo_root)
+  config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/yazi"
+  if [ ! -r "$config_dir/yazi.toml" ] && [ -r "$root/chezmoi/dot_config/yazi/yazi.toml" ]; then
+    config_dir="$root/chezmoi/dot_config/yazi"
+  fi
+
+  yazi_cmd=$(workstation_find_yazi || true)
+  if [ -n "$yazi_cmd" ]; then
+    ok 'yazi' "$("$yazi_cmd" --version 2>/dev/null | head -n 1)"
+  else
+    fail 'yazi' 'not found'
+  fi
+
+  [ -r "$config_dir/yazi.toml" ] && ok 'Yazi config' "$config_dir/yazi.toml" || fail 'Yazi config' 'yazi.toml missing'
+  [ -r "$config_dir/keymap.toml" ] && ok 'Yazi keymap' "$config_dir/keymap.toml" || fail 'Yazi keymap' 'keymap.toml missing'
+  [ -r "$config_dir/theme.toml" ] && ok 'Yazi theme' "$config_dir/theme.toml" || fail 'Yazi theme' 'theme.toml missing'
+
+  if command -v y >/dev/null 2>&1; then
+    ok 'y helper' 'available'
+  else
+    fail 'y helper' 'not loaded'
+  fi
+
+  optional_command ffmpeg
+  if find_command 7z 7zz >/dev/null 2>&1; then
+    ok 'archive preview' '7z/7zz available'
+  else
+    warn 'archive preview' 'optional; 7z/7zz not found'
+  fi
+  optional_command magick
+
+  local wezterm_config="${XDG_CONFIG_HOME:-$HOME/.config}/wezterm/wezterm.lua"
+  if [ ! -r "$wezterm_config" ] && [ -r "$root/chezmoi/dot_config/wezterm/wezterm.lua" ]; then
+    wezterm_config="$root/chezmoi/dot_config/wezterm/wezterm.lua"
+  fi
+  if [ -r "$wezterm_config" ] && grep -q "spawn_interactive_bash_command('y')" "$wezterm_config" && grep -q "SendString 'y" "$wezterm_config"; then
+    ok 'WezTerm Yazi keys' 'configured'
+  else
+    fail 'WezTerm Yazi keys' 'missing'
+  fi
+
+  ok 'Yazi agent status' 'not an AI agent'
+}
+
 case "$phase" in
   foundation) check_foundation ;;
   shell) check_shell ;;
   wezterm) check_wezterm ;;
   quake) check_quake ;;
   neovim) check_neovim ;;
+  yazi) check_yazi ;;
   all)
     check_quake
     check_neovim
+    check_yazi
     ;;
 esac
 

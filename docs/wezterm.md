@@ -7,7 +7,7 @@ Phase 2 configures WezTerm as the terminal, pane, tab, and workspace layer.
 Implemented in Phase 2:
 
 - platform-aware Bash startup
-- Git Bash startup on Windows
+- MSYS2 UCRT64 Bash startup on Windows
 - Bash startup on macOS and Ubuntu
 - `Ctrl+A` terminal leader
 - tmux-style pane, tab, copy-mode, and workspace bindings
@@ -16,19 +16,12 @@ Implemented in Phase 2:
 
 Deferred:
 
-- real Yazi setup
 - rich agent status integration
 - tmux integration
 
 ## Shell Startup
 
-Windows uses Git for Windows Bash. Setup does not install Git.
-
-WezTerm checks these Windows shell paths in order:
-
-- `%ProgramFiles%/Git/bin/bash.exe`
-- `%ProgramFiles%/Git/usr/bin/bash.exe`
-- `%LOCALAPPDATA%/Programs/Git/bin/bash.exe`
+Windows uses MSYS2 UCRT64 Bash at `C:/msys64/usr/bin/bash.exe`. WezTerm sets `MSYSTEM=UCRT64` for Windows panes. Git for Windows may remain installed for cloning, but is not used for WezTerm startup.
 
 macOS prefers Homebrew Bash when present:
 
@@ -71,25 +64,29 @@ WezTerm uses an explicit palette matching the default Windows Terminal scheme in
 | `Ctrl+A`, `[` | Copy mode |
 | `Ctrl+A`, `a` | Send literal `Ctrl+A` |
 | `Ctrl+A`, `q` | Switch to `quake` workspace |
-| `Ctrl+A`, `e/E` | Call the Yazi helper stub |
+| `Ctrl+A`, `e` | Open Yazi in a new pane through the `y` helper |
+| `Ctrl+A`, `E` | Open Yazi in the current pane through the `y` helper |
 | `Ctrl+A`, `v/V` | Open Neovim through the `nv` helper |
 | `Ctrl+A`, `u` | Move to agent pane needing attention, if title metadata is present |
 
-The Yazi helper remains intentionally stubbed until Phase 5.
+Yazi is a terminal file manager only. It is not part of the AI agent launcher.
 
 ## Clipboard
 
-Explicit clipboard bindings are configured because Windows users expect predictable copy/paste behavior:
+Explicit clipboard bindings are configured for predictable copy/paste behavior. In particular, `Ctrl+V` is terminal-handled so text-paste tools such as dictation applications work in terminal TUIs that otherwise interpret a raw `Ctrl+V` as a special command.
 
 | Binding | Action |
 | --- | --- |
 | `Ctrl+Shift+C` | Copy selection to clipboard |
+| `Ctrl+V` | Paste text from the system clipboard |
 | `Ctrl+Shift+V` | Paste from clipboard |
 | `Ctrl+Insert` | Copy selection to clipboard |
 | `Shift+Insert` | Paste from clipboard |
 | Right click | Paste from clipboard |
 
 WezTerm does not provide a Windows-style context menu in this baseline. Right click is intentionally assigned to paste.
+
+This is configured on Windows, macOS, and Ubuntu. It solves a Codex CLI input-path issue rather than a Git Bash issue; native platform behavior still needs manual validation on macOS and Ubuntu.
 
 ## Validation
 
@@ -100,7 +97,7 @@ PowerShell:
 ./setup.ps1 -Phase wezterm
 ```
 
-Git Bash:
+MSYS2 UCRT64 Bash:
 
 ```bash
 doctor --phase wezterm
@@ -109,7 +106,7 @@ doctor --phase wezterm
 Manual Windows checks:
 
 1. Open WezTerm.
-2. Confirm it starts Git Bash.
+2. Confirm it starts MSYS2 UCRT64 Bash (`echo "$MSYSTEM"` prints `UCRT64`).
 3. Press `Ctrl+|` to split horizontally. On a US Windows keyboard this usually means holding `Ctrl+Shift+\`.
 4. Press `Ctrl+-` to split vertically. `Ctrl+_` is also bound as a fallback if Shift is held.
 5. Press `Ctrl+A`, then `h/j/k/l` to move between panes.

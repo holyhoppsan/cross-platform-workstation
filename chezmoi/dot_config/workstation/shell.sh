@@ -37,6 +37,7 @@ fi
 if [ "${WORKSTATION_OS:-}" = windows ]; then
   path_prepend '/c/Program Files/WezTerm'
   path_prepend '/c/Program Files/Neovim/bin'
+  path_prepend "$HOME/AppData/Local/Programs/Herdr/bin"
 fi
 
 alias ll='ls -alF'

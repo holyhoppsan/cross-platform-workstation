@@ -8,7 +8,7 @@
 - Never mark platform-specific behavior as validated unless it was actually tested on that platform.
 - If requirements change, update `PLAN.md` first or in the same change.
 - Do not rely on chat context alone; `PLAN.md` is the persistent source of truth.
-- Windows uses native Git for Windows Bash and native Windows paths. Never add WSL dependencies or paths.
+- Windows uses MSYS2 UCRT64 Bash with native Windows paths. Git for Windows may remain only for cloning/bootstrap compatibility. Never add WSL dependencies or paths.
 - Keep shared behavior in `chezmoi/`; isolate operating-system automation in `platform/`.
 - Quote shell variables, support spaces in paths, and avoid aliases that alter destructive commands.
 - Never commit credentials. Checked-in configuration must use placeholders and `.example` names.

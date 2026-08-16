@@ -52,19 +52,13 @@ end
 
 config.default_prog = nil
 if wezterm.target_triple:find('windows') then
-  local program_files = os.getenv('ProgramFiles') or 'C:/Program Files'
-  local local_app_data = os.getenv('LOCALAPPDATA') or ''
-  local candidates = {
-    program_files .. '/Git/bin/bash.exe',
-    program_files .. '/Git/usr/bin/bash.exe',
-    local_app_data .. '/Programs/Git/bin/bash.exe',
-  }
-  for _, candidate in ipairs(candidates) do
-    if file_exists(candidate) then
-      default_shell = candidate
-      config.default_prog = { candidate, '--login', '-i' }
-      break
-    end
+  local msys2_bash = 'C:/msys64/usr/bin/bash.exe'
+  if file_exists(msys2_bash) then
+    default_shell = msys2_bash
+    config.default_prog = { msys2_bash, '--login', '-i' }
+    config.set_environment_variables = { MSYSTEM = 'UCRT64' }
+  else
+    wezterm.log_error('MSYS2 UCRT64 Bash was not found at ' .. msys2_bash)
   end
 elseif wezterm.target_triple:find('apple') then
   for _, candidate in ipairs({ '/opt/homebrew/bin/bash', '/usr/local/bin/bash', '/bin/bash' }) do
@@ -149,10 +143,14 @@ config.keys = {
   { key = '[', mods = 'LEADER', action = act.ActivateCopyMode },
   { key = 'a', mods = 'LEADER', action = act.SendKey { key = 'a', mods = 'CTRL' } },
   { key = 'C', mods = 'CTRL|SHIFT', action = act.CopyTo 'Clipboard' },
+  -- Keep Ctrl+V as a terminal paste so applications receive pasted text rather
+  -- than a raw Ctrl+V key event (which Codex interprets as image paste).
+  { key = 'v', mods = 'CTRL', action = act.PasteFrom 'Clipboard' },
   { key = 'V', mods = 'CTRL|SHIFT', action = act.PasteFrom 'Clipboard' },
   { key = 'Insert', mods = 'CTRL', action = act.CopyTo 'Clipboard' },
   { key = 'Insert', mods = 'SHIFT', action = act.PasteFrom 'Clipboard' },
-  { key = 'e', mods = 'LEADER', action = spawn_bash_command('y') },
+  { key = 'e', mods = 'LEADER', action = spawn_interactive_bash_command('y') },
+  { key = 'e', mods = 'LEADER|SHIFT', action = act.SendString 'y\n' },
   { key = 'E', mods = 'LEADER|SHIFT', action = act.SendString 'y\n' },
   { key = 'v', mods = 'LEADER', action = act.SendString 'nv\n' },
   { key = 'v', mods = 'LEADER|SHIFT', action = spawn_interactive_bash_command('nv') },

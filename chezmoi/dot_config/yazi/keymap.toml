@@ -1,0 +1,5 @@
+[manager]
+prepend_keymap = [
+  { on = [ "g", "r" ], run = "cd $WORKSTATION_REPO_ROOT", desc = "Go to workstation repository" },
+  { on = [ "g", "w" ], run = "cd ~/work", desc = "Go to work directory" },
+]
