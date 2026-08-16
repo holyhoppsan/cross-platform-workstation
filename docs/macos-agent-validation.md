@@ -29,25 +29,7 @@ Stop and report instead of continuing if either condition applies:
 
 Homebrew documents its supported prefix as `/opt/homebrew` on Apple Silicon and `/usr/local` on Intel Macs; use `brew --prefix` rather than assuming either path.
 
-## 2. User-approved prerequisites
-
-After Homebrew is available and the user explicitly approves package installation, the agent may run:
-
-```bash
-brew install bash chezmoi neovim yazi ripgrep fd jq fzf
-brew install --cask wezterm
-```
-
-`git` is normally supplied by the Xcode Command Line Tools. `unzip` is supplied by macOS. Optional Yazi preview dependencies are out of scope for the initial validation.
-
-Verify the result before touching dotfiles:
-
-```bash
-command -v git bash chezmoi wezterm nvim yazi ya rg fd jq fzf unzip
-brew --prefix bash
-```
-
-## 3. Clone and non-destructive repository checks
+## 2. Clone and non-destructive repository checks
 
 Clone the repository into a normal user-writable directory, then run:
 
@@ -61,12 +43,12 @@ cd ~/src/cross-platform-workstation
 
 The dry run only reports intent. The test suite and doctor may report missing managed configuration before it is applied; record that result rather than treating it as a platform failure.
 
-## 4. Apply managed configuration
+## 3. User-approved setup, dependency installation, and managed configuration
 
-Ask the user for explicit approval before this step. `setup.sh` backs up the managed targets under `~/.workstation-setup-backup/<timestamp>` before applying this repository's chezmoi source.
+Ask the user for explicit approval before this step. When Homebrew is already available, this command installs or verifies the missing macOS dependencies through Homebrew: `git`, Bash, chezmoi, ripgrep, fd, jq, fzf, WezTerm, Neovim, and Yazi. It never installs Homebrew. It then backs up the managed targets under `~/.workstation-setup-backup/<timestamp>` before applying this repository's chezmoi source.
 
 ```bash
-./setup.sh --phase yazi
+./setup.sh --phase yazi --install-missing
 ```
 
 Then start a fresh Bash session and collect this evidence:
@@ -80,7 +62,9 @@ doctor --phase yazi
 command -v y nvim yazi wezterm
 ```
 
-## 5. User-performed GUI validation
+`unzip` is supplied by macOS. Optional Yazi preview dependencies are out of scope for the initial validation.
+
+## 4. User-performed GUI validation
 
 The user, not the agent, confirms the following in a newly opened WezTerm window:
 
@@ -93,7 +77,7 @@ The user, not the agent, confirms the following in a newly opened WezTerm window
 
 Quake mode is not part of Phase 6 validation because the macOS adapter remains unimplemented.
 
-## 6. Report and stop conditions
+## 5. Report and stop conditions
 
 Record the macOS version, CPU architecture, Homebrew prefix, package versions, command/test/doctor output, and every manual result in `PLAN.md`.
 

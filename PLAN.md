@@ -1080,6 +1080,7 @@ Requirements:
 * Use native macOS; do not introduce Windows/MSYS2 paths or dependencies.
 * The bootstrap instructions must use official, version-specific documentation where package or operating-system behavior is relevant.
 * Do not silently install Homebrew. If Homebrew is absent, the plan must stop with explicit user instructions and resume only after the user installs or approves it.
+* When Homebrew already exists, `./setup.sh --phase <phase> --install-missing` must install or verify that phase's missing macOS dependencies through Homebrew without installing Homebrew itself.
 * Define one safe agent-run command sequence for clone/bootstrap, setup dry-run, setup/apply, doctor, and repository tests.
 * Separate automated checks from user-performed GUI checks: WezTerm launch and shell, clipboard behavior, pane bindings, Neovim interaction, Yazi interaction, and any future Quake adapter.
 * Preserve user configuration through the existing backup/forced-chezmoi contract and do not require SSH, Mosh, ShadowTerm, or Tailscale for the initial macOS validation.
@@ -1094,6 +1095,7 @@ Tasks:
 
 * [x] Audit the existing macOS branches in setup, doctor, shell, and WezTerm configuration against current official documentation. Status: Windows-side audit completed on 2026-08-16; no macOS behavior has been tested.
 * [x] Define macOS prerequisites and package ownership without automatic Homebrew installation. Status: documented on 2026-08-16; user approval remains required before package installation.
+* [x] Implement Homebrew-backed macOS `--install-missing` support for the existing shell, WezTerm, Neovim, and Yazi phases; stop clearly when Homebrew is absent. Status: implementation and Windows-side syntax/test validation completed on 2026-08-16; macOS validation remains pending.
 * [x] Add the agent-run bootstrap and validation runbook. Status: `docs/macos-agent-validation.md` added on 2026-08-16.
 * [ ] Test the dry-run and non-destructive validation sequence on the MacBook Pro.
 * [ ] Apply managed configuration on the MacBook Pro only after dry-run review.
@@ -2452,3 +2454,11 @@ Format:
 - Validation performed: Windows-side source audit and official-documentation review completed. The runbook is covered by repository static tests. No commands were run on a MacBook Pro, so macOS remains unvalidated.
 - Known gaps: MacBook Pro preflight, package installation, setup/apply, doctor/test execution, and GUI validation remain outstanding. The macOS Quake adapter is still out of scope.
 - Next actions: Run the Phase 6 runbook on the MacBook Pro in a separate agent session, beginning with the read-only preflight.
+
+### 2026-08-16
+
+- Summary of changes: Implemented macOS Homebrew-backed `--install-missing` support for the shell, WezTerm, Neovim, and Yazi setup phases. Existing Homebrew is required; setup does not install Homebrew and produces a clear stop message when it is unavailable.
+- Phases touched: Phase 6 macOS bootstrap; shared setup helpers; shell, WezTerm, Neovim, and Yazi phase installers; runbook and tests.
+- Validation performed: Bash syntax checks and the full repository test suite passed under Windows MSYS2 UCRT64. Static tests cover the Homebrew formula/cask helpers and macOS runbook. ShellCheck was unavailable and therefore skipped.
+- Known gaps: No commands have been run on macOS. The MacBook Pro remains the required validation environment for Homebrew behavior, package installation, chezmoi application, doctor/test execution, and GUI checks.
+- Next actions: Push this commit, then use `./setup.sh --phase yazi --install-missing` on the MacBook Pro only after the Phase 6 preflight and explicit approval.

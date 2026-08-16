@@ -15,6 +15,10 @@ if [ "$WORKSTATION_OS" = windows ]; then
   workstation_windows_bash_path >/dev/null 2>&1 || die 'MSYS2 Bash path could not be detected'
 fi
 
+if [ "$WORKSTATION_OS" = macos ] && [ "$install_missing" = true ]; then
+  macos_install_formulae git bash chezmoi ripgrep fd jq fzf
+fi
+
 if ! has_command chezmoi; then
   if [ "$WORKSTATION_OS" = windows ]; then
     if [ "$install_missing" = true ]; then
@@ -27,6 +31,8 @@ if ! has_command chezmoi; then
     else
       die 'chezmoi is missing. Rerun with ./setup.sh --phase shell --install-missing, or install with: winget install --id twpayne.chezmoi --exact'
     fi
+  elif [ "$WORKSTATION_OS" = macos ]; then
+    die 'chezmoi is missing. Rerun with ./setup.sh --phase shell --install-missing after Homebrew is available.'
   else
     die 'chezmoi is missing. Install it with your platform package manager, then rerun setup.'
   fi

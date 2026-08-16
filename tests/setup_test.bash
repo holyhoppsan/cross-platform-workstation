@@ -131,15 +131,21 @@ assert_contains "$common_sh" ".config/nvim" 'setup.sh backs up Neovim config bef
 assert_contains "$common_sh" ".config/yazi" 'setup.sh backs up Yazi config before chezmoi apply'
 assert_contains "$common_sh" 'WORKSTATION_REPO_ROOT' 'setup.sh writes machine-local repo root env'
 assert_contains "$common_sh" 'setup_validate_interactive_shell' 'setup.sh has interactive shell validation helper'
+assert_contains "$common_sh" 'macos_install_formulae' 'setup.sh has macOS Homebrew formula helper'
+assert_contains "$common_sh" 'macos_install_cask' 'setup.sh has macOS Homebrew cask helper'
+assert_contains "$common_sh" 'Install or approve Homebrew yourself' 'macOS setup never installs Homebrew automatically'
 
 wezterm_phase=$(cat "$repo_root/scripts/setup/phases/wezterm.sh")
 assert_contains "$wezterm_phase" 'wez.wezterm' 'setup.sh WezTerm phase knows Windows package'
+assert_contains "$wezterm_phase" 'macos_install_cask wezterm' 'setup.sh WezTerm phase can install macOS cask'
 
 neovim_phase=$(cat "$repo_root/scripts/setup/phases/neovim.sh")
 assert_contains "$neovim_phase" 'Neovim.Neovim' 'setup.sh Neovim phase knows Windows package'
+assert_contains "$neovim_phase" 'macos_install_formulae neovim' 'setup.sh Neovim phase can install macOS formula'
 
 yazi_phase=$(cat "$repo_root/scripts/setup/phases/yazi.sh")
 assert_contains "$yazi_phase" 'sxyazi.yazi' 'setup.sh Yazi phase knows Windows package'
+assert_contains "$yazi_phase" 'macos_install_formulae yazi' 'setup.sh Yazi phase can install macOS formula'
 
 detect_output=$("$repo_root/scripts/setup/detect-platform.sh")
 case "$detect_output" in

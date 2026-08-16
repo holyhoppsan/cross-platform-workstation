@@ -15,6 +15,10 @@ if ! has_command wezterm && ! has_command wezterm.exe; then
     else
       die 'WezTerm is missing and winget was not found. Install WezTerm manually, then rerun setup.'
     fi
+  elif [ "$WORKSTATION_OS" = macos ] && [ "$install_missing" = true ]; then
+    macos_install_cask wezterm
+  elif [ "$WORKSTATION_OS" = macos ]; then
+    die 'WezTerm is missing. Rerun with ./setup.sh --phase wezterm --install-missing after Homebrew is available.'
   else
     die 'WezTerm is missing. Install it with your platform package manager, then rerun setup.'
   fi

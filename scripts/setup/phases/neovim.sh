@@ -15,6 +15,10 @@ if ! has_command nvim && ! has_command nvim.exe; then
     else
       die 'Neovim is missing and winget was not found. Install Neovim manually, then rerun setup.'
     fi
+  elif [ "$WORKSTATION_OS" = macos ] && [ "$install_missing" = true ]; then
+    macos_install_formulae neovim
+  elif [ "$WORKSTATION_OS" = macos ]; then
+    die 'Neovim is missing. Rerun with ./setup.sh --phase neovim --install-missing after Homebrew is available.'
   else
     die 'Neovim is missing. Install it with your platform package manager, then rerun setup.'
   fi

@@ -44,6 +44,20 @@ has_command() {
   command -v "$1" >/dev/null 2>&1
 }
 
+macos_install_formulae() {
+  [ "$#" -gt 0 ] || return 0
+  has_command brew || die 'Homebrew is required to install missing macOS dependencies. Install or approve Homebrew yourself, then rerun setup.'
+  info "installing or verifying macOS Homebrew formulae: $*"
+  brew install "$@" || die "Homebrew failed while installing formulae: $*"
+}
+
+macos_install_cask() {
+  [ "$#" -eq 1 ] || { printf 'macos_install_cask requires one cask name\n' >&2; return 2; }
+  has_command brew || die 'Homebrew is required to install missing macOS dependencies. Install or approve Homebrew yourself, then rerun setup.'
+  info "installing or verifying macOS Homebrew cask: $1"
+  brew install --cask "$1" || die "Homebrew failed while installing cask: $1"
+}
+
 windows_command_exists() {
   if command -v "$1" >/dev/null 2>&1; then
     return 0
