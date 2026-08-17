@@ -9,8 +9,8 @@ plan=$(cat "$repo_root/PLAN.md")
 
 assert_contains "$runbook" 'Do not install Homebrew automatically' 'macOS runbook blocks automatic Homebrew installation'
 assert_contains "$runbook" 'xcode-select -p' 'macOS runbook checks Xcode Command Line Tools'
-assert_contains "$runbook" './setup.sh --phase yazi --dry-run' 'macOS runbook includes setup dry run'
-assert_contains "$runbook" './setup.sh --phase yazi --install-missing' 'macOS runbook uses setup for approved dependency installation'
+assert_contains "$runbook" './setup.sh --phase all --dry-run' 'macOS runbook includes setup dry run'
+assert_contains "$runbook" './setup.sh --phase all --install-missing' 'macOS runbook uses setup for approved dependency installation'
 assert_contains "$runbook" './tests/run.bash' 'macOS runbook includes repository tests'
 assert_contains "$runbook" 'User-performed GUI validation' 'macOS runbook keeps GUI validation manual'
 assert_contains "$runbook" 'Do not work around these conditions with an alternate package manager or a curl-to-shell installer' 'macOS runbook has explicit stop condition'

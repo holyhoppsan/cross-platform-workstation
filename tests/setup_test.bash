@@ -15,7 +15,9 @@ assert_contains "$shell_output" 'install_missing: false' 'setup.sh reports insta
 setup_sh=$(cat "$repo_root/setup.sh")
 assert_contains "$setup_sh" 'set -eu' 'setup.sh stops when a setup command fails'
 assert_contains "$setup_sh" 'macos)' 'setup.sh has macOS completion guidance'
-assert_contains "$setup_sh" 'Open a fresh WezTerm window' 'setup.sh gives macOS-specific completion guidance'
+assert_contains "$setup_sh" "session_label='a fresh WezTerm window'" 'setup.sh gives macOS-specific completion guidance'
+assert_contains "$setup_sh" 'doctor_phase=$phase' 'setup.sh tailors completion validation to the selected phase'
+assert_contains "$setup_sh" '[ "$doctor_phase" = all ] && doctor_phase=yazi' 'setup.sh maps all to its implemented doctor phase'
 
 wezterm_output=$("$repo_root/setup.sh" --phase wezterm --dry-run)
 assert_contains "$wezterm_output" 'phase: wezterm' 'setup.sh parses wezterm phase'

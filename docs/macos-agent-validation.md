@@ -36,7 +36,7 @@ Clone the repository into a normal user-writable directory, then run:
 ```bash
 git clone <repository-url> ~/src/cross-platform-workstation
 cd ~/src/cross-platform-workstation
-./setup.sh --phase yazi --dry-run
+./setup.sh --phase all --dry-run
 ./tests/run.bash
 ./scripts/doctor --phase yazi
 ```
@@ -48,7 +48,7 @@ The dry run only reports intent. The test suite and doctor may report missing ma
 Ask the user for explicit approval before this step. When Homebrew is already available, this command installs or verifies the missing macOS dependencies through Homebrew: `git`, Bash, chezmoi, ripgrep, fd, jq, fzf, WezTerm, Neovim, and Yazi. It never installs Homebrew. It then backs up the managed targets under `~/.workstation-setup-backup/<timestamp>` before applying this repository's chezmoi source.
 
 ```bash
-./setup.sh --phase yazi --install-missing
+./setup.sh --phase all --install-missing
 ```
 
 Then start a fresh Bash session and collect this evidence:

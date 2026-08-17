@@ -115,32 +115,13 @@ case "$phase" in
     ;;
 esac
 
+doctor_phase=$phase
+[ "$doctor_phase" = all ] && doctor_phase=yazi
+
 case "$platform" in
-  windows)
-    cat <<'EOF'
-
-Setup completed. Open a fresh MSYS2 UCRT64 Bash session and run:
-  doctor --phase wezterm
-  doctor --phase neovim
-  doctor --phase yazi
-EOF
-    ;;
-  macos)
-    cat <<'EOF'
-
-Setup completed. Open a fresh WezTerm window and run:
-  doctor --phase wezterm
-  doctor --phase neovim
-  doctor --phase yazi
-EOF
-    ;;
-  *)
-    cat <<'EOF'
-
-Setup completed. Open a fresh Bash session and run:
-  doctor --phase wezterm
-  doctor --phase neovim
-  doctor --phase yazi
-EOF
-    ;;
+  windows) session_label='a fresh MSYS2 UCRT64 Bash session' ;;
+  macos) session_label='a fresh WezTerm window' ;;
+  *) session_label='a fresh Bash session' ;;
 esac
+
+printf '\nSetup completed. Open %s and run:\n  doctor --phase %s\n' "$session_label" "$doctor_phase"
