@@ -10,7 +10,7 @@ nvim_keymaps=$(cat "$repo_root/chezmoi/dot_config/nvim/lua/workstation/keymaps.l
 nvim_filetypes=$(cat "$repo_root/chezmoi/dot_config/nvim/lua/workstation/filetypes.lua")
 nvim_lsp=$(cat "$repo_root/chezmoi/dot_config/nvim/lua/workstation/lsp.lua")
 nvim_doc=$(cat "$repo_root/docs/neovim.md")
-doctor=$(cat "$repo_root/chezmoi/dot_config/workstation/doctor")
+doctor=$(cat "$repo_root/chezmoi/dot_config/workstation/executable_doctor")
 
 assert_contains "$nvim_init" "vim.g.mapleader = ' '" 'Neovim uses Space leader'
 assert_contains "$nvim_init" "require('workstation.options')" 'Neovim loads options module'

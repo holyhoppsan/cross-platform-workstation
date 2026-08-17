@@ -2485,4 +2485,11 @@ Format:
 - Phases touched: Phase 6 macOS bootstrap user guidance.
 - Validation performed: Windows-side static test coverage added; macOS rerun pending.
 - Known gaps: The MacBook Pro must pull the correction and rerun setup before macOS completion guidance and doctor behavior are considered validated.
+
+### 2026-08-17
+
+- Summary of changes: Corrected the chezmoi source name for the managed `workstation/doctor` so chezmoi explicitly deploys it as executable on macOS and other Unix platforms. The prior Git executable-bit correction alone did not make the deployed target executable.
+- Phases touched: Phase 6 macOS bootstrap and validation; managed doctor deployment.
+- Validation performed: Root cause identified from the MacBook Pro setup log. Portable repository tests will verify the chezmoi executable attribute; macOS rerun remains required.
+- Known gaps: The MacBook Pro setup succeeds through repository doctor validation but its configured interactive shell still cannot execute the deployed doctor until this correction is pulled and applied.
 - Next actions: Pull the latest commit on the MacBook Pro, rerun setup, then open WezTerm and perform the documented doctor and GUI checks.

@@ -79,7 +79,7 @@ assert_contains "$functions_config" '"$yazi_cmd" "$@" --cwd-file="$tmp"' 'functi
 assert_contains "$functions_config" 'nvc()' 'functions include Neovim config check helper'
 assert_contains "$functions_config" 'edit() { nv "$@"; }' 'edit delegates to Neovim helper'
 
-doctor_config=$(cat "$repo_root/chezmoi/dot_config/workstation/doctor")
+doctor_config=$(cat "$repo_root/chezmoi/dot_config/workstation/executable_doctor")
 assert_contains "$doctor_config" 'workstation_load_env' 'doctor can load machine-local workstation env'
 
 WORKSTATION_REPO_ROOT="$repo_root"
