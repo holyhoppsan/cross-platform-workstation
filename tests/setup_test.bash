@@ -12,6 +12,9 @@ shell_output=$("$repo_root/setup.sh" --phase shell --dry-run)
 assert_contains "$shell_output" 'phase: shell' 'setup.sh parses shell phase'
 assert_contains "$shell_output" 'install_missing: false' 'setup.sh reports install-missing default'
 
+setup_sh=$(cat "$repo_root/setup.sh")
+assert_contains "$setup_sh" 'set -eu' 'setup.sh stops when a setup command fails'
+
 wezterm_output=$("$repo_root/setup.sh" --phase wezterm --dry-run)
 assert_contains "$wezterm_output" 'phase: wezterm' 'setup.sh parses wezterm phase'
 
@@ -131,6 +134,9 @@ assert_contains "$common_sh" ".config/nvim" 'setup.sh backs up Neovim config bef
 assert_contains "$common_sh" ".config/yazi" 'setup.sh backs up Yazi config before chezmoi apply'
 assert_contains "$common_sh" 'WORKSTATION_REPO_ROOT' 'setup.sh writes machine-local repo root env'
 assert_contains "$common_sh" 'setup_validate_interactive_shell' 'setup.sh has interactive shell validation helper'
+
+doctor_index=$(git -C "$repo_root" ls-files -s chezmoi/dot_config/workstation/doctor)
+assert_contains "$doctor_index" '100755' 'managed workstation doctor is executable'
 assert_contains "$common_sh" 'macos_install_formulae' 'setup.sh has macOS Homebrew formula helper'
 assert_contains "$common_sh" 'macos_install_cask' 'setup.sh has macOS Homebrew cask helper'
 assert_contains "$common_sh" 'Install or approve Homebrew yourself' 'macOS setup never installs Homebrew automatically'
