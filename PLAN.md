@@ -675,7 +675,7 @@ Deferred items:
 
 ## Phase 3: Quake-Mode Dropdown
 
-Status: Windows validated; macOS/Ubuntu stubbed
+Status: Windows validated; macOS Hammerspoon adapter is the immediate next implementation; Ubuntu stubbed
 
 Goal: Add global Ctrl+` dropdown behavior using platform-specific adapters.
 
@@ -712,7 +712,7 @@ On second activation, when the dropdown is focused:
 Platform-specific adapters:
 
 * Windows: AutoHotkey v2. Status: implemented, syntax-validated, and manually validated on Windows.
-* macOS: Hammerspoon. Status: stubbed/deferred.
+* macOS: Hammerspoon. Status: prioritized for immediate implementation and manual validation.
 * Ubuntu GNOME on Wayland: a GNOME Shell extension or another GNOME-native mechanism. Status: stubbed/deferred.
 
 State machine:
@@ -746,7 +746,7 @@ Deliverables:
 Tasks:
 
 * [x] Implement Windows AutoHotkey adapter.
-* [ ] Implement macOS Hammerspoon adapter.
+* [ ] Implement macOS Hammerspoon adapter. Priority: immediate, before Phase 7 `just` work.
 * [ ] Implement Ubuntu GNOME adapter or documented stub.
 * [x] Add setup support for Windows adapter.
 * [ ] Add setup support for macOS/Ubuntu adapters.
@@ -795,7 +795,7 @@ Notes:
 
 Deferred items:
 
-* macOS Hammerspoon adapter.
+* macOS Hammerspoon adapter: immediate next implementation; requires Hammerspoon Accessibility permission and manual validation on the MacBook Pro.
 * Ubuntu GNOME adapter.
 * None for Windows startup registration; reboot validation completed on 2026-07-06.
 * Manual validation on all supported platforms.
@@ -2516,3 +2516,11 @@ Format:
 - Validation performed: `./setup.sh --phase all --install-missing` completed successfully, then `nvim`, `nv`, `doctor --phase neovim`, and the WezTerm Neovim current/new-pane bindings were manually confirmed in a fresh WezTerm Bash session.
 - Known gaps: macOS WezTerm tab/workspace interaction checks, macOS Quake mode, and Ubuntu validation remain pending.
 - Next actions: Optionally validate WezTerm tab/workspace interactions on macOS, then proceed to Phase 7 only after the user supplies the intended `just` workflow examples.
+
+### 2026-08-18
+
+- Summary of changes: Reprioritized the macOS Hammerspoon Quake-mode adapter as the immediate next implementation because the user requires the same global dropdown workflow on the MacBook Pro.
+- Phases touched: Phase 3 Quake-mode dropdown; Phase ordering.
+- Validation performed: Hammerspoon and WezTerm official API documentation reviewed for global hotkeys, focused-window screen placement, usable-screen geometry, window show/hide/minimize, and workspace launch. No macOS adapter has been installed or tested yet.
+- Known gaps: Hammerspoon must be installed with user approval, granted Accessibility permission, configured to load the managed adapter, and manually tested for launch, hide/show persistence, focused-monitor placement, and process preservation.
+- Next actions: Implement the macOS adapter, setup/doctor support, documentation, and tests; then request the user to approve Hammerspoon installation and Accessibility access for live validation.
