@@ -2470,3 +2470,11 @@ Format:
 - Validation performed: Windows-side Git index audit confirmed `setup.sh` and its invoked shell scripts were tracked as non-executable before this correction. macOS rerun remains pending.
 - Known gaps: The executable-bit fix must be pulled and rerun on the MacBook Pro; macOS setup behavior remains unvalidated.
 - Next actions: Pull the executable-bit fix on the MacBook Pro, rerun `./setup.sh --phase yazi --dry-run`, then continue the documented Phase 6 sequence.
+
+### 2026-08-17
+
+- Summary of changes: Corrected the managed doctor executable bit and changed `setup.sh` to fail immediately when a setup, chezmoi, doctor, or interactive validation command fails. This follows the MacBook Pro result where package installation completed but non-executable doctor scripts produced permission errors that setup incorrectly continued past.
+- Phases touched: Phase 6 macOS bootstrap and validation; setup failure handling; managed doctor deployment.
+- Validation performed: Windows-side index audit identified the missing executable bits. macOS rerun remains required to validate managed doctor deployment and fail-fast setup behavior.
+- Known gaps: The MacBook Pro has installed the requested Homebrew packages, but its setup/apply/doctor phase has not yet completed successfully.
+- Next actions: Pull this correction on the MacBook Pro and rerun `./setup.sh --phase yazi --install-missing`; it should finish quickly because the packages are already installed.
