@@ -2492,4 +2492,11 @@ Format:
 - Phases touched: Phase 6 macOS bootstrap and validation; managed doctor deployment.
 - Validation performed: Root cause identified from the MacBook Pro setup log. Portable repository tests will verify the chezmoi executable attribute; macOS rerun remains required.
 - Known gaps: The MacBook Pro setup succeeds through repository doctor validation but its configured interactive shell still cannot execute the deployed doctor until this correction is pulled and applied.
+
+### 2026-08-17
+
+- Summary of changes: Added macOS Homebrew PATH discovery to the shared Bash configuration and doctor command. This makes Homebrew-installed tools available from a GUI-launched WezTerm session and from `doctor` invoked by the default macOS shell.
+- Phases touched: Phase 1 shared shell workflow; Phase 2 WezTerm baseline; Phase 6 macOS bootstrap and validation.
+- Validation performed: The MacBook Pro reported that a fresh default shell could not find Homebrew, WezTerm, or the Homebrew Bash despite successful installation. Portable tests will cover the Apple Silicon and Intel Homebrew-prefix handling; macOS rerun remains required.
+- Known gaps: The MacBook Pro must pull this correction and validate `doctor` from a fresh WezTerm session. macOS Quake mode remains intentionally unimplemented.
 - Next actions: Pull the latest commit on the MacBook Pro, rerun setup, then open WezTerm and perform the documented doctor and GUI checks.

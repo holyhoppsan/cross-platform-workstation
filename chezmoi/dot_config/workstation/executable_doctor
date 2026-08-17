@@ -71,6 +71,8 @@ elif [ -z "${WORKSTATION_REPO_ROOT:-}" ] && [ -r "$config_dir/env.sh" ]; then
   . "$config_dir/env.sh"
 fi
 
+workstation_add_homebrew_path
+
 failures=0
 warnings=0
 

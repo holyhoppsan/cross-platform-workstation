@@ -19,6 +19,7 @@ path_prepend() {
 
 path_prepend "$HOME/.local/bin"
 path_prepend "$HOME/bin"
+workstation_add_homebrew_path
 
 if [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/workstation/env.sh" ]; then
   # shellcheck source=env.sh
