@@ -221,7 +221,7 @@ Do not include Yazi in the AI agent list.
 | 1     | Common shell workflow                     | Implemented and validated on Windows and macOS; needs Ubuntu validation |
 | 2     | WezTerm baseline with tmux-style bindings | Implemented and validated on Windows and partially on macOS; needs Ubuntu and remaining macOS tab/workspace validation |
 | 3     | Quake-mode dropdown                       | Windows validated; macOS/Ubuntu stubbed |
-| 4     | Neovim baseline                           | Implemented and validated on Windows; needs macOS/Ubuntu validation |
+| 4     | Neovim baseline                           | Implemented and validated on Windows and macOS; needs Ubuntu validation |
 | 5     | Yazi baseline                             | Implemented and manually validated on Windows and macOS; needs Ubuntu validation |
 | 5.5   | Windows MSYS2 and Mosh remote access      | LAN phone connection validated; Mosh roaming validation pending |
 | 6     | macOS bootstrap and agent validation      | In progress; shell, WezTerm, and Yazi validated on macOS; Neovim remains |
@@ -360,7 +360,7 @@ Deferred items:
 
 ## Phase 1: Common Shell Workflow
 
-Status: Implemented and validated on Windows; needs macOS/Ubuntu validation
+Status: Implemented and validated on Windows and macOS; needs Ubuntu validation
 
 Goal: Create a shared Bash-first workflow across Windows, macOS, and Ubuntu.
 
@@ -871,11 +871,11 @@ Tasks:
 
 Validation:
 
-* [x] `nvim` starts. Status: Windows validated headlessly with Neovim 0.12.3.
-* [x] `nv` works. Status: Windows validated with `nv --headless +qa`; interactive editor launch still needs a human smoke test.
-* [x] WezTerm Neovim keybindings work. Status: Windows GUI validated for `Ctrl+A`, `v` and `Ctrl+A`, `V`.
-* [x] Neovim does not conflict with Ctrl+A terminal leader. Status: Windows GUI key chord validation passed.
-* [x] `doctor --phase neovim` reports status.
+* [x] `nvim` starts. Status: Windows validated headlessly with Neovim 0.12.3; macOS Neovim 0.12.4 manual validation passed on 2026-08-18.
+* [x] `nv` works. Status: Windows validated with `nv --headless +qa`; macOS interactive validation passed on 2026-08-18.
+* [x] WezTerm Neovim keybindings work. Status: Windows GUI validated for `Ctrl+A`, `v` and `Ctrl+A`, `V`; macOS manual validation passed on 2026-08-18.
+* [x] Neovim does not conflict with Ctrl+A terminal leader. Status: Windows and macOS GUI key chord validation passed.
+* [x] `doctor --phase neovim` reports status. Status: macOS manual validation passed on 2026-08-18.
 * [x] Windows Phase 4 reset/reinstall path works. Status: validated with `reset-windows.ps1 -Phase neovim -Apply -RemovePackages`, `setup.ps1 -Phase neovim`, repo tests, doctor, and interactive Git Bash helper checks.
 
 Notes:
@@ -1071,7 +1071,7 @@ Security and network decisions still required:
 
 ## Phase 6: macOS Bootstrap and Agent Validation
 
-Status: Planned
+Status: Validated for the shell, WezTerm pane workflow, Neovim, and Yazi on Apple Silicon macOS; tab/workspace checks remain
 
 Goal: Prepare the MacBook Pro for an agent-led, evidence-backed validation of the existing common shell, WezTerm, Neovim, and Yazi configuration without claiming macOS behavior before it is tested.
 
@@ -1099,14 +1099,14 @@ Tasks:
 * [x] Add the agent-run bootstrap and validation runbook. Status: `docs/macos-agent-validation.md` added on 2026-08-16.
 * [x] Test the dry-run and non-destructive validation sequence on the MacBook Pro. Status: `./setup.sh --phase yazi --dry-run` and `./tests/run.bash` passed on Apple Silicon macOS on 2026-08-17.
 * [x] Apply managed configuration on the MacBook Pro only after dry-run review. Status: `./setup.sh --phase yazi --install-missing` completed successfully on 2026-08-17, preserving backups under `~/.workstation-setup-backup/`.
-* [x] Record automated and manual validation results separately in this plan. Status: automated shell/WezTerm/Yazi doctor checks and manual WezTerm, clipboard, pane, and Yazi checks passed on 2026-08-18; Neovim remains uninstalled and unvalidated.
+* [x] Record automated and manual validation results separately in this plan. Status: automated shell/WezTerm/Yazi doctor checks and manual WezTerm, clipboard, pane, Yazi, and Neovim checks passed on 2026-08-18.
 
 Validation:
 
 * [x] A coding agent can run the documented non-GUI checks without needing chat context for the validated shell, WezTerm, and Yazi scope.
 * [x] `setup.sh` dry-run, repository tests, and shell/WezTerm/Yazi `doctor` checks complete on the MacBook Pro.
-* [ ] User manually confirms Neovim behavior. Shell, WezTerm, clipboard, pane bindings, and Yazi behavior passed on 2026-08-18.
-* [x] macOS shell, WezTerm, and Yazi behavior are marked validated only after the documented checks. macOS Quake mode and Neovim remain unvalidated.
+* [x] User manually confirms Neovim behavior. Shell, WezTerm, clipboard, pane bindings, Neovim, and Yazi behavior passed on 2026-08-18.
+* [x] macOS shell, WezTerm, Neovim, and Yazi behavior are marked validated only after the documented checks. macOS Quake mode remains unvalidated.
 
 ## Phase 7: `just` Command Runner
 
@@ -2508,3 +2508,11 @@ Format:
 - Validation performed: `./setup.sh --phase yazi --dry-run`, `./tests/run.bash`, successful `./setup.sh --phase yazi --install-missing`, Homebrew tool discovery in a fresh WezTerm Bash 5.3.15 session, `doctor --phase wezterm`, `doctor --phase yazi`, and the documented manual shell/WezTerm/Yazi checks all passed on the MacBook Pro.
 - Known gaps: Neovim is not installed or validated on macOS yet; macOS WezTerm tab/workspace checks, macOS Quake mode, and all Ubuntu validation remain pending.
 - Next actions: Pull the runbook/completion correction on the MacBook Pro, run `./setup.sh --phase all --install-missing` when ready to install Neovim, then validate Neovim and the remaining WezTerm tab/workspace interactions.
+
+### 2026-08-18
+
+- Summary of changes: Recorded successful macOS Neovim installation and manual validation after the full `--phase all` setup run installed Neovim 0.12.4.
+- Phases touched: Phase 4 Neovim baseline; Phase 6 macOS bootstrap and validation.
+- Validation performed: `./setup.sh --phase all --install-missing` completed successfully, then `nvim`, `nv`, `doctor --phase neovim`, and the WezTerm Neovim current/new-pane bindings were manually confirmed in a fresh WezTerm Bash session.
+- Known gaps: macOS WezTerm tab/workspace interaction checks, macOS Quake mode, and Ubuntu validation remain pending.
+- Next actions: Optionally validate WezTerm tab/workspace interactions on macOS, then proceed to Phase 7 only after the user supplies the intended `just` workflow examples.
