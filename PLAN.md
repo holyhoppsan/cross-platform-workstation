@@ -2478,3 +2478,11 @@ Format:
 - Validation performed: Windows-side index audit identified the missing executable bits. macOS rerun remains required to validate managed doctor deployment and fail-fast setup behavior.
 - Known gaps: The MacBook Pro has installed the requested Homebrew packages, but its setup/apply/doctor phase has not yet completed successfully.
 - Next actions: Pull this correction on the MacBook Pro and rerun `./setup.sh --phase yazi --install-missing`; it should finish quickly because the packages are already installed.
+
+### 2026-08-17
+
+- Summary of changes: Made `setup.sh` completion guidance platform-aware after macOS setup displayed Windows-only next steps.
+- Phases touched: Phase 6 macOS bootstrap user guidance.
+- Validation performed: Windows-side static test coverage added; macOS rerun pending.
+- Known gaps: The MacBook Pro must pull the correction and rerun setup before macOS completion guidance and doctor behavior are considered validated.
+- Next actions: Pull the latest commit on the MacBook Pro, rerun setup, then open WezTerm and perform the documented doctor and GUI checks.
