@@ -2462,3 +2462,11 @@ Format:
 - Validation performed: Bash syntax checks and the full repository test suite passed under Windows MSYS2 UCRT64. Static tests cover the Homebrew formula/cask helpers and macOS runbook. ShellCheck was unavailable and therefore skipped.
 - Known gaps: No commands have been run on macOS. The MacBook Pro remains the required validation environment for Homebrew behavior, package installation, chezmoi application, doctor/test execution, and GUI checks.
 - Next actions: Push this commit, then use `./setup.sh --phase yazi --install-missing` on the MacBook Pro only after the Phase 6 preflight and explicit approval.
+
+### 2026-08-17
+
+- Summary of changes: Corrected Git executable bits for macOS-relevant shell entrypoints after the MacBook Pro reported `permission denied` for `./setup.sh`.
+- Phases touched: Phase 6 macOS bootstrap and validation.
+- Validation performed: Windows-side Git index audit confirmed `setup.sh` and its invoked shell scripts were tracked as non-executable before this correction. macOS rerun remains pending.
+- Known gaps: The executable-bit fix must be pulled and rerun on the MacBook Pro; macOS setup behavior remains unvalidated.
+- Next actions: Pull the executable-bit fix on the MacBook Pro, rerun `./setup.sh --phase yazi --dry-run`, then continue the documented Phase 6 sequence.
