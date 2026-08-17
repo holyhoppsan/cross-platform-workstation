@@ -218,13 +218,13 @@ Do not include Yazi in the AI agent list.
 | Phase | Name                                      | Status                                    |
 | ----- | ----------------------------------------- | ----------------------------------------- |
 | 0     | Repository foundation                     | Implemented and locally validated         |
-| 1     | Common shell workflow                     | Implemented and validated on Windows; needs macOS/Ubuntu validation |
-| 2     | WezTerm baseline with tmux-style bindings | Implemented and automated validation passed on Windows; needs manual GUI validation |
+| 1     | Common shell workflow                     | Implemented and validated on Windows and macOS; needs Ubuntu validation |
+| 2     | WezTerm baseline with tmux-style bindings | Implemented and validated on Windows and partially on macOS; needs Ubuntu and remaining macOS tab/workspace validation |
 | 3     | Quake-mode dropdown                       | Windows validated; macOS/Ubuntu stubbed |
 | 4     | Neovim baseline                           | Implemented and validated on Windows; needs macOS/Ubuntu validation |
-| 5     | Yazi baseline                             | Implemented and automated validation passed on Windows; needs manual GUI validation |
+| 5     | Yazi baseline                             | Implemented and manually validated on Windows and macOS; needs Ubuntu validation |
 | 5.5   | Windows MSYS2 and Mosh remote access      | LAN phone connection validated; Mosh roaming validation pending |
-| 6     | macOS bootstrap and agent validation      | Planned                                  |
+| 6     | macOS bootstrap and agent validation      | In progress; shell, WezTerm, and Yazi validated on macOS; Neovim remains |
 | 7     | `just` command runner                     | Planned; awaiting workflow examples      |
 | 8     | Tailscale remote access                   | Planned                                  |
 | 9     | Rider and minimal Unreal launching        | Not started                               |
@@ -501,7 +501,7 @@ Validation:
 
 * [x] Windows MSYS2 UCRT64 Bash opens and loads shared config.
 * [x] `ls`, `git`, `rg`, `fd`, and `jq` work from MSYS2 UCRT64 Bash.
-* [ ] macOS Bash loads shared config.
+* [x] macOS Bash loads shared config. Status: Homebrew Bash 5.3.15 launched from WezTerm and found the Homebrew toolchain on Apple Silicon macOS on 2026-08-18.
 * [ ] Ubuntu Bash loads shared config.
 * [x] `platform-info` identifies the platform.
 * [x] `doctor --phase shell` reports shell status.
@@ -532,7 +532,7 @@ Deferred items:
 
 ## Phase 2: WezTerm Baseline with Tmux-Style Bindings
 
-Status: Implemented and validated on Windows; needs macOS/Ubuntu validation
+Status: Implemented and validated on Windows; macOS shell, pane, clipboard, and Yazi-pane bindings validated; macOS tab/workspace and Ubuntu validation remain
 
 Goal: Configure WezTerm as the cross-platform terminal and pane/tab/workspace layer.
 
@@ -640,9 +640,9 @@ Validation:
 * [x] WezTerm starts successfully on Windows.
 * [x] It launches the correct shell. Status: Windows MSYS2 UCRT64 validated; macOS/Ubuntu pending.
 * [x] On Windows, WezTerm launches MSYS2 UCRT64 Bash.
-* [ ] On macOS and Ubuntu, WezTerm launches Bash.
-* [x] Ctrl+A bindings work on Windows. Status: macOS/Ubuntu pending.
-* [x] Pane splits and navigation work on Windows. Status: macOS/Ubuntu pending.
+* [x] On macOS, WezTerm launches Homebrew Bash. Ubuntu remains pending.
+* [x] Ctrl+A bindings work on Windows and macOS. Ubuntu pending.
+* [x] Pane splits and navigation work on Windows and macOS. Ubuntu pending.
 * [x] Tabs work on Windows. Status: macOS/Ubuntu pending.
 * [x] `doctor --phase wezterm` reports status.
 
@@ -901,7 +901,7 @@ Deferred items:
 
 ## Phase 5: Yazi Baseline
 
-Status: Implemented and automated validation passed on Windows; needs manual GUI validation
+Status: Implemented and manually validated on Windows and macOS; needs Ubuntu validation
 
 Goal: Add Yazi as the terminal file manager.
 
@@ -966,10 +966,10 @@ Tasks:
 
 Validation:
 
-* [x] `yazi` starts. Status: Windows command/version validated with Yazi 26.5.6; full TUI use still needs manual smoke test in WezTerm.
-* [x] `y` opens Yazi. Status: Windows Git Bash live validation passed.
-* [x] Directory-changing-on-exit works where supported. Status: Windows Git Bash live validation passed; user selected `/tmp/yazi-cwd-test/target` and `pwd` changed to that path after exit.
-* [ ] WezTerm Yazi keybindings work. Status: configured and doctor/static tests pass; Windows GUI key chords need manual validation.
+* [x] `yazi` starts. Status: Windows command/version validated with Yazi 26.5.6; macOS Yazi 26.8.15 manual TUI validation passed in WezTerm on 2026-08-18.
+* [x] `y` opens Yazi. Status: Windows Git Bash live validation passed; macOS manual validation passed on 2026-08-18.
+* [x] Directory-changing-on-exit works where supported. Status: Windows Git Bash live validation passed; user selected `/tmp/yazi-cwd-test/target` and `pwd` changed to that path after exit. macOS manual validation passed on 2026-08-18.
+* [x] WezTerm Yazi keybindings work. Status: macOS `Ctrl+A`, `e` new-pane and current-pane Yazi validation passed on 2026-08-18; Ubuntu pending.
 * [x] `doctor --phase yazi` reports status.
 * [x] `setup.ps1 -Phase yazi` installs or verifies Yazi and applies managed config on Windows.
 * [x] `reset-windows.ps1 -Phase yazi -Apply -RemovePackages` fully removes setup-managed packages. Status: validated from normal user PowerShell; elevated/Admin PowerShell is now blocked before package removal.
@@ -1097,16 +1097,16 @@ Tasks:
 * [x] Define macOS prerequisites and package ownership without automatic Homebrew installation. Status: documented on 2026-08-16; user approval remains required before package installation.
 * [x] Implement Homebrew-backed macOS `--install-missing` support for the existing shell, WezTerm, Neovim, and Yazi phases; stop clearly when Homebrew is absent. Status: implementation and Windows-side syntax/test validation completed on 2026-08-16; macOS validation remains pending.
 * [x] Add the agent-run bootstrap and validation runbook. Status: `docs/macos-agent-validation.md` added on 2026-08-16.
-* [ ] Test the dry-run and non-destructive validation sequence on the MacBook Pro.
-* [ ] Apply managed configuration on the MacBook Pro only after dry-run review.
-* [ ] Record automated and manual validation results separately in this plan.
+* [x] Test the dry-run and non-destructive validation sequence on the MacBook Pro. Status: `./setup.sh --phase yazi --dry-run` and `./tests/run.bash` passed on Apple Silicon macOS on 2026-08-17.
+* [x] Apply managed configuration on the MacBook Pro only after dry-run review. Status: `./setup.sh --phase yazi --install-missing` completed successfully on 2026-08-17, preserving backups under `~/.workstation-setup-backup/`.
+* [x] Record automated and manual validation results separately in this plan. Status: automated shell/WezTerm/Yazi doctor checks and manual WezTerm, clipboard, pane, and Yazi checks passed on 2026-08-18; Neovim remains uninstalled and unvalidated.
 
 Validation:
 
-* [ ] A coding agent can run the documented non-GUI checks without needing chat context.
-* [ ] `setup.sh` dry-run, repository tests, and `doctor` complete on the MacBook Pro.
-* [ ] User manually confirms WezTerm, clipboard, pane bindings, Neovim, and Yazi behavior.
-* [ ] macOS platform-specific behavior is marked validated only after these checks.
+* [x] A coding agent can run the documented non-GUI checks without needing chat context for the validated shell, WezTerm, and Yazi scope.
+* [x] `setup.sh` dry-run, repository tests, and shell/WezTerm/Yazi `doctor` checks complete on the MacBook Pro.
+* [ ] User manually confirms Neovim behavior. Shell, WezTerm, clipboard, pane bindings, and Yazi behavior passed on 2026-08-18.
+* [x] macOS shell, WezTerm, and Yazi behavior are marked validated only after the documented checks. macOS Quake mode and Neovim remain unvalidated.
 
 ## Phase 7: `just` Command Runner
 
@@ -2500,3 +2500,11 @@ Format:
 - Validation performed: The MacBook Pro reported that a fresh default shell could not find Homebrew, WezTerm, or the Homebrew Bash despite successful installation. Portable tests will cover the Apple Silicon and Intel Homebrew-prefix handling; macOS rerun remains required.
 - Known gaps: The MacBook Pro must pull this correction and validate `doctor` from a fresh WezTerm session. macOS Quake mode remains intentionally unimplemented.
 - Next actions: Pull the latest commit on the MacBook Pro, rerun setup, then open WezTerm and perform the documented doctor and GUI checks.
+
+### 2026-08-18
+
+- Summary of changes: Recorded successful Apple Silicon macOS validation for the shared Homebrew Bash shell, WezTerm launch and configuration, clipboard paste, pane splits/navigation, Yazi, and its WezTerm bindings. Corrected the macOS full-validation runbook to use `--phase all`, because `--phase yazi` intentionally does not install Neovim, and made setup completion guidance phase-specific.
+- Phases touched: Phase 1 shell workflow; Phase 2 WezTerm baseline; Phase 5 Yazi baseline; Phase 6 macOS bootstrap and validation.
+- Validation performed: `./setup.sh --phase yazi --dry-run`, `./tests/run.bash`, successful `./setup.sh --phase yazi --install-missing`, Homebrew tool discovery in a fresh WezTerm Bash 5.3.15 session, `doctor --phase wezterm`, `doctor --phase yazi`, and the documented manual shell/WezTerm/Yazi checks all passed on the MacBook Pro.
+- Known gaps: Neovim is not installed or validated on macOS yet; macOS WezTerm tab/workspace checks, macOS Quake mode, and all Ubuntu validation remain pending.
+- Next actions: Pull the runbook/completion correction on the MacBook Pro, run `./setup.sh --phase all --install-missing` when ready to install Neovim, then validate Neovim and the remaining WezTerm tab/workspace interactions.
