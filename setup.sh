@@ -115,10 +115,32 @@ case "$phase" in
     ;;
 esac
 
-cat <<'EOF'
+case "$platform" in
+  windows)
+    cat <<'EOF'
 
-Setup completed. On Windows, open a fresh MSYS2 UCRT64 Bash session and run:
+Setup completed. Open a fresh MSYS2 UCRT64 Bash session and run:
   doctor --phase wezterm
   doctor --phase neovim
   doctor --phase yazi
 EOF
+    ;;
+  macos)
+    cat <<'EOF'
+
+Setup completed. Open a fresh WezTerm window and run:
+  doctor --phase wezterm
+  doctor --phase neovim
+  doctor --phase yazi
+EOF
+    ;;
+  *)
+    cat <<'EOF'
+
+Setup completed. Open a fresh Bash session and run:
+  doctor --phase wezterm
+  doctor --phase neovim
+  doctor --phase yazi
+EOF
+    ;;
+esac
