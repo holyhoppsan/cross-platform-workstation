@@ -48,5 +48,26 @@ workstation_session_type() {
   printf '%s\n' "${XDG_SESSION_TYPE:-unknown}"
 }
 
+workstation_add_homebrew_path() {
+  [ "${WORKSTATION_OS:-$(workstation_detect_platform)}" = macos ] || return 0
+
+  local brew_path brew_prefix
+  for brew_path in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+    [ -x "$brew_path" ] || continue
+    brew_prefix=$("$brew_path" --prefix 2>/dev/null) || continue
+
+    case ":$PATH:" in
+      *":$brew_prefix/bin:"*) ;;
+      *) PATH="$brew_prefix/bin:$PATH" ;;
+    esac
+    case ":$PATH:" in
+      *":$brew_prefix/sbin:"*) ;;
+      *) PATH="$brew_prefix/sbin:$PATH" ;;
+    esac
+    export PATH
+    return 0
+  done
+}
+
 WORKSTATION_OS=${WORKSTATION_OS:-$(workstation_detect_platform)}
 export WORKSTATION_OS

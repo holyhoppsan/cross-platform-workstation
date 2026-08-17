@@ -68,6 +68,11 @@ assert_contains "$shell_config" "/c/Program Files/WezTerm" 'Windows shell has We
 assert_contains "$shell_config" "/c/Program Files/Neovim/bin" 'Windows shell has Neovim path fallback'
 assert_contains "$shell_config" 'AppData/Local/Programs/Herdr/bin' 'Windows shell adds the per-user Herdr directory'
 assert_contains "$shell_config" 'workstation/env.sh' 'shell loads machine-local workstation env'
+assert_contains "$shell_config" 'workstation_add_homebrew_path' 'macOS shell adds Homebrew paths'
+
+platform_config=$(cat "$repo_root/chezmoi/dot_config/workstation/platform.sh")
+assert_contains "$platform_config" '/opt/homebrew/bin/brew' 'macOS Homebrew path checks Apple Silicon prefix'
+assert_contains "$platform_config" '/usr/local/bin/brew' 'macOS Homebrew path checks Intel prefix'
 
 functions_config=$(cat "$repo_root/chezmoi/dot_config/workstation/functions.sh")
 assert_contains "$functions_config" 'msystem=%s' 'platform-info reports the MSYS2 environment on Windows'
@@ -81,6 +86,7 @@ assert_contains "$functions_config" 'edit() { nv "$@"; }' 'edit delegates to Neo
 
 doctor_config=$(cat "$repo_root/chezmoi/dot_config/workstation/executable_doctor")
 assert_contains "$doctor_config" 'workstation_load_env' 'doctor can load machine-local workstation env'
+assert_contains "$doctor_config" 'workstation_add_homebrew_path' 'doctor adds the macOS Homebrew path'
 
 WORKSTATION_REPO_ROOT="$repo_root"
 assert_eq "$repo_root" "$(workstation-root)" 'workstation-root uses configured repository root'
