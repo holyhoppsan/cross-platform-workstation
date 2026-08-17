@@ -7,7 +7,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 adapter=$(cat "$repo_root/platform/windows/quake-toggle.ahk")
 launcher=$(cat "$repo_root/platform/windows/start-quake.ps1")
 doc=$(cat "$repo_root/docs/quake-mode.md")
-doctor=$(cat "$repo_root/chezmoi/dot_config/workstation/doctor")
+doctor=$(cat "$repo_root/chezmoi/dot_config/workstation/executable_doctor")
 
 assert_contains "$adapter" '#Requires AutoHotkey v2.0' 'Windows Quake adapter requires AutoHotkey v2'
 assert_contains "$adapter" 'Hotkey("^``", ToggleQuake)' 'Windows Quake adapter registers Ctrl+backtick'

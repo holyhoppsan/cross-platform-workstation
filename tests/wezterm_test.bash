@@ -7,7 +7,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 wezterm_config=$(cat "$repo_root/chezmoi/dot_config/wezterm/wezterm.lua")
 helper_block=$(sed -n '/local function spawn_bash_command/,/^end/p' "$repo_root/chezmoi/dot_config/wezterm/wezterm.lua")
 wezterm_doc=$(cat "$repo_root/docs/wezterm.md")
-doctor=$(cat "$repo_root/chezmoi/dot_config/workstation/doctor")
+doctor=$(cat "$repo_root/chezmoi/dot_config/workstation/executable_doctor")
 
 assert_not_contains "$wezterm_config" 'intentionally not implemented' 'WezTerm placeholder failure removed'
 assert_contains "$wezterm_config" "foreground = '#cccccc'" 'WezTerm mirrors Windows Terminal default foreground'

@@ -137,8 +137,9 @@ assert_contains "$common_sh" ".config/yazi" 'setup.sh backs up Yazi config befor
 assert_contains "$common_sh" 'WORKSTATION_REPO_ROOT' 'setup.sh writes machine-local repo root env'
 assert_contains "$common_sh" 'setup_validate_interactive_shell' 'setup.sh has interactive shell validation helper'
 
-doctor_index=$(git -C "$repo_root" ls-files -s chezmoi/dot_config/workstation/doctor)
-assert_contains "$doctor_index" '100755' 'managed workstation doctor is executable'
+doctor_source=$(git -C "$repo_root" ls-files --stage chezmoi/dot_config/workstation/executable_doctor)
+assert_contains "$doctor_source" '100755' 'managed workstation doctor source is executable'
+assert_contains "$doctor_source" 'executable_doctor' 'managed workstation doctor uses chezmoi executable attribute'
 assert_contains "$common_sh" 'macos_install_formulae' 'setup.sh has macOS Homebrew formula helper'
 assert_contains "$common_sh" 'macos_install_cask' 'setup.sh has macOS Homebrew cask helper'
 assert_contains "$common_sh" 'Install or approve Homebrew yourself' 'macOS setup never installs Homebrew automatically'
