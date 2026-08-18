@@ -675,7 +675,7 @@ Deferred items:
 
 ## Phase 3: Quake-Mode Dropdown
 
-Status: Windows validated; macOS Hammerspoon adapter is the immediate next implementation; Ubuntu stubbed
+Status: Windows validated; macOS launch/toggle/session persistence validated; macOS multi-monitor placement and Ubuntu remain pending
 
 Goal: Add global Ctrl+` dropdown behavior using platform-specific adapters.
 
@@ -712,7 +712,7 @@ On second activation, when the dropdown is focused:
 Platform-specific adapters:
 
 * Windows: AutoHotkey v2. Status: implemented, syntax-validated, and manually validated on Windows.
-* macOS: Hammerspoon. Status: prioritized for immediate implementation and manual validation.
+* macOS: Hammerspoon. Status: implemented; global launch/toggle and session persistence validated on 2026-08-18; multi-monitor placement remains pending.
 * Ubuntu GNOME on Wayland: a GNOME Shell extension or another GNOME-native mechanism. Status: stubbed/deferred.
 
 State machine:
@@ -746,7 +746,7 @@ Deliverables:
 Tasks:
 
 * [x] Implement Windows AutoHotkey adapter.
-* [ ] Implement macOS Hammerspoon adapter. Priority: immediate, before Phase 7 `just` work.
+* [x] Implement macOS Hammerspoon adapter. Status: live single-monitor launch, minimize/restore, and process persistence validated on 2026-08-18; multi-monitor placement remains pending.
 * [ ] Implement Ubuntu GNOME adapter or documented stub.
 * [x] Add setup support for Windows adapter.
 * [ ] Add setup support for macOS/Ubuntu adapters.
@@ -758,8 +758,10 @@ Tasks:
 Validation:
 
 * [x] Ctrl+` toggles the dropdown on Windows.
+* [x] Ctrl+` toggles the dropdown on macOS. Status: Hammerspoon launch/minimize/restore and same-session persistence validated on 2026-08-18.
 * [ ] It appears on the focused monitor. Status: Initial Windows validation confirms dropdown appears on the active machine; multi-monitor focused placement still needs validation.
 * [x] It hides without killing the shell on Windows.
+* [x] It hides without killing the shell on macOS. Status: a running `sleep 60` survived minimize/restore on 2026-08-18.
 * [x] It preserves running commands on Windows with the minimize fallback.
 * [ ] It works after switching monitor focus. Status: Needs Windows manual GUI validation.
 * [x] Behavior is documented separately for Windows, macOS, and Ubuntu.
@@ -795,7 +797,7 @@ Notes:
 
 Deferred items:
 
-* macOS Hammerspoon adapter: immediate next implementation; requires Hammerspoon Accessibility permission and manual validation on the MacBook Pro.
+* macOS multi-monitor placement remains to be manually validated.
 * Ubuntu GNOME adapter.
 * None for Windows startup registration; reboot validation completed on 2026-07-06.
 * Manual validation on all supported platforms.
@@ -2543,3 +2545,11 @@ Format:
 - Summary of changes: Replaced the macOS Quake focused-window predicate with a direct Hammerspoon window-ID comparison after live console output confirmed the adapter can identify the `wezterm-quake` window.
 - Phases touched: Phase 3 macOS Quake-mode adapter.
 - Validation performed: Hammerspoon listed `wezterm-gui` window ID 4601 with the expected `wezterm-quake` title. Minimize/restore retest remains pending.
+
+### 2026-08-18
+
+- Summary of changes: Recorded successful macOS Hammerspoon Quake-mode validation after the focused-window identity correction.
+- Phases touched: Phase 3 macOS Quake-mode adapter.
+- Validation performed: Global `Ctrl+`` launch/minimize/restore worked on the MacBook Pro, and a running `sleep 60` command remained in the same session after the dropdown was minimized and restored.
+- Known gaps: macOS multi-monitor focused-placement validation and Ubuntu implementation/validation remain pending.
+- Next actions: Validate macOS focused-monitor placement when a second monitor is available; otherwise resume the Phase 7 `just` work when the user supplies workflow examples.
