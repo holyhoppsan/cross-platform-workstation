@@ -2524,3 +2524,10 @@ Format:
 - Validation performed: Hammerspoon and WezTerm official API documentation reviewed for global hotkeys, focused-window screen placement, usable-screen geometry, window show/hide/minimize, and workspace launch. No macOS adapter has been installed or tested yet.
 - Known gaps: Hammerspoon must be installed with user approval, granted Accessibility permission, configured to load the managed adapter, and manually tested for launch, hide/show persistence, focused-monitor placement, and process preservation.
 - Next actions: Implement the macOS adapter, setup/doctor support, documentation, and tests; then request the user to approve Hammerspoon installation and Accessibility access for live validation.
+
+### 2026-08-18
+
+- Summary of changes: Corrected the macOS Hammerspoon Quake adapter task-constructor call after live testing showed the optional stream-callback placeholder was invalid for the installed Hammerspoon API.
+- Phases touched: Phase 3 macOS Quake-mode adapter.
+- Validation performed: Hammerspoon loaded the configuration and registered the global `Ctrl+`` hotkey. The first hotkey invocation exposed the task-constructor argument error; the launch correction is pending MacBook Pro retest.
+- Known gaps: Live launch, minimize/restore persistence, focused-monitor placement, and Accessibility permission validation remain pending.

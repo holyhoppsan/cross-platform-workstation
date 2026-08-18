@@ -42,7 +42,7 @@ end
 local function launch_quake(screen)
   retry_count = 0
   local command = "printf '\\033]0;" .. quake_title .. "\\007'; exec /opt/homebrew/bin/bash --login -i"
-  local task = hs.task.new(wezterm, nil, nil, { "start", "--always-new-process", "--workspace", "quake", "--", "/opt/homebrew/bin/bash", "--login", "-i", "-c", command })
+  local task = hs.task.new(wezterm, function() end, { "start", "--always-new-process", "--workspace", "quake", "--", "/opt/homebrew/bin/bash", "--login", "-i", "-c", command })
   if task and task:start() then hs.timer.doAfter(0.1, function() reveal_after_launch(screen) end) else hs.alert.show("Unable to launch WezTerm Quake window") end
 end
 

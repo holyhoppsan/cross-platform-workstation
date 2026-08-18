@@ -42,6 +42,7 @@ assert_contains "$macos_adapter" 'wezterm-quake' 'macOS Quake adapter identifies
 assert_contains "$macos_adapter" 'window:minimize()' 'macOS Quake adapter preserves processes while hidden'
 assert_contains "$macos_adapter" 'focused_screen()' 'macOS Quake adapter uses focused monitor'
 assert_contains "$macos_adapter" 'setFrame' 'macOS Quake adapter positions the dropdown'
+assert_contains "$macos_adapter" 'hs.task.new(wezterm, function() end, {' 'macOS Quake adapter uses Hammerspoon task arguments correctly'
 
 assert_contains "$launcher" 'quake-toggle.ahk' 'Windows Quake launcher starts adapter script'
 assert_contains "$launcher" 'AutoHotkey64.exe' 'Windows Quake launcher resolves AutoHotkey executable'
