@@ -57,7 +57,15 @@ Current Windows status: implemented and setup/doctor-checkable, but global hotke
 
 ## macOS
 
-The Hammerspoon adapter remains deferred.
+macOS uses the chezmoi-managed `~/.hammerspoon/init.lua` adapter. It binds global `Ctrl+`` and starts a dedicated WezTerm `quake` workspace, identified by the `wezterm-quake` title. The adapter minimizes the focused dropdown instead of closing it, then restores, moves, sizes, and focuses it on the currently focused application's monitor.
+
+Install/apply it with user approval:
+
+```bash
+./setup.sh --phase quake --install-missing
+```
+
+Open Hammerspoon once, grant its Accessibility permission in macOS Privacy & Security, then reload its configuration. Manual validation is required for hotkey registration, process preservation, and focused-monitor placement.
 
 ## Ubuntu GNOME
 

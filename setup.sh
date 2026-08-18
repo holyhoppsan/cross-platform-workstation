@@ -81,6 +81,11 @@ case "$phase" in
     "$repo_root/scripts/setup/phases/wezterm.sh" "$repo_root" "$install_missing"
     if [ "$platform" = windows ]; then
       info 'Windows Quake setup is implemented in setup.ps1; run ./setup.ps1 -Phase quake from PowerShell.'
+    elif [ "$platform" = macos ]; then
+      [ "$install_missing" = true ] && macos_install_cask hammerspoon
+      [ -d /Applications/Hammerspoon.app ] || die 'Hammerspoon is missing. Rerun with --install-missing after Homebrew is available.'
+      setup_apply_chezmoi "$repo_root"
+      "$repo_root/scripts/doctor" --phase quake
     else
       die 'Quake setup is currently implemented only for Windows; macOS and Ubuntu adapters are documented stubs.'
     fi

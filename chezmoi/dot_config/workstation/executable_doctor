@@ -87,6 +87,17 @@ version_of() {
 require_command() {
   if command -v "$1" >/dev/null 2>&1; then
     ok "$1" "$(version_of "$1")"
+  elif [ "$WORKSTATION_OS" = macos ]; then
+    local macos_adapter
+    macos_adapter="$HOME/.hammerspoon/init.lua"
+    [ -d /Applications/Hammerspoon.app ] && ok 'Hammerspoon' 'installed' || fail 'Hammerspoon' 'not found; rerun setup.sh --phase quake --install-missing'
+    [ -r "$macos_adapter" ] && ok 'Quake adapter' "$macos_adapter" || fail 'Quake adapter' 'managed Hammerspoon init.lua missing'
+    if [ -r "$macos_adapter" ]; then
+      grep -Fq 'hs.hotkey.bind({ "ctrl" }, "`"' "$macos_adapter" && ok 'Quake hotkey' 'Ctrl+` configured' || fail 'Quake hotkey' 'Ctrl+` registration missing'
+      grep -Fq 'window:minimize()' "$macos_adapter" && ok 'Quake dismiss behavior' 'minimize preserves processes' || fail 'Quake dismiss behavior' 'missing'
+      grep -Fq 'focused_screen()' "$macos_adapter" && ok 'Quake placement behavior' 'focused-monitor placement configured' || fail 'Quake placement behavior' 'missing'
+    fi
+    warn 'Quake manual validation' 'grant Hammerspoon Accessibility permission, reload its config, then test hotkey and focused-monitor placement'
   else
     fail "$1" 'not found'
   fi
