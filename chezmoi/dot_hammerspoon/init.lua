@@ -48,7 +48,8 @@ end
 
 hs.hotkey.bind({ "ctrl" }, "`", function()
   local window = quake_window()
-  if window and window:isFocused() then
+  local focused = hs.window.focusedWindow()
+  if window and focused and window:id() == focused:id() then
     window:minimize()
   elseif window then
     place_and_focus(window, focused_screen())
