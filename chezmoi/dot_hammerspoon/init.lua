@@ -16,7 +16,7 @@ end
 
 local function quake_window()
   for _, window in ipairs(hs.window.allWindows()) do
-    if window:title() == quake_title then return window end
+    if window:title():find(quake_title, 1, true) then return window end
   end
 end
 
