@@ -5,6 +5,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 . "$repo_root/tests/test_helper.bash"
 
 adapter=$(cat "$repo_root/platform/windows/quake-toggle.ahk")
+macos_adapter=$(cat "$repo_root/chezmoi/dot_hammerspoon/init.lua")
 launcher=$(cat "$repo_root/platform/windows/start-quake.ps1")
 doc=$(cat "$repo_root/docs/quake-mode.md")
 doctor=$(cat "$repo_root/chezmoi/dot_config/workstation/executable_doctor")
@@ -36,6 +37,11 @@ assert_contains "$adapter" 'QuakeHeightRatio := 1.00' 'Windows Quake adapter use
 assert_contains "$adapter" 'QuakeOpacity := 0.95' 'Windows Quake adapter uses requested opacity'
 assert_contains "$adapter" 'QuakeGeometry' 'Windows Quake adapter centralizes geometry calculation'
 assert_not_contains "$adapter" 'not implemented yet' 'Windows Quake adapter is no longer a stub'
+assert_contains "$macos_adapter" 'hs.hotkey.bind({ "ctrl" }, "`"' 'macOS Quake adapter registers Ctrl+backtick'
+assert_contains "$macos_adapter" 'wezterm-quake' 'macOS Quake adapter identifies its window'
+assert_contains "$macos_adapter" 'window:minimize()' 'macOS Quake adapter preserves processes while hidden'
+assert_contains "$macos_adapter" 'focused_screen()' 'macOS Quake adapter uses focused monitor'
+assert_contains "$macos_adapter" 'setFrame' 'macOS Quake adapter positions the dropdown'
 
 assert_contains "$launcher" 'quake-toggle.ahk' 'Windows Quake launcher starts adapter script'
 assert_contains "$launcher" 'AutoHotkey64.exe' 'Windows Quake launcher resolves AutoHotkey executable'
