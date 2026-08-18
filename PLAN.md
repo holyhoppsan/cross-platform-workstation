@@ -2531,3 +2531,9 @@ Format:
 - Phases touched: Phase 3 macOS Quake-mode adapter.
 - Validation performed: Hammerspoon loaded the configuration and registered the global `Ctrl+`` hotkey. The first hotkey invocation exposed the task-constructor argument error; the launch correction is pending MacBook Pro retest.
 - Known gaps: Live launch, minimize/restore persistence, focused-monitor placement, and Accessibility permission validation remain pending.
+
+### 2026-08-18
+
+- Summary of changes: Corrected macOS Quake-window identification to tolerate a WezTerm-decorated title after live testing showed launch succeeded but subsequent hotkey presses created new windows instead of toggling.
+- Phases touched: Phase 3 macOS Quake-mode adapter.
+- Validation performed: Global hotkey registration and first launch passed on the MacBook Pro. Toggle/minimize/restore retest remains pending.
