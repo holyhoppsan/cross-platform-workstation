@@ -338,17 +338,36 @@ function Ensure-WindowsHerdr {
 function Ensure-WindowsAgent {
     param([Parameter(Mandatory)][ValidateSet('pi', 'codex')][string]$Agent, [switch]$DryRun)
     Ensure-WindowsPackageCommand -Command 'node.exe' -PackageId 'OpenJS.NodeJS.LTS' -Name 'Node.js LTS' -DryRun:$DryRun
-    if ($DryRun) { Write-SetupInfo "would install $Agent with npm"; return }
+    if ($DryRun) {
+        Write-SetupInfo "would install $Agent with npm"
+        if ($Agent -eq 'pi') { Write-SetupInfo 'would install Pi plugin: npm:@narumitw/pi-usage' }
+        return
+    }
     $npm = Resolve-InstalledCommand -Name 'npm.cmd'
     $package = if ($Agent -eq 'pi') { '@earendil-works/pi-coding-agent' } else { '@openai/codex' }
     $command = if ($Agent -eq 'pi') { 'pi.cmd' } else { 'codex.cmd' }
-    if (Test-CommandAvailable -Name $command) { Write-SetupInfo "$Agent already available"; return }
-    & $npm install -g --ignore-scripts $package
-    if ($LASTEXITCODE -ne 0) { throw "npm failed to install $Agent." }
+    if (Test-CommandAvailable -Name $command) {
+        Write-SetupInfo "$Agent already available"
+    } else {
+        & $npm install -g --ignore-scripts $package
+        if ($LASTEXITCODE -ne 0) { throw "npm failed to install $Agent." }
+    }
     $agentCommand = Resolve-InstalledCommand -Name $command
     if (-not $agentCommand) { throw "$Agent was installed but command was not found." }
     & $agentCommand --version
     if ($LASTEXITCODE -ne 0) { throw "$Agent was installed but its version check failed." }
+    if ($Agent -eq 'pi') {
+        $plugin = 'npm:@narumitw/pi-usage'
+        $installedPackages = & $agentCommand list 2>&1
+        if ($LASTEXITCODE -ne 0) { throw 'Pi could not list installed packages.' }
+        if ($installedPackages -match [regex]::Escape($plugin)) {
+            Write-SetupInfo "Pi plugin already available: $plugin"
+        } else {
+            Write-SetupInfo "installing Pi plugin: $plugin"
+            & $agentCommand install $plugin
+            if ($LASTEXITCODE -ne 0) { throw "Pi failed to install plugin $plugin." }
+        }
+    }
 }
 
 function Get-WindowsQuakeStartupShortcutPath {

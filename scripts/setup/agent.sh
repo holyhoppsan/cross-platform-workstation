@@ -30,3 +30,13 @@ if ! has_command "$command_name"; then
   npm install -g --ignore-scripts "$package"
 fi
 "$command_name" --version
+
+if [ "$agent" = pi ]; then
+  pi_plugin='npm:@narumitw/pi-usage'
+  if "$command_name" list 2>/dev/null | grep -Fq "$pi_plugin"; then
+    info "Pi plugin already available: $pi_plugin"
+  else
+    info "installing Pi plugin: $pi_plugin"
+    "$command_name" install "$pi_plugin"
+  fi
+fi
