@@ -2560,3 +2560,10 @@ Format:
 - Phases touched: Phase 1 shell workflow; Phase 5.5 Herdr remote-session entry point.
 - Validation performed: PowerShell parser validation, Bash syntax checks, the full portable test suite, `git diff --check`, a Windows shell-setup dry run, and the corrected live Windows shell setup passed. The live run verified that the MSYS2 login-shell validation restores the repository directory, completed all portable tests, and reported the existing Herdr installation through `doctor --phase shell`. macOS installation remains pending.
 - Known gaps: The Windows exception must remain limited to Herdr's documented preview installer. Herdr must be installed and validated on the MacBook Pro in a fresh WezTerm Bash session.
+
+### 2026-08-20
+
+- Summary of changes: Corrected macOS `doctor` self-reporting. When invoked through the system Bash, it now restarts once under the installed Homebrew Bash before checking tool versions, preserving its requested phase.
+- Phases touched: Phase 1 shell diagnostics.
+- Validation performed: Source-level validation pending; the issue was observed on the MacBook Pro where the interactive shell was Homebrew Bash but `doctor` reported Apple Bash and Git.
+- Known gaps: The corrected `doctor --phase shell` output must be manually validated on the MacBook Pro after chezmoi applies this change.

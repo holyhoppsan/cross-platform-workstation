@@ -87,6 +87,8 @@ assert_contains "$functions_config" 'edit() { nv "$@"; }' 'edit delegates to Neo
 doctor_config=$(cat "$repo_root/chezmoi/dot_config/workstation/executable_doctor")
 assert_contains "$doctor_config" 'workstation_load_env' 'doctor can load machine-local workstation env'
 assert_contains "$doctor_config" 'workstation_add_homebrew_path' 'doctor adds the macOS Homebrew path'
+assert_contains "$doctor_config" 'WORKSTATION_DOCTOR_REEXEC' 'doctor re-execs under Homebrew Bash on macOS'
+assert_contains "$doctor_config" 'exec "$macos_bash" "$0" "${original_args[@]}"' 'doctor preserves arguments when it re-execs under Homebrew Bash'
 
 WORKSTATION_REPO_ROOT="$repo_root"
 assert_eq "$repo_root" "$(workstation-root)" 'workstation-root uses configured repository root'
