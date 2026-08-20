@@ -220,7 +220,7 @@ Do not include Yazi in the AI agent list.
 | 0     | Repository foundation                     | Implemented and locally validated         |
 | 1     | Common shell workflow                     | Implemented and validated on Windows and macOS; needs Ubuntu validation |
 | 2     | WezTerm baseline with tmux-style bindings | Implemented and validated on Windows and partially on macOS; needs Ubuntu and remaining macOS tab/workspace validation |
-| 3     | Quake-mode dropdown                       | Windows validated; macOS/Ubuntu stubbed |
+| 3     | Quake-mode dropdown                       | Windows and macOS validated; macOS unfocused-window recovery fix pending MacBook Pro retest; Ubuntu stubbed |
 | 4     | Neovim baseline                           | Implemented and validated on Windows and macOS; needs Ubuntu validation |
 | 5     | Yazi baseline                             | Implemented and manually validated on Windows and macOS; needs Ubuntu validation |
 | 5.5   | Windows MSYS2 and Mosh remote access      | LAN phone connection validated; Mosh roaming validation pending |
@@ -2591,3 +2591,11 @@ Format:
 - Validation performed: On Windows, `setup.ps1 -Agent pi` installed Pi 0.84.2 and `setup.ps1 -Agent codex` installed Codex CLI 0.148.0. A fresh interactive MSYS2 UCRT64 Bash resolved `node`, `pi`, and `codex`, completed each version check, and reported both tools through `doctor --phase shell`. Bash/PowerShell parser checks, `git diff --check`, and the portable test suite (137 setup tests) passed.
 - Known gaps: The new macOS commands are implemented but not yet validated on the MacBook Pro. The first Pi test exposed a stale Homebrew Node 21 binary referencing a removed ICU library; setup now needs a MacBook Pro retest of its Homebrew repair path. No tool was authenticated, configured, or launched as an agent; the common `agent` launcher and profiles remain future Phase 11 work.
 - Next actions: Commit and push when approved, then on macOS install and verify Pi and Codex one at a time using the documented commands.
+
+### 2026-08-20
+
+- Summary of changes: Hardened macOS Quake-window recovery after live use showed that an unfocused existing dropdown could be missed and trigger a new terminal. The Hammerspoon adapter now retains the macOS window ID after discovery and restores that exact window before using its title as a reload-recovery fallback.
+- Phases touched: Phase 3 Quake-mode dropdown.
+- Validation performed: Portable adapter-shape tests cover the retained-window lookup. MacBook Pro manual validation remains required.
+- Known gaps: The fix has not yet been tested on the MacBook Pro. Hammerspoon reloads still require title-based rediscovery, and Ubuntu remains unimplemented.
+- Next actions: Apply the managed Hammerspoon config, reload it, then test opening, unfocusing, restoring, minimizing, and restoring the same Quake session.
