@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -u
 
+original_args=("$@")
+
 usage() {
   cat <<'EOF'
 usage: doctor [--phase foundation|shell|wezterm|quake|neovim|yazi|all] [--help]
@@ -72,6 +74,21 @@ elif [ -z "${WORKSTATION_REPO_ROOT:-}" ] && [ -r "$config_dir/env.sh" ]; then
 fi
 
 workstation_add_homebrew_path
+
+if [ "$WORKSTATION_OS" = macos ] && [ "${WORKSTATION_DOCTOR_REEXEC:-}" != 1 ]; then
+  macos_bash=''
+  for candidate in /opt/homebrew/bin/bash /usr/local/bin/bash; do
+    if [ -x "$candidate" ]; then
+      macos_bash=$candidate
+      break
+    fi
+  done
+
+  if [ -n "$macos_bash" ] && [ "$BASH" != "$macos_bash" ]; then
+    export WORKSTATION_DOCTOR_REEXEC=1
+    exec "$macos_bash" "$0" "${original_args[@]}"
+  fi
+fi
 
 failures=0
 warnings=0
