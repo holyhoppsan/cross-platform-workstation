@@ -1112,13 +1112,15 @@ Validation:
 
 ## Phase 7: `just` Command Runner
 
-Status: Planned; awaiting the user's IndyDevDan workflow examples
+Status: In progress; install/detection work may proceed before recipe design, which still awaits the user's IndyDevDan workflow examples
 
 Goal: Evaluate and, if suitable, add [`just`](https://github.com/casey/just) as a documented command runner for repeatable repository tasks without replacing the existing setup entrypoints.
 
 Requirements:
 
 * Do not implement recipes until the user supplies representative workflow examples.
+* Installing and validating the `just` executable is explicitly allowed before any repository `justfile` is added.
+* Do not create a global or user `justfile` as part of bootstrap.
 * `just` must remain optional until the documented bootstrap path can install or verify it safely on every supported platform.
 * Do not put credentials, machine-specific paths, or destructive defaults in a `justfile`.
 * Preserve `setup.sh`, `setup.ps1`, and `scripts/doctor` as the authoritative bootstrap and validation interfaces.
@@ -1127,7 +1129,8 @@ Requirements:
 Tasks:
 
 * [ ] Review the user's reference workflow examples and decide which commands belong in recipes.
-* [ ] Decide installation/detection policy for Windows, macOS, and Ubuntu.
+* [ ] Decide installation/detection policy for Windows, macOS, and Ubuntu. Windows uses the MSYS2 UCRT64 package `mingw-w64-ucrt-x86_64-just`; macOS uses the Homebrew `just` formula. Ubuntu policy remains pending.
+* [x] Add Windows/macOS executable installation and `doctor` detection without adding any `justfile`. Status: Windows uses MSYS2 UCRT64 package `mingw-w64-ucrt-x86_64-just`; macOS uses the Homebrew formula. Platform validation remains pending.
 * [ ] Add a documented `justfile` only after that review.
 * [ ] Add safe recipes, tests, and docs.
 * [ ] Validate the chosen recipes on each supported platform before claiming portability.
@@ -2567,3 +2570,10 @@ Format:
 - Phases touched: Phase 1 shell diagnostics.
 - Validation performed: Bash syntax checks, the full portable test suite, and `git diff --check` passed after the PATH-ordering correction. On 2026-08-20, the MacBook Pro reran `./setup.sh --phase shell` and direct `doctor --phase shell`; both reported Homebrew Bash 5.3.15, Git 2.55.0, jq 1.8.2, and Herdr 0.8.2.
 - Known gaps: Ubuntu remains unvalidated. The `shell` field still reports the parent login shell (`/bin/zsh`), which is accurate and distinct from the Bash interpreter used by doctor.
+
+### 2026-08-20
+
+- Summary of changes: Added and validated the LAN-only MacBook Pro SSH entry point named `lfg-laptop-herdr` for controlling Herdr on the Windows laptop. The Mac uses a dedicated Ed25519 key; the existing ShadowTerm key remains authorized separately.
+- Phases touched: Phase 5.5 Windows MSYS2 and Mosh remote access; Phase 6 macOS agent readiness.
+- Validation performed: The MacBook Pro reached the Windows MSYS2 `sshd` listener over the shared private Wi-Fi network, verified the server ED25519 host-key fingerprint, accepted it, completed SSH login through the `lfg-laptop-herdr` alias, and successfully ran Herdr from the UCRT64 remote shell.
+- Known gaps: This is LAN-only. The router-assigned Windows address can change, and off-LAN access still awaits Phase 8 Tailscale.

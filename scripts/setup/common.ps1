@@ -279,7 +279,8 @@ function Ensure-WindowsPhaseOneTools {
         'unzip',
         'mingw-w64-ucrt-x86_64-ripgrep',
         'mingw-w64-ucrt-x86_64-fd',
-        'mingw-w64-ucrt-x86_64-fzf'
+        'mingw-w64-ucrt-x86_64-fzf',
+        'mingw-w64-ucrt-x86_64-just'
     ) -DryRun:$DryRun
 }
 

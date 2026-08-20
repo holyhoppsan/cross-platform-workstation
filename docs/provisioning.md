@@ -44,6 +44,7 @@ Expected behavior:
 - install or verify `chezmoi` on Windows
 - install or verify Phase 1 MSYS2 CLI tools on Windows: `git`, `ripgrep`, `fd`, `jq`, `fzf`, and `unzip`
 - install or verify Herdr: use `brew install herdr` on macOS; on Windows, only if absent, use Herdr's documented preview installer. This is a user-approved exception to the repository's normal no-remote-script execution rule because Herdr has no supported Winget package. Do not reuse this exception for any other dependency.
+- install or verify `just`: Homebrew's `just` formula on macOS and MSYS2's `mingw-w64-ucrt-x86_64-just` package on Windows. This installs only the executable; no `justfile` is created.
 - back up known Phase 1 managed dotfiles to `~/.workstation-setup-backup/<timestamp>`
 - apply chezmoi dotfiles with `--force` so setup does not block on interactive overwrite prompts
 - verify common Unix-style commands

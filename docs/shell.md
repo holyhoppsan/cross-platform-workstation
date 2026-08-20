@@ -21,6 +21,8 @@ Install the shared CLI tools inside MSYS2 with `pacman`: `git`, `jq`, `unzip`, `
 
 Use Bash. Homebrew Bash is preferred when already installed, but setup must not silently install Homebrew. The managed shell puts the active Homebrew `bin` and `sbin` directories before system paths so Homebrew-provided Git, Bash, and CLI tools take precedence.
 
+The shell setup also installs or verifies the `just` command runner. It does not create a repository, global, or user `justfile`; recipes remain a separate Phase 7 decision.
+
 ## Ubuntu
 
 Use system Bash. Ubuntu GNOME Wayland is the default platform assumption for future Quake work, but Phase 1 only detects session facts.
