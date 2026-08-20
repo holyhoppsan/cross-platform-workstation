@@ -2558,12 +2558,12 @@ Format:
 
 - Summary of changes: Added Herdr installation ownership to the implemented shell setup on Windows and macOS. macOS uses the official Homebrew formula. The user explicitly approved a narrow Windows exception for Herdr's official preview `irm | iex` installer because no supported Winget package exists.
 - Phases touched: Phase 1 shell workflow; Phase 5.5 Herdr remote-session entry point.
-- Validation performed: PowerShell parser validation, Bash syntax checks, the full portable test suite, `git diff --check`, a Windows shell-setup dry run, and the corrected live Windows shell setup passed. The live run verified that the MSYS2 login-shell validation restores the repository directory, completed all portable tests, and reported the existing Herdr installation through `doctor --phase shell`. macOS installation remains pending.
-- Known gaps: The Windows exception must remain limited to Herdr's documented preview installer. Herdr must be installed and validated on the MacBook Pro in a fresh WezTerm Bash session.
+- Validation performed: PowerShell parser validation, Bash syntax checks, the full portable test suite, `git diff --check`, a Windows shell-setup dry run, and the corrected live Windows shell setup passed. The live Windows run verified that the MSYS2 login-shell validation restores the repository directory, completed all portable tests, and reported the existing Herdr installation through `doctor --phase shell`. On 2026-08-20, the MacBook Pro ran `./setup.sh --phase shell` successfully and both setup and a direct `doctor --phase shell` reported Herdr 0.8.2.
+- Known gaps: The Windows exception must remain limited to Herdr's documented preview installer. No MacBook-Pro Herdr remote-session workflow has been configured or validated yet.
 
 ### 2026-08-20
 
 - Summary of changes: Corrected macOS `doctor` self-reporting. When invoked through the system Bash, it now restarts once under the installed Homebrew Bash before checking tool versions, preserving its requested phase. The shared PATH helper now also moves Homebrew directories to the front when they are already present later in a zsh-launched PATH.
 - Phases touched: Phase 1 shell diagnostics.
-- Validation performed: The MacBook Pro confirmed the doctor restart corrected the Bash version but exposed that an existing later Homebrew PATH entry still allowed Apple Git and jq to win. Portable validation of the PATH-ordering correction remains pending.
-- Known gaps: The corrected `doctor --phase shell` output must be manually validated on the MacBook Pro after chezmoi applies this change.
+- Validation performed: Bash syntax checks, the full portable test suite, and `git diff --check` passed after the PATH-ordering correction. On 2026-08-20, the MacBook Pro reran `./setup.sh --phase shell` and direct `doctor --phase shell`; both reported Homebrew Bash 5.3.15, Git 2.55.0, jq 1.8.2, and Herdr 0.8.2.
+- Known gaps: Ubuntu remains unvalidated. The `shell` field still reports the parent login shell (`/bin/zsh`), which is accurate and distinct from the Bash interpreter used by doctor.
