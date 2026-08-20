@@ -37,6 +37,15 @@ assert_contains "$default_output" 'phase: shell' 'setup.sh defaults to current i
 install_output=$("$repo_root/setup.sh" --phase shell --install-missing --dry-run)
 assert_contains "$install_output" 'install_missing: true' 'setup.sh parses install-missing'
 
+agent_dry_run=$("$repo_root/setup.sh" --agent pi --dry-run)
+assert_contains "$agent_dry_run" 'would install or verify agent: pi' 'setup.sh parses a separate Pi agent install'
+
+agent_setup=$(cat "$repo_root/scripts/setup/agent.sh")
+assert_contains "$agent_setup" '@earendil-works/pi-coding-agent' 'agent setup knows the Pi npm package'
+assert_contains "$agent_setup" '@openai/codex' 'agent setup knows the Codex npm package'
+assert_contains "$agent_setup" 'npm install -g --ignore-scripts' 'agent setup installs selected agents through npm without lifecycle scripts'
+assert_contains "$agent_setup" 'macos_install_formulae node' 'agent setup can install Node.js on macOS when approved'
+
 powershell_setup=$(cat "$repo_root/setup.ps1")
 verify_ps1=$(cat "$repo_root/scripts/setup/verify.ps1")
 assert_contains "$powershell_setup" "[string]\$Phase = 'shell'" 'setup.ps1 defaults to shell phase'
@@ -46,6 +55,7 @@ assert_contains "$powershell_setup" "'neovim'" 'setup.ps1 accepts neovim phase'
 assert_contains "$powershell_setup" "'yazi'" 'setup.ps1 accepts yazi phase'
 assert_contains "$powershell_setup" 'Ensure-WindowsPhaseOneTools' 'setup.ps1 verifies Windows Phase 1 prerequisites'
 assert_contains "$powershell_setup" 'Ensure-WindowsHerdr -DryRun:$DryRun' 'setup.ps1 installs or verifies Herdr with the shell phase'
+assert_contains "$powershell_setup" 'Ensure-WindowsAgent -Agent $Agent' 'setup.ps1 has a separate Windows agent setup path'
 assert_contains "$powershell_setup" 'Ensure-WindowsWezTerm' 'setup.ps1 verifies Windows WezTerm'
 assert_contains "$powershell_setup" 'Ensure-WindowsAutoHotkey' 'setup.ps1 verifies Windows AutoHotkey for Quake phase'
 assert_contains "$powershell_setup" 'Ensure-WindowsNeovim' 'setup.ps1 verifies Windows Neovim'
@@ -108,6 +118,10 @@ assert_contains "$common_ps1" "PackageId 'AutoHotkey.AutoHotkey'" 'Windows boots
 assert_contains "$common_ps1" "PackageId 'Neovim.Neovim'" 'Windows bootstrap knows Neovim package'
 assert_contains "$common_ps1" "PackageId 'sxyazi.yazi'" 'Windows bootstrap knows Yazi package'
 assert_contains "$common_ps1" 'Ensure-WindowsHerdr' 'Windows bootstrap has a Herdr installer'
+assert_contains "$common_ps1" 'Ensure-WindowsAgent' 'Windows bootstrap has a separate agent installer'
+assert_contains "$common_ps1" "PackageId 'OpenJS.NodeJS.LTS'" 'Windows agent setup can install Node.js LTS'
+assert_contains "$common_ps1" '@earendil-works/pi-coding-agent' 'Windows agent setup knows the Pi npm package'
+assert_contains "$common_ps1" '@openai/codex' 'Windows agent setup knows the Codex npm package'
 assert_contains "$common_ps1" "Invoke-RestMethod 'https://herdr.dev/install.ps1' | Invoke-Expression" 'Windows bootstrap uses the approved official Herdr exception'
 assert_contains "$common_ps1" "WezTerm" 'Windows bootstrap searches standard WezTerm install path'
 assert_contains "$common_ps1" "Neovim\\bin" 'Windows bootstrap searches standard Neovim install path'
@@ -151,6 +165,8 @@ assert_contains "$doctor_source" 'executable_doctor' 'managed workstation doctor
 doctor_config=$(cat "$repo_root/chezmoi/dot_config/workstation/executable_doctor")
 assert_contains "$doctor_config" 'optional_command herdr' 'doctor reports Herdr when available'
 assert_contains "$doctor_config" 'optional_command just' 'doctor reports Just when available'
+assert_contains "$doctor_config" 'optional_command pi' 'doctor reports Pi when available'
+assert_contains "$doctor_config" 'optional_command codex' 'doctor reports Codex when available'
 assert_contains "$common_sh" 'macos_install_formulae' 'setup.sh has macOS Homebrew formula helper'
 assert_contains "$common_sh" 'macos_install_cask' 'setup.sh has macOS Homebrew cask helper'
 assert_contains "$common_sh" 'Install or approve Homebrew yourself' 'macOS setup never installs Homebrew automatically'

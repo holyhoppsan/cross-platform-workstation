@@ -1130,7 +1130,7 @@ Tasks:
 
 * [ ] Review the user's reference workflow examples and decide which commands belong in recipes.
 * [ ] Decide installation/detection policy for Windows, macOS, and Ubuntu. Windows uses the MSYS2 UCRT64 package `mingw-w64-ucrt-x86_64-just`; macOS uses the Homebrew `just` formula. Ubuntu policy remains pending.
-* [x] Add Windows/macOS executable installation and `doctor` detection without adding any `justfile`. Status: Windows uses MSYS2 UCRT64 package `mingw-w64-ucrt-x86_64-just`; macOS uses the Homebrew formula. Platform validation remains pending.
+* [x] Add Windows/macOS executable installation and `doctor` detection without adding any `justfile`. Status: Windows uses MSYS2 UCRT64 package `mingw-w64-ucrt-x86_64-just`; macOS uses the Homebrew formula. Windows `just 1.52.0` and macOS `just` were installed and confirmed on 2026-08-20.
 * [ ] Add a documented `justfile` only after that review.
 * [ ] Add safe recipes, tests, and docs.
 * [ ] Validate the chosen recipes on each supported platform before claiming portability.
@@ -1344,7 +1344,7 @@ Deferred items:
 
 ## Phase 11: AI Agent Launcher
 
-Status: Not started
+Status: In progress; separate Pi and Codex installation support is first
 
 Goal: Add a common agent launcher with adapters for supported tools.
 
@@ -1353,6 +1353,9 @@ Scope:
 * Adapter-based agent launcher.
 * Support OpenCode, Pi, Claude Code, Codex, and Goose.
 * Do not assume every tool supports every model or provider.
+* Node.js/npm may be installed as a managed prerequisite when Pi or Codex is selected and it is missing.
+* Pi and Codex installation must remain independent; installing one must not install, configure, or authenticate the other.
+* Use package-manager/npm installation, not remote-script installers.
 
 Supported AI tools:
 
@@ -1442,6 +1445,9 @@ Deliverables:
 
 Tasks:
 
+* [x] Add independent Pi installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows; macOS validation remains pending.
+* [x] Add independent Codex installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows; macOS validation remains pending.
+* [x] Make Windows global npm commands reachable from the managed MSYS2 UCRT64 shell. Status: the managed PATH includes Node.js and the per-user npm command directory; Pi and Codex were version-checked from a fresh UCRT64 interactive Bash session.
 * [ ] Add `agent` launcher.
 * [ ] Add adapter structure.
 * [ ] Add OpenCode adapter.
@@ -1450,8 +1456,8 @@ Tasks:
 * [ ] Add Codex adapter.
 * [ ] Add Goose adapter.
 * [ ] Add model profile examples.
-* [ ] Add docs.
-* [ ] Add doctor checks.
+* [x] Document separate Pi and Codex installation commands. Status: command installation is documented; launcher/profile documentation remains pending.
+* [x] Add installation detection to doctor. Status: `doctor --phase shell` reports optional Pi and Codex commands; the full Phase 11 `--phase agents` doctor work remains pending.
 * [ ] Add tests where practical.
 
 Validation:
@@ -1470,7 +1476,7 @@ Notes:
 
 Deferred items:
 
-* Automatic installation of optional agents until the policy is decided.
+* Agent adapters, launcher behavior, profiles, notifications, and all optional agents beyond the independently installable Pi and Codex paths.
 
 ## Phase 12: Agent Notifications and Status
 
@@ -2577,3 +2583,11 @@ Format:
 - Phases touched: Phase 5.5 Windows MSYS2 and Mosh remote access; Phase 6 macOS agent readiness.
 - Validation performed: The MacBook Pro reached the Windows MSYS2 `sshd` listener over the shared private Wi-Fi network, verified the server ED25519 host-key fingerprint, accepted it, completed SSH login through the `lfg-laptop-herdr` alias, and successfully ran Herdr from the UCRT64 remote shell.
 - Known gaps: This is LAN-only. The router-assigned Windows address can change, and off-LAN access still awaits Phase 8 Tailscale.
+
+### 2026-08-20
+
+- Summary of changes: Began Phase 11 with separate, opt-in Pi and Codex installation paths. Windows uses Node.js LTS plus npm; macOS uses Homebrew Node.js plus npm only when the selected agent needs it. The managed Windows MSYS2 UCRT64 PATH now exposes the Node.js and per-user npm command directories.
+- Phases touched: Phase 11 AI agent launcher; Phase 1 shared shell PATH behavior.
+- Validation performed: On Windows, `setup.ps1 -Agent pi` installed Pi 0.84.2 and `setup.ps1 -Agent codex` installed Codex CLI 0.148.0. A fresh interactive MSYS2 UCRT64 Bash resolved `node`, `pi`, and `codex`, completed each version check, and reported both tools through `doctor --phase shell`. Bash/PowerShell parser checks, `git diff --check`, and the portable test suite (137 setup tests) passed.
+- Known gaps: The new macOS commands are implemented but not yet validated on the MacBook Pro. No tool was authenticated, configured, or launched as an agent; the common `agent` launcher and profiles remain future Phase 11 work.
+- Next actions: Commit and push when approved, then on macOS install and verify Pi and Codex one at a time using the documented commands.

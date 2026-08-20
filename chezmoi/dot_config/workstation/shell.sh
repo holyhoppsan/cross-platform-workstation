@@ -33,12 +33,15 @@ fi
 if [ "${WORKSTATION_OS:-}" = windows ] && command -v cygpath >/dev/null 2>&1 && [ -n "${ProgramFiles:-}" ]; then
   path_prepend "$(cygpath -u "$ProgramFiles")/WezTerm"
   path_prepend "$(cygpath -u "$ProgramFiles")/Neovim/bin"
+  path_prepend "$(cygpath -u "$ProgramFiles")/nodejs"
 fi
 
 if [ "${WORKSTATION_OS:-}" = windows ]; then
   path_prepend '/c/Program Files/WezTerm'
   path_prepend '/c/Program Files/Neovim/bin'
+  path_prepend '/c/Program Files/nodejs'
   path_prepend "$HOME/AppData/Local/Programs/Herdr/bin"
+  path_prepend "$HOME/AppData/Roaming/npm"
 fi
 
 alias ll='ls -alF'
