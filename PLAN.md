@@ -1446,7 +1446,7 @@ Deliverables:
 
 Tasks:
 
-* [x] Add independent Pi installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows; macOS validation remains pending.
+* [x] Add independent Pi installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS. Pi setup also ensures the opt-in global `npm:@narumitw/pi-usage` extension through Pi; Windows extension installation is validated and macOS validation remains pending.
 * [x] Add independent Codex installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows; macOS validation remains pending.
 * [x] Make Windows global npm commands reachable from the managed MSYS2 UCRT64 shell. Status: the managed PATH includes Node.js and the per-user npm command directory; Pi and Codex were version-checked from a fresh UCRT64 interactive Bash session.
 * [ ] Add `agent` launcher.
@@ -1459,7 +1459,7 @@ Tasks:
 * [ ] Add model profile examples.
 * [x] Document separate Pi and Codex installation commands. Status: command installation is documented; launcher/profile documentation remains pending.
 * [x] Add installation detection to doctor. Status: `doctor --phase shell` reports optional Pi and Codex commands; the full Phase 11 `--phase agents` doctor work remains pending.
-* [ ] Add tests where practical.
+* [x] Add tests where practical. Status: portable setup tests cover Pi/Codex package selection and the Pi-only default extension installation path.
 
 Validation:
 
@@ -1645,6 +1645,7 @@ Tasks:
 * [ ] Add manual validation checklist.
 * [ ] Review security behavior.
 * [ ] Review path quoting behavior.
+* [ ] Add optional Vowen desktop-dictation installation and validation for Windows and macOS. Keep it independent from coding agents, require explicit approval for any installer, and review its global shortcut and text-insertion behavior against WezTerm bindings.
 
 Validation:
 
@@ -2608,3 +2609,19 @@ Format:
 - Validation performed: Portable tests, Bash syntax validation, and `git diff --check` passed. Windows shell setup installed Starship 1.25.1 and a simulated interactive UCRT64 session initialized the prompt successfully.
 - Known gaps: The Starship prompt has not yet been visually validated in a MacBook Pro WezTerm window.
 - Next actions: Commit and push when approved, then validate a fresh MacBook Pro WezTerm prompt after `./setup.sh --phase shell --install-missing`.
+
+### 2026-08-20
+
+- Summary of changes: Added the Pi-only default global extension `npm:@narumitw/pi-usage`. The separate Pi setup path detects global Pi packages with `pi list` and installs the extension with `pi install` only when absent; the Codex path remains independent.
+- Phases touched: Phase 11 AI agent launcher.
+- Validation performed: Portable test coverage was added for the Windows and macOS installer paths. On Windows, the prior default package was removed, `setup.ps1 -Agent pi` installed `npm:@narumitw/pi-usage`, `pi list` reported it, and a second setup run reported it as already available. macOS validation remains pending.
+- Known gaps: Pi extensions are third-party code and run with the user's permissions. No credentials are read or committed by this repository; Pi retains its own extension and authentication configuration.
+- Next actions: Commit and push when approved, then validate `./setup.sh --agent pi --install-missing` and `pi list` on macOS.
+
+### 2026-08-20
+
+- Summary of changes: Added an explicit future task for the optional Vowen desktop dictation application. It is a Windows/macOS voice-input integration, not an AI coding agent.
+- Phases touched: Phase 14 polish and hardening.
+- Validation performed: Vowen's official documentation was reviewed for supported desktop platforms and system-wide text input behavior. No installer, shortcut, or permission change has been made.
+- Known gaps: Vowen may use a global shortcut and insert text into WezTerm, so its shortcut and paste behavior must be reviewed on each platform before it is considered compatible.
+- Next actions: Choose the desired Vowen shortcut and text-insertion workflow, then implement an opt-in installation and manual validation path.
