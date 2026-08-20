@@ -195,6 +195,7 @@ check_shell() {
   optional_command fdfind
   optional_command jq
   optional_command fzf
+  optional_command herdr
 
   if [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/workstation/platform.sh" ]; then
     ok 'managed shell config' 'platform.sh readable'

@@ -31,6 +31,7 @@ if ($Phase -in @('shell', 'wezterm', 'quake', 'neovim', 'yazi', 'all')) {
             Test-ShellPhase -RepoRoot $RepoRoot -Platform $Platform
         } else {
             Ensure-WindowsPhaseOneTools -DryRun:$DryRun
+            Ensure-WindowsHerdr -DryRun:$DryRun
         }
 
         if ($Phase -in @('shell', 'all')) {

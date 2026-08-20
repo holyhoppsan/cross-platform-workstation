@@ -307,6 +307,32 @@ function Ensure-WindowsYazi {
     Ensure-WindowsPackageCommand -Command 'yazi.exe' -PackageId 'sxyazi.yazi' -Name 'Yazi' -DryRun:$DryRun
 }
 
+function Ensure-WindowsHerdr {
+    param([switch]$DryRun)
+
+    # The preview installer writes the user PATH. Refresh this process first so
+    # an existing installation is detected without running the installer again.
+    Update-ProcessPathFromRegistry
+
+    if (Test-CommandAvailable -Name 'herdr.exe') {
+        Write-SetupInfo 'Herdr already available'
+        return
+    }
+    if ($DryRun) {
+        Write-SetupInfo 'would install Herdr Windows preview through the official herdr.dev installer'
+        return
+    }
+
+    # User-approved exception: Herdr has no supported Windows package-manager route.
+    # Do not generalize this irm|iex pattern to any other bootstrap dependency.
+    Write-SetupInfo 'installing Herdr Windows preview through the official herdr.dev installer'
+    Invoke-RestMethod 'https://herdr.dev/install.ps1' | Invoke-Expression
+    Update-ProcessPathFromRegistry
+    if (-not (Test-CommandAvailable -Name 'herdr.exe')) {
+        throw 'Herdr installer completed, but herdr.exe was not found. Open a new PowerShell window and rerun setup.'
+    }
+}
+
 function Get-WindowsQuakeStartupShortcutPath {
     $startup = [Environment]::GetFolderPath('Startup')
     if (-not $startup) {
@@ -462,17 +488,25 @@ function Invoke-Msys2Bash {
         [Parameter(Mandatory)][string]$WorkingDirectory
     )
 
-    Push-Location $WorkingDirectory
+    $absoluteWorkingDirectory = [System.IO.Path]::GetFullPath($WorkingDirectory)
+    $previousSetupDirectory = $Env:WORKSTATION_SETUP_DIRECTORY
     try {
         $previousMsystem = $Env:MSYSTEM
         $Env:MSYSTEM = 'UCRT64'
-        & $BashPath --login -c $Command
+        $Env:WORKSTATION_SETUP_DIRECTORY = $absoluteWorkingDirectory
+        # --login starts Bash in the user's home directory, so PowerShell's
+        # current location is not inherited. Set it explicitly inside Bash.
+        & $BashPath --login -c ('cd -- "$WORKSTATION_SETUP_DIRECTORY" && ' + $Command)
         if ($LASTEXITCODE -ne 0) {
             throw "MSYS2 Bash command failed with exit code $LASTEXITCODE`: $Command"
         }
     } finally {
         $Env:MSYSTEM = $previousMsystem
-        Pop-Location
+        if ($null -eq $previousSetupDirectory) {
+            Remove-Item Env:WORKSTATION_SETUP_DIRECTORY -ErrorAction SilentlyContinue
+        } else {
+            $Env:WORKSTATION_SETUP_DIRECTORY = $previousSetupDirectory
+        }
     }
 }
 
@@ -483,17 +517,24 @@ function Invoke-Msys2BashInteractive {
         [Parameter(Mandatory)][string]$WorkingDirectory
     )
 
-    Push-Location $WorkingDirectory
+    $absoluteWorkingDirectory = [System.IO.Path]::GetFullPath($WorkingDirectory)
+    $previousSetupDirectory = $Env:WORKSTATION_SETUP_DIRECTORY
     try {
         $previousMsystem = $Env:MSYSTEM
         $Env:MSYSTEM = 'UCRT64'
-        & $BashPath --login -i -c $Command
+        $Env:WORKSTATION_SETUP_DIRECTORY = $absoluteWorkingDirectory
+        # Interactive login Bash also resets to the home directory.
+        & $BashPath --login -i -c ('cd -- "$WORKSTATION_SETUP_DIRECTORY" && ' + $Command)
         if ($LASTEXITCODE -ne 0) {
             throw "Interactive MSYS2 Bash command failed with exit code $LASTEXITCODE`: $Command"
         }
     } finally {
         $Env:MSYSTEM = $previousMsystem
-        Pop-Location
+        if ($null -eq $previousSetupDirectory) {
+            Remove-Item Env:WORKSTATION_SETUP_DIRECTORY -ErrorAction SilentlyContinue
+        } else {
+            $Env:WORKSTATION_SETUP_DIRECTORY = $previousSetupDirectory
+        }
     }
 }
 
