@@ -8,6 +8,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 phase=shell
 dry_run=false
 install_missing=false
+agent=''
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -28,6 +29,11 @@ while [ "$#" -gt 0 ]; do
       install_missing=true
       shift
       ;;
+    --agent)
+      [ "$#" -ge 2 ] || die '--agent requires pi or codex'
+      agent=$2
+      shift 2
+      ;;
     -h|--help)
       setup_usage
       exit 0
@@ -37,6 +43,16 @@ while [ "$#" -gt 0 ]; do
       ;;
   esac
 done
+
+if [ -n "$agent" ]; then
+  case "$agent" in pi|codex) ;; *) die "unknown agent: $agent" ;; esac
+  if [ "$dry_run" = true ]; then
+    info "would install or verify agent: $agent"
+    exit 0
+  fi
+  bash "$repo_root/scripts/setup/agent.sh" "$repo_root" "$agent" "$install_missing"
+  exit 0
+fi
 
 case "$phase" in
   foundation|shell|wezterm|quake|neovim|yazi|all) ;;

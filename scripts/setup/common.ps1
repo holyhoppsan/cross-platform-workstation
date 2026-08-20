@@ -334,6 +334,22 @@ function Ensure-WindowsHerdr {
     }
 }
 
+function Ensure-WindowsAgent {
+    param([Parameter(Mandatory)][ValidateSet('pi', 'codex')][string]$Agent, [switch]$DryRun)
+    Ensure-WindowsPackageCommand -Command 'node.exe' -PackageId 'OpenJS.NodeJS.LTS' -Name 'Node.js LTS' -DryRun:$DryRun
+    if ($DryRun) { Write-SetupInfo "would install $Agent with npm"; return }
+    $npm = Resolve-InstalledCommand -Name 'npm.cmd'
+    $package = if ($Agent -eq 'pi') { '@earendil-works/pi-coding-agent' } else { '@openai/codex' }
+    $command = if ($Agent -eq 'pi') { 'pi.cmd' } else { 'codex.cmd' }
+    if (Test-CommandAvailable -Name $command) { Write-SetupInfo "$Agent already available"; return }
+    & $npm install -g --ignore-scripts $package
+    if ($LASTEXITCODE -ne 0) { throw "npm failed to install $Agent." }
+    $agentCommand = Resolve-InstalledCommand -Name $command
+    if (-not $agentCommand) { throw "$Agent was installed but command was not found." }
+    & $agentCommand --version
+    if ($LASTEXITCODE -ne 0) { throw "$Agent was installed but its version check failed." }
+}
+
 function Get-WindowsQuakeStartupShortcutPath {
     $startup = [Environment]::GetFolderPath('Startup')
     if (-not $startup) {

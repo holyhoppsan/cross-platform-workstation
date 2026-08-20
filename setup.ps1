@@ -4,7 +4,8 @@ param(
     [string]$Phase = 'shell',
     [switch]$DryRun,
     [switch]$SkipInstall,
-    [switch]$SkipApply
+    [switch]$SkipApply,
+    [ValidateSet('pi', 'codex')][string]$Agent
 )
 
 $ErrorActionPreference = 'Stop'
@@ -24,6 +25,12 @@ if ($Platform -eq 'windows' -and -not $DryRun -and (Test-WindowsProcessElevated)
 }
 
 Test-FoundationPhase -RepoRoot $RepoRoot
+
+if ($Agent) {
+    if ($Platform -ne 'windows') { throw 'Agent installation through setup.ps1 is supported on Windows only.' }
+    if ($SkipInstall) { Write-SetupInfo "skipping $Agent install/verify by request" } else { Ensure-WindowsAgent -Agent $Agent -DryRun:$DryRun }
+    exit 0
+}
 
 if ($Phase -in @('shell', 'wezterm', 'quake', 'neovim', 'yazi', 'all')) {
     if ($Platform -eq 'windows') {

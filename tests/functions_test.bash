@@ -64,9 +64,12 @@ shell_config=$(cat "$repo_root/chezmoi/dot_config/workstation/shell.sh")
 assert_contains "$shell_config" 'Microsoft/WinGet/Links' 'Windows shell adds winget links directory'
 assert_contains "$shell_config" 'WezTerm' 'Windows shell adds standard WezTerm install directory'
 assert_contains "$shell_config" 'Neovim/bin' 'Windows shell adds standard Neovim install directory'
+assert_contains "$shell_config" 'nodejs' 'Windows shell adds standard Node.js install directory'
 assert_contains "$shell_config" "/c/Program Files/WezTerm" 'Windows shell has WezTerm path fallback'
 assert_contains "$shell_config" "/c/Program Files/Neovim/bin" 'Windows shell has Neovim path fallback'
+assert_contains "$shell_config" "/c/Program Files/nodejs" 'Windows shell has Node.js path fallback'
 assert_contains "$shell_config" 'AppData/Local/Programs/Herdr/bin' 'Windows shell adds the per-user Herdr directory'
+assert_contains "$shell_config" 'AppData/Roaming/npm' 'Windows shell adds the per-user npm command directory'
 assert_contains "$shell_config" 'workstation/env.sh' 'shell loads machine-local workstation env'
 assert_contains "$shell_config" 'workstation_add_homebrew_path' 'macOS shell adds Homebrew paths'
 
