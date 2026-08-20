@@ -9,10 +9,20 @@ case "$agent" in
   pi) package='@earendil-works/pi-coding-agent'; command_name='pi' ;;
   codex) package='@openai/codex'; command_name='codex' ;;
 esac
-if ! has_command node || ! has_command npm; then
-  [ "$install_missing" = true ] || die "Node.js/npm is required for $agent. Rerun with --install-missing."
+node_ready=false
+if has_command node && has_command npm && node --version >/dev/null 2>&1 && npm --version >/dev/null 2>&1; then
+  node_ready=true
+fi
+if [ "$node_ready" = false ]; then
+  [ "$install_missing" = true ] || die "A working Node.js/npm installation is required for $agent. Rerun with --install-missing."
   [ "$platform" = macos ] || die 'Agent installation through setup.sh is supported on macOS only; use setup.ps1 on Windows.'
-  macos_install_formulae node
+  if has_command node || has_command npm; then
+    info 'repairing the macOS Homebrew Node.js/npm installation'
+    brew reinstall node || die 'Homebrew failed while repairing Node.js.'
+  else
+    macos_install_formulae node
+  fi
+  node --version >/dev/null 2>&1 && npm --version >/dev/null 2>&1 || die 'Node.js/npm is still unavailable after Homebrew completed.'
 fi
 if ! has_command "$command_name"; then
   [ "$install_missing" = true ] || die "$agent is missing. Rerun with --agent $agent --install-missing."
