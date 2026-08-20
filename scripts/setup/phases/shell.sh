@@ -16,7 +16,7 @@ if [ "$WORKSTATION_OS" = windows ]; then
 fi
 
 if [ "$WORKSTATION_OS" = macos ] && [ "$install_missing" = true ]; then
-  macos_install_formulae git bash chezmoi ripgrep fd jq fzf herdr just
+  macos_install_formulae git bash chezmoi ripgrep fd jq fzf herdr just starship
 fi
 
 if ! has_command chezmoi; then

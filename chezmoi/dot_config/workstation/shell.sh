@@ -44,6 +44,10 @@ if [ "${WORKSTATION_OS:-}" = windows ]; then
   path_prepend "$HOME/AppData/Roaming/npm"
 fi
 
+if [[ $- == *i* ]] && [ "${TERM:-dumb}" != dumb ] && command -v starship >/dev/null 2>&1; then
+  eval "$(starship init bash)"
+fi
+
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'

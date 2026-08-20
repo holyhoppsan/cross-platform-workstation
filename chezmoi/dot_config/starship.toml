@@ -1,0 +1,19 @@
+add_newline = false
+
+format = "$directory$git_branch$git_status$line_break$character"
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+
+[git_branch]
+symbol = "git:"
+
+[git_status]
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+
+[character]
+success_symbol = "[❯](green)"
+error_symbol = "[❯](red)"
