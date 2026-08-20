@@ -48,6 +48,27 @@ workstation_session_type() {
   printf '%s\n' "${XDG_SESSION_TYPE:-unknown}"
 }
 
+workstation_prepend_path_entry() {
+  local entry path_entry filtered_path previous_ifs
+  entry=$1
+  filtered_path=''
+  previous_ifs=$IFS
+  IFS=:
+
+  for path_entry in $PATH; do
+    [ "$path_entry" = "$entry" ] && continue
+    if [ -n "$filtered_path" ]; then
+      filtered_path="$filtered_path:$path_entry"
+    else
+      filtered_path=$path_entry
+    fi
+  done
+
+  IFS=$previous_ifs
+  PATH=$entry
+  [ -n "$filtered_path" ] && PATH="$PATH:$filtered_path"
+}
+
 workstation_add_homebrew_path() {
   [ "${WORKSTATION_OS:-$(workstation_detect_platform)}" = macos ] || return 0
 
@@ -56,14 +77,8 @@ workstation_add_homebrew_path() {
     [ -x "$brew_path" ] || continue
     brew_prefix=$("$brew_path" --prefix 2>/dev/null) || continue
 
-    case ":$PATH:" in
-      *":$brew_prefix/bin:"*) ;;
-      *) PATH="$brew_prefix/bin:$PATH" ;;
-    esac
-    case ":$PATH:" in
-      *":$brew_prefix/sbin:"*) ;;
-      *) PATH="$brew_prefix/sbin:$PATH" ;;
-    esac
+    workstation_prepend_path_entry "$brew_prefix/bin"
+    workstation_prepend_path_entry "$brew_prefix/sbin"
     export PATH
     return 0
   done

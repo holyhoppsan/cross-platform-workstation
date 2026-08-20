@@ -19,7 +19,7 @@ Install the shared CLI tools inside MSYS2 with `pacman`: `git`, `jq`, `unzip`, `
 
 ## macOS
 
-Use Bash. Homebrew Bash is preferred when already installed, but setup must not silently install Homebrew.
+Use Bash. Homebrew Bash is preferred when already installed, but setup must not silently install Homebrew. The managed shell puts the active Homebrew `bin` and `sbin` directories before system paths so Homebrew-provided Git, Bash, and CLI tools take precedence.
 
 ## Ubuntu
 

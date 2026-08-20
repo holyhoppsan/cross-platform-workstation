@@ -73,6 +73,7 @@ assert_contains "$shell_config" 'workstation_add_homebrew_path' 'macOS shell add
 platform_config=$(cat "$repo_root/chezmoi/dot_config/workstation/platform.sh")
 assert_contains "$platform_config" '/opt/homebrew/bin/brew' 'macOS Homebrew path checks Apple Silicon prefix'
 assert_contains "$platform_config" '/usr/local/bin/brew' 'macOS Homebrew path checks Intel prefix'
+assert_contains "$platform_config" 'workstation_prepend_path_entry' 'macOS Homebrew paths are prioritized over system paths'
 
 functions_config=$(cat "$repo_root/chezmoi/dot_config/workstation/functions.sh")
 assert_contains "$functions_config" 'msystem=%s' 'platform-info reports the MSYS2 environment on Windows'

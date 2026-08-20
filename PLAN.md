@@ -2563,7 +2563,7 @@ Format:
 
 ### 2026-08-20
 
-- Summary of changes: Corrected macOS `doctor` self-reporting. When invoked through the system Bash, it now restarts once under the installed Homebrew Bash before checking tool versions, preserving its requested phase.
+- Summary of changes: Corrected macOS `doctor` self-reporting. When invoked through the system Bash, it now restarts once under the installed Homebrew Bash before checking tool versions, preserving its requested phase. The shared PATH helper now also moves Homebrew directories to the front when they are already present later in a zsh-launched PATH.
 - Phases touched: Phase 1 shell diagnostics.
-- Validation performed: Source-level validation pending; the issue was observed on the MacBook Pro where the interactive shell was Homebrew Bash but `doctor` reported Apple Bash and Git.
+- Validation performed: The MacBook Pro confirmed the doctor restart corrected the Bash version but exposed that an existing later Homebrew PATH entry still allowed Apple Git and jq to win. Portable validation of the PATH-ordering correction remains pending.
 - Known gaps: The corrected `doctor --phase shell` output must be manually validated on the MacBook Pro after chezmoi applies this change.
