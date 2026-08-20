@@ -45,6 +45,8 @@ assert_contains "$agent_setup" '@earendil-works/pi-coding-agent' 'agent setup kn
 assert_contains "$agent_setup" '@openai/codex' 'agent setup knows the Codex npm package'
 assert_contains "$agent_setup" 'npm install -g --ignore-scripts' 'agent setup installs selected agents through npm without lifecycle scripts'
 assert_contains "$agent_setup" 'macos_install_formulae node' 'agent setup can install Node.js on macOS when approved'
+assert_contains "$agent_setup" 'brew reinstall node' 'agent setup repairs an unhealthy macOS Homebrew Node.js installation'
+assert_contains "$agent_setup" 'node --version >/dev/null 2>&1' 'agent setup verifies Node.js can run before npm install'
 
 powershell_setup=$(cat "$repo_root/setup.ps1")
 verify_ps1=$(cat "$repo_root/scripts/setup/verify.ps1")
