@@ -496,6 +496,7 @@ Tasks:
 * [x] Add initial worktree helper stubs.
 * [x] Add initial agent helper stubs.
 * [x] Add doctor checks for shell phase.
+* [x] Add a shared Starship prompt, installed through MSYS2 UCRT64 on Windows and Homebrew on macOS. Status: Starship 1.25.1 was installed and initialized from a Windows UCRT64 interactive Bash; macOS validation remains pending.
 
 Validation:
 
@@ -2599,3 +2600,11 @@ Format:
 - Validation performed: Portable adapter-shape tests cover the retained-window lookup. MacBook Pro manual validation remains required.
 - Known gaps: The fix has not yet been tested on the MacBook Pro. Hammerspoon reloads still require title-based rediscovery, and Ubuntu remains unimplemented.
 - Next actions: Apply the managed Hammerspoon config, reload it, then test opening, unfocusing, restoring, minimizing, and restoring the same Quake session.
+
+### 2026-08-20
+
+- Summary of changes: Added a compact, shared Starship Bash prompt. Windows uses the MSYS2 UCRT64 package and macOS uses Homebrew. The checked-in configuration avoids Nerd Font-only glyphs and skips `TERM=dumb` validation shells.
+- Phases touched: Phase 1 common shell workflow.
+- Validation performed: Portable tests, Bash syntax validation, and `git diff --check` passed. Windows shell setup installed Starship 1.25.1 and a simulated interactive UCRT64 session initialized the prompt successfully.
+- Known gaps: The Starship prompt has not yet been visually validated in a MacBook Pro WezTerm window.
+- Next actions: Commit and push when approved, then validate a fresh MacBook Pro WezTerm prompt after `./setup.sh --phase shell --install-missing`.

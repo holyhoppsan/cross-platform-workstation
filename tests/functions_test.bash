@@ -70,6 +70,8 @@ assert_contains "$shell_config" "/c/Program Files/Neovim/bin" 'Windows shell has
 assert_contains "$shell_config" "/c/Program Files/nodejs" 'Windows shell has Node.js path fallback'
 assert_contains "$shell_config" 'AppData/Local/Programs/Herdr/bin' 'Windows shell adds the per-user Herdr directory'
 assert_contains "$shell_config" 'AppData/Roaming/npm' 'Windows shell adds the per-user npm command directory'
+assert_contains "$shell_config" 'starship init bash' 'interactive shells initialize the shared Starship prompt'
+assert_contains "$shell_config" '"${TERM:-dumb}" != dumb' 'Starship skips non-terminal validation shells'
 assert_contains "$shell_config" 'workstation/env.sh' 'shell loads machine-local workstation env'
 assert_contains "$shell_config" 'workstation_add_homebrew_path' 'macOS shell adds Homebrew paths'
 
@@ -93,6 +95,7 @@ assert_contains "$doctor_config" 'workstation_load_env' 'doctor can load machine
 assert_contains "$doctor_config" 'workstation_add_homebrew_path' 'doctor adds the macOS Homebrew path'
 assert_contains "$doctor_config" 'WORKSTATION_DOCTOR_REEXEC' 'doctor re-execs under Homebrew Bash on macOS'
 assert_contains "$doctor_config" 'exec "$macos_bash" "$0" "${original_args[@]}"' 'doctor preserves arguments when it re-execs under Homebrew Bash'
+assert_contains "$doctor_config" 'optional_command starship' 'doctor reports Starship when available'
 
 WORKSTATION_REPO_ROOT="$repo_root"
 assert_eq "$repo_root" "$(workstation-root)" 'workstation-root uses configured repository root'

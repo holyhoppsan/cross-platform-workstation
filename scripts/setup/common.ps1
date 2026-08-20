@@ -280,7 +280,8 @@ function Ensure-WindowsPhaseOneTools {
         'mingw-w64-ucrt-x86_64-ripgrep',
         'mingw-w64-ucrt-x86_64-fd',
         'mingw-w64-ucrt-x86_64-fzf',
-        'mingw-w64-ucrt-x86_64-just'
+        'mingw-w64-ucrt-x86_64-just',
+        'mingw-w64-ucrt-x86_64-starship'
     ) -DryRun:$DryRun
 }
 

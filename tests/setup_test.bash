@@ -107,6 +107,7 @@ assert_contains "$common_ps1" 'Test-WindowsProcessElevated' 'Windows setup helpe
 assert_contains "$common_ps1" 'Get-WindowsMsys2BashPath' 'Windows setup locates MSYS2 Bash'
 assert_contains "$common_ps1" 'Ensure-Msys2Ucrt64Packages' 'Windows setup verifies MSYS2 CLI packages'
 assert_contains "$common_ps1" 'mingw-w64-ucrt-x86_64-just' 'Windows shell setup installs Just through MSYS2 UCRT64'
+assert_contains "$common_ps1" 'mingw-w64-ucrt-x86_64-starship' 'Windows shell setup installs Starship through MSYS2 UCRT64'
 assert_contains "$common_ps1" 'Invoke-Msys2Bash' 'Windows setup validates through MSYS2 Bash'
 assert_contains "$common_ps1" 'cd -- "$WORKSTATION_SETUP_DIRECTORY" && ' 'Windows validation explicitly restores the repository directory after a login shell starts'
 assert_contains "$common_ps1" "PackageId 'twpayne.chezmoi'" 'Windows bootstrap knows chezmoi package'
@@ -167,6 +168,7 @@ assert_contains "$doctor_source" 'executable_doctor' 'managed workstation doctor
 doctor_config=$(cat "$repo_root/chezmoi/dot_config/workstation/executable_doctor")
 assert_contains "$doctor_config" 'optional_command herdr' 'doctor reports Herdr when available'
 assert_contains "$doctor_config" 'optional_command just' 'doctor reports Just when available'
+assert_contains "$doctor_config" 'optional_command starship' 'doctor reports Starship when available'
 assert_contains "$doctor_config" 'optional_command pi' 'doctor reports Pi when available'
 assert_contains "$doctor_config" 'optional_command codex' 'doctor reports Codex when available'
 assert_contains "$common_sh" 'macos_install_formulae' 'setup.sh has macOS Homebrew formula helper'
@@ -176,6 +178,7 @@ assert_contains "$common_sh" 'Install or approve Homebrew yourself' 'macOS setup
 shell_phase=$(cat "$repo_root/scripts/setup/phases/shell.sh")
 assert_contains "$shell_phase" 'herdr' 'macOS shell phase installs Herdr through Homebrew'
 assert_contains "$shell_phase" 'just' 'macOS shell phase installs Just through Homebrew'
+assert_contains "$shell_phase" 'starship' 'macOS shell phase installs Starship through Homebrew'
 
 wezterm_phase=$(cat "$repo_root/scripts/setup/phases/wezterm.sh")
 assert_contains "$wezterm_phase" 'wez.wezterm' 'setup.sh WezTerm phase knows Windows package'

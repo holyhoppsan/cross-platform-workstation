@@ -23,6 +23,10 @@ Use Bash. Homebrew Bash is preferred when already installed, but setup must not 
 
 The shell setup also installs or verifies the `just` command runner. It does not create a repository, global, or user `justfile`; recipes remain a separate Phase 7 decision.
 
+## Starship prompt
+
+The managed Bash prompt uses [Starship](https://starship.rs/) when it is installed. Windows installs it through the MSYS2 UCRT64 package `mingw-w64-ucrt-x86_64-starship`; macOS uses the Homebrew `starship` formula. The shared configuration is `~/.config/starship.toml`, uses no Nerd Font-only glyphs, and keeps the prompt compact with directory and Git status information.
+
 ## Ubuntu
 
 Use system Bash. Ubuntu GNOME Wayland is the default platform assumption for future Quake work, but Phase 1 only detects session facts.
