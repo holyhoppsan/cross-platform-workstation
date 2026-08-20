@@ -45,6 +45,7 @@ assert_contains "$powershell_setup" "'quake'" 'setup.ps1 accepts quake phase'
 assert_contains "$powershell_setup" "'neovim'" 'setup.ps1 accepts neovim phase'
 assert_contains "$powershell_setup" "'yazi'" 'setup.ps1 accepts yazi phase'
 assert_contains "$powershell_setup" 'Ensure-WindowsPhaseOneTools' 'setup.ps1 verifies Windows Phase 1 prerequisites'
+assert_contains "$powershell_setup" 'Ensure-WindowsHerdr -DryRun:$DryRun' 'setup.ps1 installs or verifies Herdr with the shell phase'
 assert_contains "$powershell_setup" 'Ensure-WindowsWezTerm' 'setup.ps1 verifies Windows WezTerm'
 assert_contains "$powershell_setup" 'Ensure-WindowsAutoHotkey' 'setup.ps1 verifies Windows AutoHotkey for Quake phase'
 assert_contains "$powershell_setup" 'Ensure-WindowsNeovim' 'setup.ps1 verifies Windows Neovim'
@@ -94,6 +95,7 @@ assert_contains "$common_ps1" 'Test-WindowsProcessElevated' 'Windows setup helpe
 assert_contains "$common_ps1" 'Get-WindowsMsys2BashPath' 'Windows setup locates MSYS2 Bash'
 assert_contains "$common_ps1" 'Ensure-Msys2Ucrt64Packages' 'Windows setup verifies MSYS2 CLI packages'
 assert_contains "$common_ps1" 'Invoke-Msys2Bash' 'Windows setup validates through MSYS2 Bash'
+assert_contains "$common_ps1" 'cd -- "$WORKSTATION_SETUP_DIRECTORY" && ' 'Windows validation explicitly restores the repository directory after a login shell starts'
 assert_contains "$common_ps1" "PackageId 'twpayne.chezmoi'" 'Windows bootstrap knows chezmoi package'
 assert_contains "$common_ps1" 'Do not install WSL' 'Windows bootstrap documents WSL exclusion'
 assert_contains "$common_ps1" 'Backup-ChezmoiManagedTargets' 'setup.ps1 backs up managed dotfiles before chezmoi apply'
@@ -104,6 +106,8 @@ assert_contains "$common_ps1" "PackageId 'wez.wezterm'" 'Windows bootstrap knows
 assert_contains "$common_ps1" "PackageId 'AutoHotkey.AutoHotkey'" 'Windows bootstrap knows AutoHotkey package'
 assert_contains "$common_ps1" "PackageId 'Neovim.Neovim'" 'Windows bootstrap knows Neovim package'
 assert_contains "$common_ps1" "PackageId 'sxyazi.yazi'" 'Windows bootstrap knows Yazi package'
+assert_contains "$common_ps1" 'Ensure-WindowsHerdr' 'Windows bootstrap has a Herdr installer'
+assert_contains "$common_ps1" "Invoke-RestMethod 'https://herdr.dev/install.ps1' | Invoke-Expression" 'Windows bootstrap uses the approved official Herdr exception'
 assert_contains "$common_ps1" "WezTerm" 'Windows bootstrap searches standard WezTerm install path'
 assert_contains "$common_ps1" "Neovim\\bin" 'Windows bootstrap searches standard Neovim install path'
 assert_contains "$common_ps1" "Yazi" 'Windows bootstrap searches standard Yazi install path'
@@ -142,9 +146,15 @@ assert_contains "$common_sh" 'setup_validate_interactive_shell' 'setup.sh has in
 doctor_source=$(git -C "$repo_root" ls-files --stage chezmoi/dot_config/workstation/executable_doctor)
 assert_contains "$doctor_source" '100755' 'managed workstation doctor source is executable'
 assert_contains "$doctor_source" 'executable_doctor' 'managed workstation doctor uses chezmoi executable attribute'
+
+doctor_config=$(cat "$repo_root/chezmoi/dot_config/workstation/executable_doctor")
+assert_contains "$doctor_config" 'optional_command herdr' 'doctor reports Herdr when available'
 assert_contains "$common_sh" 'macos_install_formulae' 'setup.sh has macOS Homebrew formula helper'
 assert_contains "$common_sh" 'macos_install_cask' 'setup.sh has macOS Homebrew cask helper'
 assert_contains "$common_sh" 'Install or approve Homebrew yourself' 'macOS setup never installs Homebrew automatically'
+
+shell_phase=$(cat "$repo_root/scripts/setup/phases/shell.sh")
+assert_contains "$shell_phase" 'herdr' 'macOS shell phase installs Herdr through Homebrew'
 
 wezterm_phase=$(cat "$repo_root/scripts/setup/phases/wezterm.sh")
 assert_contains "$wezterm_phase" 'wez.wezterm' 'setup.sh WezTerm phase knows Windows package'

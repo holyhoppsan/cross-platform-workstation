@@ -33,7 +33,7 @@ Expected behavior:
 
 ## Phase 1
 
-Phase 1 provisions and verifies the common shell workflow for the selected platform. On Windows it requires MSYS2 UCRT64, verifies required MSYS2 CLI packages, applies chezmoi-managed dotfiles, and validates the configured UCRT64 shell.
+Phase 1 provisions and verifies the common shell workflow for the selected platform. On Windows it requires MSYS2 UCRT64, verifies required MSYS2 CLI packages, applies chezmoi-managed dotfiles, and validates the configured UCRT64 shell. On macOS, when Homebrew is already installed and `--install-missing` is supplied, it installs the supported Homebrew formulae.
 
 Expected behavior:
 
@@ -43,6 +43,7 @@ Expected behavior:
 - verify Git is available for repository use and MSYS2 packages provide the interactive CLI tools
 - install or verify `chezmoi` on Windows
 - install or verify Phase 1 MSYS2 CLI tools on Windows: `git`, `ripgrep`, `fd`, `jq`, `fzf`, and `unzip`
+- install or verify Herdr: use `brew install herdr` on macOS; on Windows, only if absent, use Herdr's documented preview installer. This is a user-approved exception to the repository's normal no-remote-script execution rule because Herdr has no supported Winget package. Do not reuse this exception for any other dependency.
 - back up known Phase 1 managed dotfiles to `~/.workstation-setup-backup/<timestamp>`
 - apply chezmoi dotfiles with `--force` so setup does not block on interactive overwrite prompts
 - verify common Unix-style commands

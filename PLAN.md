@@ -2553,3 +2553,10 @@ Format:
 - Validation performed: Global `Ctrl+`` launch/minimize/restore worked on the MacBook Pro, and a running `sleep 60` command remained in the same session after the dropdown was minimized and restored.
 - Known gaps: macOS multi-monitor focused-placement validation and Ubuntu implementation/validation remain pending.
 - Next actions: Validate macOS focused-monitor placement when a second monitor is available; otherwise resume the Phase 7 `just` work when the user supplies workflow examples.
+
+### 2026-08-20
+
+- Summary of changes: Added Herdr installation ownership to the implemented shell setup on Windows and macOS. macOS uses the official Homebrew formula. The user explicitly approved a narrow Windows exception for Herdr's official preview `irm | iex` installer because no supported Winget package exists.
+- Phases touched: Phase 1 shell workflow; Phase 5.5 Herdr remote-session entry point.
+- Validation performed: PowerShell parser validation, Bash syntax checks, the full portable test suite, `git diff --check`, a Windows shell-setup dry run, and the corrected live Windows shell setup passed. The live run verified that the MSYS2 login-shell validation restores the repository directory, completed all portable tests, and reported the existing Herdr installation through `doctor --phase shell`. macOS installation remains pending.
+- Known gaps: The Windows exception must remain limited to Herdr's documented preview installer. Herdr must be installed and validated on the MacBook Pro in a fresh WezTerm Bash session.
