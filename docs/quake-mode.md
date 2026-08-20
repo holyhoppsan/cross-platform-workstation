@@ -57,7 +57,7 @@ Current Windows status: implemented and setup/doctor-checkable, but global hotke
 
 ## macOS
 
-macOS uses the chezmoi-managed `~/.hammerspoon/init.lua` adapter. It binds global `Ctrl+`` and starts a dedicated WezTerm `quake` workspace, identified by the `wezterm-quake` title. The adapter minimizes the focused dropdown instead of closing it, then restores, moves, sizes, and focuses it on the currently focused application's monitor.
+macOS uses the chezmoi-managed `~/.hammerspoon/init.lua` adapter. It binds global `Ctrl+`` and starts a dedicated WezTerm `quake` workspace. After first discovery, the adapter retains that window's macOS window ID so an unfocused dropdown is restored rather than a new terminal being launched; title matching remains the recovery path after Hammerspoon reloads. The adapter minimizes the focused dropdown instead of closing it, then restores, moves, sizes, and focuses it on the currently focused application's monitor.
 
 Install/apply it with user approval:
 

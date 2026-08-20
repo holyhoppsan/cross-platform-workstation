@@ -6,6 +6,7 @@ if not hs.fs.attributes(wezterm) then wezterm = "/Applications/WezTerm.app/Conte
 local quake_title = "wezterm-quake"
 local width_ratio, height_ratio = 0.95, 1.00
 local retry_count = 0
+local quake_window_id = nil
 
 hs.window.animationDuration = 0
 
@@ -15,8 +16,16 @@ local function focused_screen()
 end
 
 local function quake_window()
+  if quake_window_id then
+    local remembered = hs.window.get(quake_window_id)
+    if remembered then return remembered end
+    quake_window_id = nil
+  end
   for _, window in ipairs(hs.window.allWindows()) do
-    if window:title():find(quake_title, 1, true) then return window end
+    if window:title():find(quake_title, 1, true) then
+      quake_window_id = window:id()
+      return window
+    end
   end
 end
 
