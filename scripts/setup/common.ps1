@@ -340,7 +340,10 @@ function Ensure-WindowsAgent {
     Ensure-WindowsPackageCommand -Command 'node.exe' -PackageId 'OpenJS.NodeJS.LTS' -Name 'Node.js LTS' -DryRun:$DryRun
     if ($DryRun) {
         Write-SetupInfo "would install $Agent with npm"
-        if ($Agent -eq 'pi') { Write-SetupInfo 'would install Pi plugin: npm:@narumitw/pi-usage' }
+        if ($Agent -eq 'pi') {
+            Write-SetupInfo 'would install Pi plugin: npm:@narumitw/pi-usage'
+            Write-SetupInfo 'would install Pi plugin: npm:pi-mcp-adapter'
+        }
         return
     }
     $npm = Resolve-InstalledCommand -Name 'npm.cmd'
@@ -357,15 +360,16 @@ function Ensure-WindowsAgent {
     & $agentCommand --version
     if ($LASTEXITCODE -ne 0) { throw "$Agent was installed but its version check failed." }
     if ($Agent -eq 'pi') {
-        $plugin = 'npm:@narumitw/pi-usage'
-        $installedPackages = & $agentCommand list 2>&1
-        if ($LASTEXITCODE -ne 0) { throw 'Pi could not list installed packages.' }
-        if ($installedPackages -match [regex]::Escape($plugin)) {
-            Write-SetupInfo "Pi plugin already available: $plugin"
-        } else {
-            Write-SetupInfo "installing Pi plugin: $plugin"
-            & $agentCommand install $plugin
-            if ($LASTEXITCODE -ne 0) { throw "Pi failed to install plugin $plugin." }
+        foreach ($plugin in @('npm:@narumitw/pi-usage', 'npm:pi-mcp-adapter')) {
+            $installedPackages = & $agentCommand list 2>&1
+            if ($LASTEXITCODE -ne 0) { throw 'Pi could not list installed packages.' }
+            if ($installedPackages -match [regex]::Escape($plugin)) {
+                Write-SetupInfo "Pi plugin already available: $plugin"
+            } else {
+                Write-SetupInfo "installing Pi plugin: $plugin"
+                & $agentCommand install $plugin
+                if ($LASTEXITCODE -ne 0) { throw "Pi failed to install plugin $plugin." }
+            }
         }
     }
 }

@@ -1172,7 +1172,7 @@ Implementation order:
 
 ## Phase 9: Rider and Minimal Unreal Launching
 
-Status: Not started
+Status: Not started; Windows Rider MCP bridge configured for Codex, live tool validation pending
 
 Goal: Add simple Rider integration for Unreal projects.
 
@@ -1239,6 +1239,7 @@ Deliverables:
 
 Tasks:
 
+* [x] Configure the Rider MCP Server manually for Codex on Windows. Status: Rider 2026.1.4 supplied a local HTTP-stream configuration. Its automatic Codex configuration currently fails while parsing valid literal Windows paths in the existing Codex TOML, and the desktop app rejected Rider's stdio alternative; the HTTP-stream entry at the Rider-generated loopback endpoint was then added through `codex mcp add rider --url`. Pi is configured to import Codex MCP entries and requires an interactive restart to validate the Rider import.
 * [ ] Add Rider helper.
 * [ ] Add `.uproject` detection.
 * [ ] Add Rider path config.
@@ -1259,6 +1260,7 @@ Validation:
 Notes:
 
 * Existing `docs/unreal.md` may contain related narrative, but this phase requires the minimal Rider-specific files above.
+* The Rider MCP server is a user-local IDE integration, not a checked-in workstation configuration. Do not commit its generated classpath, port, or any future credentials; regenerate it from Rider when the IDE installation changes.
 
 Deferred items:
 
@@ -1446,7 +1448,8 @@ Deliverables:
 
 Tasks:
 
-* [x] Add independent Pi installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS. Pi setup also ensures the opt-in global `npm:@narumitw/pi-usage` extension through Pi; Windows extension installation is validated and macOS validation remains pending.
+* [x] Add independent Pi installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS. Pi setup also ensures the opt-in global `npm:@narumitw/pi-usage` extension and `npm:pi-mcp-adapter`; Windows extension installation is validated and macOS validation remains pending.
+* [x] Add optional Pi MCP support through `pi-mcp-adapter`. Status: installation is implemented for the Pi-only setup path. The repository installs only the adapter; every machine's MCP server selection, imports, endpoints, and OAuth authentication remain explicit user-local configuration and are never committed.
 * [x] Add independent Codex installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows; macOS validation remains pending.
 * [x] Make Windows global npm commands reachable from the managed MSYS2 UCRT64 shell. Status: the managed PATH includes Node.js and the per-user npm command directory; Pi and Codex were version-checked from a fresh UCRT64 interactive Bash session.
 * [ ] Add `agent` launcher.
@@ -2612,11 +2615,11 @@ Format:
 
 ### 2026-08-20
 
-- Summary of changes: Added the Pi-only default global extension `npm:@narumitw/pi-usage`. The separate Pi setup path detects global Pi packages with `pi list` and installs the extension with `pi install` only when absent; the Codex path remains independent.
+- Summary of changes: Added the Pi-only default global extensions `npm:@narumitw/pi-usage` and `npm:pi-mcp-adapter`. The separate Pi setup path detects global Pi packages with `pi list` and installs extensions with `pi install` only when absent; the Codex path remains independent.
 - Phases touched: Phase 11 AI agent launcher.
-- Validation performed: Portable test coverage was added for the Windows and macOS installer paths. On Windows, the prior default package was removed, `setup.ps1 -Agent pi` installed `npm:@narumitw/pi-usage`, `pi list` reported it, and a second setup run reported it as already available. macOS validation remains pending.
-- Known gaps: Pi extensions are third-party code and run with the user's permissions. No credentials are read or committed by this repository; Pi retains its own extension and authentication configuration.
-- Next actions: Commit and push when approved, then validate `./setup.sh --agent pi --install-missing` and `pi list` on macOS.
+- Validation performed: Portable test coverage was added for the Windows and macOS installer paths. On Windows, the prior default package was removed, `setup.ps1 -Agent pi` installed `npm:@narumitw/pi-usage`, `pi list` reported it, and a second setup run reported it as already available. `pi-mcp-adapter` was then installed. User-local Windows validation confirmed that an explicitly configured Pi profile can load the adapter and connect to configured MCP servers. macOS validation remains pending.
+- Known gaps: Pi extensions are third-party code and run with the user's permissions. No credentials, endpoints, imports, or server definitions are read or committed by this repository; each Pi profile retains and reviews its own MCP and authentication configuration.
+- Next actions: On each desired computer, use `/mcp setup` to choose or add servers, then authenticate any OAuth-backed server. Commit and push when approved, then validate `./setup.sh --agent pi --install-missing`, `/mcp setup`, and `pi list` on macOS.
 
 ### 2026-08-20
 
