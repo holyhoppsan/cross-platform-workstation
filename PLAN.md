@@ -219,20 +219,21 @@ Do not include Yazi in the AI agent list.
 | ----- | ----------------------------------------- | ----------------------------------------- |
 | 0     | Repository foundation                     | Implemented and locally validated         |
 | 1     | Common shell workflow                     | Implemented and validated on Windows and macOS; needs Ubuntu validation |
-| 2     | WezTerm baseline with tmux-style bindings | Implemented and validated on Windows and partially on macOS; needs Ubuntu and remaining macOS tab/workspace validation |
-| 3     | Quake-mode dropdown                       | Windows and macOS validated; macOS unfocused-window recovery fix pending MacBook Pro retest; Ubuntu stubbed |
+| 2     | WezTerm baseline with tmux-style bindings | Implemented and validated on Windows and macOS; needs Ubuntu validation |
+| 3     | Quake-mode dropdown                       | Windows and macOS validated; macOS multi-monitor placement and Ubuntu remain pending |
 | 4     | Neovim baseline                           | Implemented and validated on Windows and macOS; needs Ubuntu validation |
 | 5     | Yazi baseline                             | Implemented and manually validated on Windows and macOS; needs Ubuntu validation |
-| 5.5   | Windows MSYS2 and Mosh remote access      | LAN phone connection validated; Mosh roaming validation pending |
-| 6     | macOS bootstrap and agent validation      | In progress; shell, WezTerm, and Yazi validated on macOS; Neovim remains |
-| 7     | `just` command runner                     | Planned; awaiting workflow examples      |
-| 8     | Tailscale remote access                   | Planned                                  |
-| 9     | Rider and minimal Unreal launching        | Not started                               |
-| 10    | Project and worktree workflow             | Not started                               |
-| 11    | AI agent launcher                         | Not started                               |
-| 12    | Agent notifications and status            | Not started                               |
-| 13    | Optional model tooling                    | Not started                               |
-| 14    | Polish and hardening                      | Not started                               |
+| 5.5   | Windows MSYS2 and Mosh remote access      | LAN connection and temporary-LAN-interruption recovery validated; Tailscale off-LAN reachability pending |
+| 6     | macOS bootstrap and agent validation      | Completed for Apple Silicon core workflow and Pi/Codex installation; remaining tab/workspace checks belong to Phase 2 |
+| 7     | `just` command runner                     | In progress; executable installed and validated on Windows/macOS, awaiting workflow examples |
+| 8     | Vowen desktop dictation                   | Planned; opt-in installation and validation |
+| 9     | Tailscale remote access                   | Planned                                  |
+| 10    | Rider and minimal Unreal launching        | In progress; Windows Rider MCP validated, launcher work remains |
+| 11    | Project and worktree workflow             | Not started                               |
+| 12    | AI agent launcher                         | In progress; Pi/Codex installation validated on Windows/macOS, launcher work remains |
+| 13    | Agent notifications and status            | Not started                               |
+| 14    | Optional model tooling                    | Not started                               |
+| 15    | Polish and hardening                      | Not started                               |
 
 Current repository state note: this tracker was added after an initial portable slice already existed. Existing files and behavior still need to be audited against the detailed checklist before broad checkboxes are marked complete.
 
@@ -533,7 +534,7 @@ Deferred items:
 
 ## Phase 2: WezTerm Baseline with Tmux-Style Bindings
 
-Status: Implemented and validated on Windows; macOS shell, pane, clipboard, and Yazi-pane bindings validated; macOS tab/workspace and Ubuntu validation remain
+Status: Implemented and validated on Windows and macOS; Ubuntu validation remains
 
 Goal: Configure WezTerm as the cross-platform terminal and pane/tab/workspace layer.
 
@@ -590,6 +591,7 @@ WezTerm tmux-like bindings:
 * Ctrl+A, x        close pane with confirmation
 * Ctrl+A, z        toggle pane zoom
 * Ctrl+A, w        workspace or tab picker
+* Ctrl+A, p        create or switch to a workspace for a project directory
 * Ctrl+A, r        rename workspace or tab where practical
 * Ctrl+A, 1..9     select tab
 * Ctrl+A, [        copy mode
@@ -644,7 +646,8 @@ Validation:
 * [x] On macOS, WezTerm launches Homebrew Bash. Ubuntu remains pending.
 * [x] Ctrl+A bindings work on Windows and macOS. Ubuntu pending.
 * [x] Pane splits and navigation work on Windows and macOS. Ubuntu pending.
-* [x] Tabs work on Windows. Status: macOS/Ubuntu pending.
+* [x] Tabs and project workspaces work on Windows and macOS. Ubuntu pending.
+* [x] On macOS, workspace switching preserves tabs and a running background process. Status: validated on 2026-08-22 with `sleep 300 &`, workspace launcher switching, and workspace rename.
 * [x] `doctor --phase wezterm` reports status.
 
 Notes:
@@ -805,7 +808,7 @@ Deferred items:
 
 ## Phase 4: Neovim Baseline
 
-Status: Implemented and validated on Windows; needs macOS/Ubuntu validation
+Status: Implemented and validated on Windows and macOS; needs Ubuntu validation
 
 Goal: Add a restrained, maintainable Neovim setup.
 
@@ -1000,7 +1003,7 @@ Deferred items:
 
 ## Phase 5.5: Windows MSYS2 and Mosh Remote Access
 
-Status: LAN phone connection validated on Windows; Mosh roaming and Tailscale reachability remain pending.
+Status: LAN phone connection and temporary-LAN-interruption recovery validated on Windows; Tailscale off-LAN reachability remains pending.
 
 Goal: Replace the Windows interactive Git Bash workflow with MSYS2 UCRT64 Bash and provide a ShadowTerm-compatible Mosh entry path without WSL or tmux.
 
@@ -1065,7 +1068,8 @@ Validation:
 * [x] ShadowTerm resolves `mosh-server` on the remote session.
 * [x] ShadowTerm establishes a Mosh session on UDP 60001 on the LAN.
 * [x] `msys2_sshd` starts after a Windows reboot.
-* [ ] ShadowTerm Mosh session survives an off-LAN network transition after Phase 8 Tailscale reachability is validated.
+* [x] ShadowTerm Mosh session recovers after a temporary LAN interruption. Status: validated when the phone Wi-Fi connection was disabled and restored; the same ShadowTerm session resumed with the expected current time.
+* [ ] ShadowTerm Mosh session survives an off-LAN network transition after Phase 9 Tailscale reachability is validated.
 
 Security and network decisions still required:
 
@@ -1074,7 +1078,7 @@ Security and network decisions still required:
 
 ## Phase 6: macOS Bootstrap and Agent Validation
 
-Status: Validated for the shell, WezTerm pane workflow, Neovim, and Yazi on Apple Silicon macOS; tab/workspace checks remain
+Status: Completed for the documented Apple Silicon macOS shell, WezTerm, Neovim, Yazi, Pi, and Codex installation scope.
 
 Goal: Prepare the MacBook Pro for an agent-led, evidence-backed validation of the existing common shell, WezTerm, Neovim, and Yazi configuration without claiming macOS behavior before it is tested.
 
@@ -1136,7 +1140,40 @@ Tasks:
 * [ ] Add safe recipes, tests, and docs.
 * [ ] Validate the chosen recipes on each supported platform before claiming portability.
 
-## Phase 8: Tailscale Remote Access
+## Phase 8: Vowen Desktop Dictation
+
+Status: Planned; opt-in installation and Windows/macOS validation required
+
+Goal: Add Vowen as an optional, system-wide desktop dictation tool before remote-access work, while preserving WezTerm clipboard and shortcut behavior.
+
+Scope:
+
+* Support Windows 10+ x64 and macOS 14+ Apple Silicon/Intel only where Vowen's official installer supports the platform.
+* Keep Vowen independent from coding agents, MCP, model profiles, and repository credentials.
+* Install only with an explicit Vowen-specific setup option and user approval; never bundle an installer or use curl-to-shell.
+* Treat Vowen's text insertion, microphone, Accessibility, and global-hotkey permissions as manual per-machine configuration.
+
+Tasks:
+
+* [ ] Review Vowen's current official Windows and macOS installation methods and package-manager availability.
+* [ ] Add an explicit opt-in setup command that downloads or launches only the official installer after approval.
+* [ ] Add Windows and macOS doctor detection without making Vowen required.
+* [ ] Document required microphone/Accessibility permissions and model download/storage expectations.
+* [ ] Choose a Vowen hotkey that does not conflict with `Ctrl+`` Quake mode or WezTerm clipboard bindings.
+* [ ] Validate dictation into a fresh WezTerm session on Windows and macOS, including text insertion and paste behavior.
+
+Validation:
+
+* [ ] Windows: Vowen installs only after explicit approval and dictation works in WezTerm.
+* [ ] macOS: Vowen installs only after explicit approval, required permissions are granted, and dictation works in WezTerm.
+* [ ] The selected hotkey does not conflict with workstation bindings on either platform.
+* [ ] No Vowen account data, model data, audio, or credentials are committed.
+
+Notes:
+
+* Vowen supports macOS 14+ and Windows 10+ x64 according to its official documentation. It provides system-wide dictation, so shortcut and insertion behavior must be validated manually on each machine.
+
+## Phase 9: Tailscale Remote Access
 
 Status: Planned
 
@@ -1170,9 +1207,9 @@ Implementation order:
 4. Apply changes without terminating existing WezTerm, Herdr, agent, or ShadowTerm sessions; validate in newly opened UCRT64 shells.
 5. Mark Windows Phase 1-5 UCRT64 validation only after those phases are actually rerun under MSYS2.
 
-## Phase 9: Rider and Minimal Unreal Launching
+## Phase 10: Rider and Minimal Unreal Launching
 
-Status: Not started; Windows Rider MCP bridge configured for Codex, live tool validation pending
+Status: In progress; Windows Rider MCP bridge validated for Codex and Pi, minimal launcher work remains
 
 Goal: Add simple Rider integration for Unreal projects.
 
@@ -1239,7 +1276,7 @@ Deliverables:
 
 Tasks:
 
-* [x] Configure the Rider MCP Server manually for Codex on Windows. Status: Rider 2026.1.4 supplied a local HTTP-stream configuration. Its automatic Codex configuration currently fails while parsing valid literal Windows paths in the existing Codex TOML, and the desktop app rejected Rider's stdio alternative; the HTTP-stream entry at the Rider-generated loopback endpoint was then added through `codex mcp add rider --url`. Pi is configured to import Codex MCP entries and requires an interactive restart to validate the Rider import.
+* [x] Configure the Rider MCP Server manually for Codex and Pi on Windows. Status: Rider 2026.1.4 supplied a local HTTP-stream configuration. Its automatic Codex configuration currently fails while parsing valid literal Windows paths in the existing Codex TOML, and the desktop app rejected Rider's stdio alternative; the Rider-generated HTTP-stream entry was added manually and then verified in both Codex and Pi. This remains user-local, per-machine configuration.
 * [ ] Add Rider helper.
 * [ ] Add `.uproject` detection.
 * [ ] Add Rider path config.
@@ -1268,7 +1305,7 @@ Deferred items:
 * Unreal Editor launching.
 * Visual Studio integration.
 
-## Phase 10: Project and Worktree Workflow
+## Phase 11: Project and Worktree Workflow
 
 Status: Not started
 
@@ -1345,7 +1382,7 @@ Deferred items:
 
 * Automated project workspace orchestration until command behavior is tested.
 
-## Phase 11: AI Agent Launcher
+## Phase 12: AI Agent Launcher
 
 Status: In progress; separate Pi and Codex installation support is first
 
@@ -1448,9 +1485,9 @@ Deliverables:
 
 Tasks:
 
-* [x] Add independent Pi installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS. Pi setup also ensures the opt-in global `npm:@narumitw/pi-usage` extension and `npm:pi-mcp-adapter`; Windows extension installation is validated and macOS validation remains pending.
+* [x] Add independent Pi installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS. Pi setup also ensures the opt-in global `npm:@narumitw/pi-usage` extension and `npm:pi-mcp-adapter`; both were validated on Windows and macOS.
 * [x] Add optional Pi MCP support through `pi-mcp-adapter`. Status: installation is implemented for the Pi-only setup path. The repository installs only the adapter; every machine's MCP server selection, imports, endpoints, and OAuth authentication remain explicit user-local configuration and are never committed.
-* [x] Add independent Codex installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows; macOS validation remains pending.
+* [x] Add independent Codex installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS.
 * [x] Make Windows global npm commands reachable from the managed MSYS2 UCRT64 shell. Status: the managed PATH includes Node.js and the per-user npm command directory; Pi and Codex were version-checked from a fresh UCRT64 interactive Bash session.
 * [ ] Add `agent` launcher.
 * [ ] Add adapter structure.
@@ -1461,7 +1498,7 @@ Tasks:
 * [ ] Add Goose adapter.
 * [ ] Add model profile examples.
 * [x] Document separate Pi and Codex installation commands. Status: command installation is documented; launcher/profile documentation remains pending.
-* [x] Add installation detection to doctor. Status: `doctor --phase shell` reports optional Pi and Codex commands; the full Phase 11 `--phase agents` doctor work remains pending.
+* [x] Add installation detection to doctor. Status: `doctor --phase shell` reports optional Pi and Codex commands; the full Phase 12 `--phase agents` doctor work remains pending.
 * [x] Add tests where practical. Status: portable setup tests cover Pi/Codex package selection and the Pi-only default extension installation path.
 
 Validation:
@@ -1482,7 +1519,7 @@ Deferred items:
 
 * Agent adapters, launcher behavior, profiles, notifications, and all optional agents beyond the independently installable Pi and Codex paths.
 
-## Phase 12: Agent Notifications and Status
+## Phase 13: Agent Notifications and Status
 
 Status: Not started
 
@@ -1543,7 +1580,7 @@ Deferred items:
 
 * Rich desktop notification behavior if portable support is not reliable.
 
-## Phase 13: Optional Model Tooling
+## Phase 14: Optional Model Tooling
 
 Status: Not started
 
@@ -1604,7 +1641,7 @@ Deferred items:
 * Full model gateway provisioning.
 * Automatic cloud credential setup.
 
-## Phase 14: Polish and Hardening
+## Phase 15: Polish and Hardening
 
 Status: Not started
 
@@ -1648,7 +1685,6 @@ Tasks:
 * [ ] Add manual validation checklist.
 * [ ] Review security behavior.
 * [ ] Review path quoting behavior.
-* [ ] Add optional Vowen desktop-dictation installation and validation for Windows and macOS. Keep it independent from coding agents, require explicit approval for any installer, and review its global shortcut and text-insertion behavior against WezTerm bindings.
 
 Validation:
 
@@ -2052,8 +2088,9 @@ Current next actions:
 3. Use the Phase 6 runbook to validate macOS only when the MacBook Pro is available.
 4. Review IndyDevDan `just` examples and scope Phase 7 recipes.
 5. Manually validate remaining Windows GUI-only checks: Quake focused-monitor behavior and WezTerm Yazi key chords.
-6. Implement Phase 8 Tailscale only when off-LAN ShadowTerm/Mosh access becomes the priority.
-7. Begin Phase 9 Rider baseline after the relevant preceding work is accepted.
+6. Implement Phase 8 Vowen only when explicit system-wide dictation becomes the priority.
+7. Implement Phase 9 Tailscale only when off-LAN ShadowTerm/Mosh access becomes the priority.
+8. Begin Phase 10 Rider baseline after the relevant preceding work is accepted.
 8. Keep `PLAN.md` updated after each implementation or validation session.
 
 ## PLAN.md Update Rules
@@ -2131,7 +2168,7 @@ Format:
 ### 2026-07-05
 
 - Summary of changes: Added a conservative Windows Phase 1 reset script at `scripts/setup/reset-windows.ps1`. It dry-runs by default, backs up/removes known Phase 1 dotfiles only when `-Apply` is provided, uninstalls setup-managed Phase 1 packages only with `-RemovePackages`, and never removes Git.
-- Phases touched: Phase 1, Phase 11 hardening precursor.
+- Phases touched: Phase 1, Phase 12 hardening precursor.
 - Validation performed: `scripts/setup/reset-windows.ps1 -Phase shell` dry-run passed and listed the files it would back up/remove. `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 19 setup tests. `git diff --check` passed.
 - Known gaps: Actual reset execution has not been run. Package uninstall reset has not been run. macOS and Ubuntu remain untested.
 - Next actions: If a setup reset retest is desired, run reset with `-Apply`, then rerun `setup.ps1 -Phase shell`. Keep Git for Windows installed because it is the repository prerequisite.
@@ -2139,7 +2176,7 @@ Format:
 ### 2026-07-05
 
 - Summary of changes: Tightened the Windows bootstrap/reset contract. `setup.ps1` now treats Git for Windows and Git Bash as prerequisites to verify, not tools to install. `scripts/setup/reset-windows.ps1` no longer has any Git removal option and only removes setup-managed packages when `-RemovePackages` is provided.
-- Phases touched: Phase 1, Phase 11 hardening precursor.
+- Phases touched: Phase 1, Phase 12 hardening precursor.
 - Validation performed: `setup.ps1 -Phase shell -DryRun` passed and reported Git/Git Bash as already available without any Git install action. `scripts/setup/reset-windows.ps1 -Phase shell` dry-run passed and reported that Git is never removed. `scripts/setup/reset-windows.ps1 -Phase shell -RemovePackages` dry-run passed and listed only setup-managed packages: chezmoi, ripgrep, fd, jq, and fzf. The user also manually reran these three dry-runs from PowerShell and confirmed matching output. `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 20 setup tests. `git diff --check` passed for tracked changes.
 - Known gaps: Actual reset execution and package uninstall reset remain untested. macOS and Ubuntu remain untested.
 - Next actions: If a setup reset retest is desired, run `scripts/setup/reset-windows.ps1 -Phase shell -Apply`, then rerun `setup.ps1 -Phase shell`. Do not uninstall Git; it remains a prerequisite.
@@ -2147,7 +2184,7 @@ Format:
 ### 2026-07-05
 
 - Summary of changes: Fixed the real Windows reset/provision loop after user testing showed `chezmoi apply` could block with `.bash_profile has changed since chezmoi last wrote it?`. Setup now backs up known Phase 1 managed targets to `~/.workstation-setup-backup/<timestamp>` and then runs `chezmoi apply --force`.
-- Phases touched: Phase 1, Phase 11 hardening precursor.
+- Phases touched: Phase 1, Phase 12 hardening precursor.
 - Validation performed: `setup.ps1 -Phase shell -DryRun` passed and now reports `chezmoi apply --force`. `chezmoi apply --help` confirmed `--force` makes changes without prompting. `tests/run.bash` passed under Git for Windows Bash: 13 config tests, 6 function tests, 5 platform tests, and 24 setup tests. `git diff --check` passed for tracked changes. User then manually validated `setup.ps1 -Phase shell`, fresh Git Bash `doctor --phase shell`, `platform-info`, `workstation-root`, `reset-windows.ps1 -Phase shell -Apply -RemovePackages`, and a full reinstall via `setup.ps1 -Phase shell`; all required checks passed.
 - Known gaps: macOS and Ubuntu remain untested. Reset package removal idempotency should be improved so rerunning removal after packages are already absent reports "not installed" rather than relying on winget behavior.
 - Next actions: Optionally harden package uninstall idempotency messages, then commit the Phase 1 reset/provisioning updates if accepted.
@@ -2211,7 +2248,7 @@ Format:
 ### 2026-07-05
 
 - Summary of changes: Hardened setup/reset handling for Phase 2. Setup backup logic now includes the managed WezTerm config directory, and `reset-windows.ps1` now supports `-Phase wezterm`/`all`, includes `~/.config/wezterm` in cleanup targets, and includes setup-managed WezTerm package removal only behind `-RemovePackages`.
-- Phases touched: Phase 2, Phase 11 hardening precursor.
+- Phases touched: Phase 2, Phase 12 hardening precursor.
 - Validation performed: `setup.ps1 -Phase wezterm -DryRun` passed and showed WezTerm config backup. `reset-windows.ps1 -Phase wezterm` dry-run passed and showed WezTerm config cleanup. `reset-windows.ps1 -Phase wezterm -RemovePackages` dry-run passed and showed setup-managed WezTerm package removal while still not removing Git. User then ran `reset-windows.ps1 -Phase wezterm -Apply -RemovePackages`, which backed up/removed managed files and uninstalled chezmoi, ripgrep, fd, jq, fzf, and WezTerm without removing Git. `setup.ps1 -Phase wezterm` then reinstalled/verifed Phase 1 tools plus WezTerm, applied chezmoi, and passed `doctor --phase wezterm`. `tests/run.bash` passed with 38 setup tests and 27 WezTerm tests. `git diff --check` passed with only expected CRLF warnings for PowerShell scripts.
 - Known gaps: macOS and Ubuntu remain untested.
 - Next actions: Commit and push the Phase 2 setup/reset hardening, then proceed to Phase 3 or defer macOS/Ubuntu validation explicitly.
@@ -2363,7 +2400,7 @@ Format:
 ### 2026-07-07
 
 - Summary of changes: Validated and hardened the Windows Phase 4 reset/reinstall path. The reset script now stops setup-managed WezTerm processes before package removal and skips winget uninstall for packages that are already absent. Fresh Git Bash PATH and doctor checks now include the standard WezTerm install path after reinstall.
-- Phases touched: Phase 4, Phase 2 PATH/doctor hardening, Phase 11 reset idempotency precursor, setup/reset, tests, tracking.
+- Phases touched: Phase 4, Phase 2 PATH/doctor hardening, Phase 12 reset idempotency precursor, setup/reset, tests, tracking.
 - Validation performed: `setup.ps1 -Phase neovim -DryRun`, `reset-windows.ps1 -Phase neovim`, and `reset-windows.ps1 -Phase neovim -RemovePackages` dry-runs passed. A destructive `reset-windows.ps1 -Phase neovim -Apply -RemovePackages` exposed the running-WezTerm partial reinstall issue; after the reset fix and idempotency fix, reset completed cleanly. `setup.ps1 -Phase neovim` reinstalled/verifed WezTerm and Neovim, applied chezmoi, and passed setup doctor checks. `setup.ps1 -Phase neovim -SkipInstall` reapplied the final PATH updates and passed. `tests/run.bash`, `doctor --phase neovim`, and interactive Git Bash checks for `command -v wezterm`, `command -v nvim`, `nvc`, and `nv --headless +qa` passed.
 - Known gaps: macOS and Ubuntu remain unvalidated. This validation used the current Windows machine and included an elevated setup run because the tool's normal context could not execute winget install output reliably; user-run PowerShell remains the intended workflow.
 - Next actions: Run `git diff --check`, review the Phase 4 diff, then commit/push Phase 4 if accepted.
@@ -2414,14 +2451,14 @@ Format:
 - Phases touched: Phase 5.5 Windows MSYS2 and Mosh remote access.
 - Validation performed: User restarted the laptop, then reconnected successfully from ShadowTerm and confirmed the UCRT64 shell plus `herdr` were available. This validates `msys2_sshd` automatic startup and the persisted remote-shell PATH configuration.
 - Known gaps: Mosh roaming through a phone network transition remains unvalidated. The desktop Windows workflow is still Git Bash pending the planned repository migration to MSYS2 UCRT64.
-- Next actions: Optionally validate reconnection after a brief Wi-Fi interruption on the LAN. A true Wi-Fi-to-cellular Mosh roaming test requires Phase 8 Tailscale reachability first. Begin the Git-Bash-to-MSYS2 migration across WezTerm, setup, doctor, and tests before enabling off-LAN Tailscale access.
+- Next actions: Optionally validate reconnection after a brief Wi-Fi interruption on the LAN. A true Wi-Fi-to-cellular Mosh roaming test requires Phase 9 Tailscale reachability first. Begin the Git-Bash-to-MSYS2 migration across WezTerm, setup, doctor, and tests before enabling off-LAN Tailscale access.
 
 ### 2026-08-14
 
 - Summary of changes: Recorded successful LAN-only Mosh reconnection validation.
 - Phases touched: Phase 5.5 Windows MSYS2 and Mosh remote access.
 - Validation performed: User disabled phone Wi-Fi while connected through ShadowTerm, observed that the LAN-only session could not accept input without a route to the laptop, restored Wi-Fi, and confirmed the same session resumed with the expected current time. This validates recovery from a temporary LAN interruption.
-- Known gaps: This is not an off-LAN cellular roaming test; cellular cannot reach the private LAN address until Phase 8 Tailscale is configured.
+- Known gaps: This is not an off-LAN cellular roaming test; cellular cannot reach the private LAN address until Phase 9 Tailscale is configured.
 - Next actions: Begin the Git-Bash-to-MSYS2 migration across WezTerm, setup, doctor, and tests; add Tailscale afterward for true off-LAN Mosh roaming.
 
 ### 2026-08-14
@@ -2429,7 +2466,7 @@ Format:
 - Summary of changes: Migrated the active Windows workstation shell configuration from Git Bash to MSYS2 UCRT64. WezTerm now launches `C:/msys64/usr/bin/bash.exe` with `MSYSTEM=UCRT64`; setup, verification, doctor, shell helpers, tests, documentation, and the durable Windows constraint now use the same target. Git for Windows remains a clone/bootstrap compatibility prerequisite only. The MSYS2 package set includes `git`, `jq`, `unzip`, UCRT64 `ripgrep`, `fd`, and `fzf`.
 - Phases touched: Windows Phase 1 shell; Phase 2 WezTerm configuration; shared documentation and test coverage.
 - Validation performed: Installed the MSYS2 package set. Applied managed dotfiles with `chezmoi apply --force` after automatic backups. `setup.ps1 -Phase shell -DryRun` passed. `setup.ps1 -Phase shell -SkipInstall -SkipApply` passed end to end: all 319 repository checks passed under MSYS2 UCRT64 and the configured interactive UCRT64 shell passed `doctor --phase shell` with only the existing optional `fdfind` and future-helper warnings. PowerShell parsing and `git diff --check` passed before the final correction; the complete test/doctor validation was rerun after it.
-- Known gaps: Existing terminals and WezTerm panes deliberately remain untouched. Open a new WezTerm window to manually confirm it starts UCRT64 and that Phase 2-5 workflows still behave as expected; do not mark those phases revalidated until tested. Tailscale/off-LAN Mosh remains Phase 8 work.
+- Known gaps: Existing terminals and WezTerm panes deliberately remain untouched. Open a new WezTerm window to manually confirm it starts UCRT64 and that Phase 2-5 workflows still behave as expected; do not mark those phases revalidated until tested. Tailscale/off-LAN Mosh remains Phase 9 work.
 - Next actions: Manually validate a fresh WezTerm UCRT64 pane (`echo "$MSYSTEM"`, `doctor --phase wezterm`, and normal Herdr/Yazi/Neovim use), then revalidate the remaining Windows phases in order. Configure Tailscale after that validation.
 
 ### 2026-08-14
@@ -2445,7 +2482,7 @@ Format:
 - Summary of changes: Completed manual Windows workflow revalidation after the MSYS2 UCRT64 desktop-shell migration.
 - Phases touched: Windows Phases 1-5.
 - Validation performed: User confirmed `herdr`, `y` (Yazi), and `nvim` all work from a newly opened MSYS2 UCRT64 WezTerm pane, following successful UCRT64 shell and WezTerm doctor validation.
-- Known gaps: This validation is Windows-only. The existing macOS and Ubuntu validation status is unchanged. Tailscale/off-LAN Mosh reachability remains Phase 8 work.
+- Known gaps: This validation is Windows-only. The existing macOS and Ubuntu validation status is unchanged. Tailscale/off-LAN Mosh reachability remains Phase 9 work.
 - Next actions: Configure Tailscale, then test ShadowTerm Mosh through the tailnet from outside the home LAN.
 
 ### 2026-08-16
@@ -2458,7 +2495,7 @@ Format:
 
 ### 2026-08-16
 
-- Summary of changes: Renumbered all planned work after Phase 5.5 into a linear sequence: Phase 6 macOS bootstrap and agent validation, Phase 7 `just`, Phase 8 Tailscale, and Phases 9-14 for Rider through hardening.
+- Summary of changes: Renumbered all planned work after Phase 5.5 into a linear sequence: Phase 6 macOS bootstrap and agent validation, Phase 7 `just`, Phase 8 Vowen, Phase 9 Tailscale, and Phases 10-15 for Rider through hardening.
 - Phases touched: Plan numbering and implementation-plan narrative only.
 - Validation performed: Planning/documentation change only; no platform behavior changed or was retested.
 - Next actions: Start Phase 6 macOS bootstrap and agent-validation preparation when ready.
@@ -2587,14 +2624,14 @@ Format:
 - Summary of changes: Added and validated the LAN-only MacBook Pro SSH entry point named `lfg-laptop-herdr` for controlling Herdr on the Windows laptop. The Mac uses a dedicated Ed25519 key; the existing ShadowTerm key remains authorized separately.
 - Phases touched: Phase 5.5 Windows MSYS2 and Mosh remote access; Phase 6 macOS agent readiness.
 - Validation performed: The MacBook Pro reached the Windows MSYS2 `sshd` listener over the shared private Wi-Fi network, verified the server ED25519 host-key fingerprint, accepted it, completed SSH login through the `lfg-laptop-herdr` alias, and successfully ran Herdr from the UCRT64 remote shell.
-- Known gaps: This is LAN-only. The router-assigned Windows address can change, and off-LAN access still awaits Phase 8 Tailscale.
+- Known gaps: This is LAN-only. The router-assigned Windows address can change, and off-LAN access still awaits Phase 9 Tailscale.
 
 ### 2026-08-20
 
-- Summary of changes: Began Phase 11 with separate, opt-in Pi and Codex installation paths. Windows uses Node.js LTS plus npm; macOS uses Homebrew Node.js plus npm only when the selected agent needs it. The managed Windows MSYS2 UCRT64 PATH now exposes the Node.js and per-user npm command directories.
-- Phases touched: Phase 11 AI agent launcher; Phase 1 shared shell PATH behavior.
+- Summary of changes: Began Phase 12 with separate, opt-in Pi and Codex installation paths. Windows uses Node.js LTS plus npm; macOS uses Homebrew Node.js plus npm only when the selected agent needs it. The managed Windows MSYS2 UCRT64 PATH now exposes the Node.js and per-user npm command directories.
+- Phases touched: Phase 12 AI agent launcher; Phase 1 shared shell PATH behavior.
 - Validation performed: On Windows, `setup.ps1 -Agent pi` installed Pi 0.84.2 and `setup.ps1 -Agent codex` installed Codex CLI 0.148.0. A fresh interactive MSYS2 UCRT64 Bash resolved `node`, `pi`, and `codex`, completed each version check, and reported both tools through `doctor --phase shell`. Bash/PowerShell parser checks, `git diff --check`, and the portable test suite (137 setup tests) passed.
-- Known gaps: The new macOS commands are implemented but not yet validated on the MacBook Pro. The first Pi test exposed a stale Homebrew Node 21 binary referencing a removed ICU library; setup now needs a MacBook Pro retest of its Homebrew repair path. No tool was authenticated, configured, or launched as an agent; the common `agent` launcher and profiles remain future Phase 11 work.
+- Known gaps: The new macOS commands are implemented but not yet validated on the MacBook Pro. The first Pi test exposed a stale Homebrew Node 21 binary referencing a removed ICU library; setup now needs a MacBook Pro retest of its Homebrew repair path. No tool was authenticated, configured, or launched as an agent; the common `agent` launcher and profiles remain future Phase 12 work.
 - Next actions: Commit and push when approved, then on macOS install and verify Pi and Codex one at a time using the documented commands.
 
 ### 2026-08-20
@@ -2616,7 +2653,7 @@ Format:
 ### 2026-08-20
 
 - Summary of changes: Added the Pi-only default global extensions `npm:@narumitw/pi-usage` and `npm:pi-mcp-adapter`. The separate Pi setup path detects global Pi packages with `pi list` and installs extensions with `pi install` only when absent; the Codex path remains independent.
-- Phases touched: Phase 11 AI agent launcher.
+- Phases touched: Phase 12 AI agent launcher.
 - Validation performed: Portable test coverage was added for the Windows and macOS installer paths. On Windows, the prior default package was removed, `setup.ps1 -Agent pi` installed `npm:@narumitw/pi-usage`, `pi list` reported it, and a second setup run reported it as already available. `pi-mcp-adapter` was then installed. User-local Windows validation confirmed that an explicitly configured Pi profile can load the adapter and connect to configured MCP servers. macOS validation remains pending.
 - Known gaps: Pi extensions are third-party code and run with the user's permissions. No credentials, endpoints, imports, or server definitions are read or committed by this repository; each Pi profile retains and reviews its own MCP and authentication configuration.
 - Next actions: On each desired computer, use `/mcp setup` to choose or add servers, then authenticate any OAuth-backed server. Commit and push when approved, then validate `./setup.sh --agent pi --install-missing`, `/mcp setup`, and `pi list` on macOS.
@@ -2624,7 +2661,31 @@ Format:
 ### 2026-08-20
 
 - Summary of changes: Added an explicit future task for the optional Vowen desktop dictation application. It is a Windows/macOS voice-input integration, not an AI coding agent.
-- Phases touched: Phase 14 polish and hardening.
+- Phases touched: Phase 8 Vowen desktop dictation.
 - Validation performed: Vowen's official documentation was reviewed for supported desktop platforms and system-wide text input behavior. No installer, shortcut, or permission change has been made.
 - Known gaps: Vowen may use a global shortcut and insert text into WezTerm, so its shortcut and paste behavior must be reviewed on each platform before it is considered compatible.
 - Next actions: Choose the desired Vowen shortcut and text-insertion workflow, then implement an opt-in installation and manual validation path.
+
+### 2026-08-22
+
+- Summary of changes: Reconciled the phase tracker with completed Windows and Apple Silicon macOS validation. Recorded the successful macOS Quake recovery retest, temporary-LAN-interruption Mosh recovery, Windows/macOS `just` installation, Windows/macOS Pi and Codex installation, and the optional Windows-local Rider MCP bridge used by Codex and Pi.
+- Phases touched: Phases 2, 3, 4, 5.5, 6, 7, 10, and 12.
+- Validation performed: The user confirmed the repaired macOS Quake toggle restores the existing window; ShadowTerm resumed the same Mosh session after Wi-Fi returned; `just`, Pi, and Codex were installed and used on both Windows and macOS; and Rider MCP was used successfully from both Codex and Pi on Windows.
+- Known gaps: Ubuntu validation, macOS Quake multi-monitor placement, Tailscale off-LAN Mosh, `just` recipe design, Rider launcher automation, common agent-launcher work, model tooling, and Vowen remain pending. MCP endpoints and credentials remain per-machine user configuration and are not tracked in this repository.
+- Next actions: Gather `just` workflow examples, begin Phase 8 Vowen, or begin Phase 9 Tailscale when ready; keep later phase work scoped to its documented prerequisites.
+
+### 2026-08-22
+
+- Summary of changes: Validated macOS WezTerm tabs and project workspaces in a fresh non-Quake window. The workspace launcher switched between the default and a project workspace, tab selection worked, a `sleep 300 &` process persisted across workspace switching, and workspace rename was visible in status and the launcher.
+- Phases touched: Phase 2 WezTerm baseline; Phase 6 macOS validation.
+- Validation performed: User manually completed the documented tab/workspace validation on Apple Silicon macOS on 2026-08-22.
+- Known gaps: Ubuntu remains unvalidated.
+- Next actions: Proceed with Phase 7 recipes, Phase 8 Vowen, or Phase 9 Tailscale when ready.
+
+### 2026-08-22
+
+- Summary of changes: Moved optional Vowen desktop dictation forward into its own Phase 8, ahead of Tailscale, and renumbered each subsequent planned phase linearly through Phase 15.
+- Phases touched: Phase ordering; Phase 8 Vowen; Phases 9-15 renumbering.
+- Validation performed: Vowen's current official documentation was reviewed. It supports Windows 10+ x64 and macOS 14+ on Apple Silicon or Intel, and provides system-wide dictation; no installer or permission change has been made.
+- Known gaps: Vowen installation method, package-manager availability, selected hotkey, microphone/Accessibility permissions, and WezTerm text-insertion behavior remain unvalidated on both platforms.
+- Next actions: Implement an explicit, opt-in Vowen installation and doctor path only after selecting the preferred install method and shortcut policy.

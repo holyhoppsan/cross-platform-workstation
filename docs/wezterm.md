@@ -59,6 +59,7 @@ WezTerm uses an explicit palette matching the default Windows Terminal scheme in
 | `Ctrl+A`, `x` | Close pane with confirmation |
 | `Ctrl+A`, `z` | Toggle pane zoom |
 | `Ctrl+A`, `w` | Workspace launcher |
+| `Ctrl+A`, `p` | Create or switch to a workspace for a project directory |
 | `Ctrl+A`, `r` | Rename workspace |
 | `Ctrl+A`, `1..9` | Select tab |
 | `Ctrl+A`, `[` | Copy mode |
