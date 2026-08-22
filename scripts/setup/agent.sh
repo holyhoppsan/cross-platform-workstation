@@ -32,11 +32,12 @@ fi
 "$command_name" --version
 
 if [ "$agent" = pi ]; then
-  pi_plugin='npm:@narumitw/pi-usage'
-  if "$command_name" list 2>/dev/null | grep -Fq "$pi_plugin"; then
-    info "Pi plugin already available: $pi_plugin"
-  else
-    info "installing Pi plugin: $pi_plugin"
-    "$command_name" install "$pi_plugin"
-  fi
+  for pi_plugin in 'npm:@narumitw/pi-usage' 'npm:pi-mcp-adapter'; do
+    if "$command_name" list 2>/dev/null | grep -Fq "$pi_plugin"; then
+      info "Pi plugin already available: $pi_plugin"
+    else
+      info "installing Pi plugin: $pi_plugin"
+      "$command_name" install "$pi_plugin"
+    fi
+  done
 fi
