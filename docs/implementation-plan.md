@@ -15,12 +15,13 @@ The repository is implemented in independently testable slices. A phase may add 
 - Phase 5.5 adds the Windows MSYS2 SSH/Mosh and ShadowTerm LAN path.
 - Phase 6 prepares and validates the existing workstation stack on the MacBook Pro using an agent-led runbook plus user GUI checks.
 - Phase 7 evaluates `just` after the user supplies representative workflow examples.
-- Phase 8 is optional Tailscale transport for off-LAN ShadowTerm/Mosh access.
-- Phases 9 through 14 add Rider/Unreal launching, project/worktree workflow, agent adapters, notifications, optional model tooling, and hardening.
+- Phase 8 adds optional, per-machine Vowen desktop dictation with explicit installer and hotkey validation.
+- Phase 9 is optional Tailscale transport for off-LAN ShadowTerm/Mosh access.
+- Phases 10 through 15 add Rider/Unreal launching, project/worktree workflow, agent adapters, notifications, optional model tooling, and hardening.
 
 ## Current State
 
-Windows is the only platform with completed validation so far. The active interactive shell is MSYS2 UCRT64 Bash, and Git for Windows may remain available only for clone/bootstrap compatibility.
+Windows and Apple Silicon macOS have completed the documented core-workflow validation. Ubuntu remains unvalidated. The active Windows interactive shell is MSYS2 UCRT64 Bash, and Git for Windows may remain available only for clone/bootstrap compatibility.
 
 Implemented and validated on Windows:
 
@@ -32,12 +33,13 @@ Implemented and validated on Windows:
 - Yazi configuration and the `y` shell workflow;
 - key-only MSYS2 SSH, LAN-scoped Mosh, ShadowTerm access, reboot persistence, and temporary LAN interruption recovery.
 
-Not yet validated:
+Not yet validated or implemented:
 
-- macOS and Ubuntu behavior;
-- Windows Quake focused-monitor behavior and explicit WezTerm Yazi key chords;
+- Ubuntu behavior;
+- macOS Quake multi-monitor placement;
+- Vowen desktop-dictation installation and hotkey behavior;
 - Tailscale/off-LAN Mosh reachability;
-- Rider, project/worktree commands, agent launcher/status, model endpoint tooling, and polish/hardening.
+- Rider launcher automation, project/worktree commands, agent launcher/status, model endpoint tooling, and polish/hardening.
 
 ## macOS Agent Validation Model
 

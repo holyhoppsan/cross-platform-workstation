@@ -1,6 +1,6 @@
 # Agent integration status
 
-Agent launchers and model profile translation are scheduled for Phase 11. OpenCode, Pi, Claude Code, and Codex remain independent integrations. A profile name expresses intent; it does not imply that every tool supports that model or endpoint.
+Agent launchers and model profile translation are scheduled for Phase 12. OpenCode, Pi, Claude Code, and Codex remain independent integrations. A profile name expresses intent; it does not imply that every tool supports that model or endpoint.
 
 Pi and Codex can already be installed independently; selecting one never installs, configures, or authenticates the other. Node.js/npm is installed only when the selected agent needs it and `--install-missing` is supplied.
 
