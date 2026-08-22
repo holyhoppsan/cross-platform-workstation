@@ -70,6 +70,30 @@ To actually reset Phase 1 config, use `-Apply`. To uninstall setup-managed Phase
 
 Dry-run mode prints the selected phase, detected platform, and intended checks without changing files.
 
+## Phase 8: Vowen desktop dictation
+
+Vowen is an optional desktop dictation app. It is not an AI coding agent, MCP
+server, model profile, or managed dotfile. It is deliberately excluded from
+`--phase all`.
+
+The Phase 8 commands only detect Vowen and, with an explicit opt-in, open the
+official Vowen download page in the default browser. They do not download an
+installer, run a silent installer, bypass Windows SmartScreen, or alter OS
+privacy permissions:
+
+```powershell
+./setup.ps1 -Phase vowen
+./setup.ps1 -Phase vowen -InstallVowen
+```
+
+```bash
+./setup.sh --phase vowen
+./setup.sh --phase vowen --install-missing
+```
+
+After manually installing Vowen, run `doctor --phase vowen`. Complete the
+per-machine validation steps in [Vowen desktop dictation](vowen.md).
+
 ## Install Policy
 
 Setup must not:

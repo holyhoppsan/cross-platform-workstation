@@ -309,6 +309,61 @@ function Ensure-WindowsYazi {
     Ensure-WindowsPackageCommand -Command 'yazi.exe' -PackageId 'sxyazi.yazi' -Name 'Yazi' -DryRun:$DryRun
 }
 
+function Get-WindowsVowenInstallation {
+    $candidates = @()
+    if ($Env:LocalAppData) {
+        $candidates += Join-Path $Env:LocalAppData 'Programs\Vowen\Vowen.exe'
+        $candidates += Join-Path $Env:LocalAppData 'Vowen\Vowen.exe'
+    }
+    if ($Env:ProgramFiles) {
+        $candidates += Join-Path $Env:ProgramFiles 'Vowen\Vowen.exe'
+    }
+
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate) {
+            return $candidate
+        }
+    }
+
+    foreach ($uninstallKey in @(
+        'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*'
+    )) {
+        $entry = Get-ItemProperty -Path $uninstallKey -ErrorAction SilentlyContinue |
+            Where-Object { $_.DisplayName -match '^Vowen(?:\s|$)' } |
+            Select-Object -First 1
+        if ($entry) {
+            if ($entry.InstallLocation) { return $entry.InstallLocation }
+            return $entry.DisplayName
+        }
+    }
+
+    return $null
+}
+
+function Ensure-WindowsVowen {
+    param([switch]$Install, [switch]$DryRun)
+
+    $installed = Get-WindowsVowenInstallation
+    if ($installed) {
+        Write-SetupInfo "Vowen already detected: $installed"
+        return
+    }
+
+    if (-not $Install) {
+        Write-SetupInfo 'Vowen is optional and was not detected. To open its official download page, rerun: ./setup.ps1 -Phase vowen -InstallVowen'
+        return
+    }
+
+    if ($DryRun) {
+        Write-SetupInfo 'would open the official Vowen Windows download page; no installer would be downloaded or run automatically'
+        return
+    }
+
+    Write-SetupInfo 'opening the official Vowen Windows download page; download, security review, and installation remain manual'
+    Start-Process 'https://vowen.ai/windows/download/'
+}
+
 function Ensure-WindowsHerdr {
     param([switch]$DryRun)
 
@@ -698,6 +753,26 @@ function Invoke-WindowsYaziValidation {
 
     Write-SetupInfo 'validating Yazi phase through MSYS2 UCRT64 Bash'
     Invoke-Msys2Bash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase yazi'
+}
+
+function Invoke-WindowsVowenValidation {
+    param(
+        [Parameter(Mandatory)][string]$RepoRoot,
+        [switch]$DryRun
+    )
+
+    $bash = Get-WindowsMsys2BashPath
+    if (-not $bash) {
+        throw 'MSYS2 UCRT64 Bash was not found for Vowen detection.'
+    }
+
+    if ($DryRun) {
+        Write-SetupInfo 'would run doctor --phase vowen through MSYS2 UCRT64 Bash'
+        return
+    }
+
+    Write-SetupInfo 'checking optional Vowen status through MSYS2 UCRT64 Bash'
+    Invoke-Msys2Bash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase vowen'
 }
 
 function Test-ShellPhase {

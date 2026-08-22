@@ -36,6 +36,7 @@ Useful docs:
 - [WezTerm](docs/wezterm.md)
 - [Neovim](docs/neovim.md)
 - [Yazi](docs/yazi.md)
+- [Vowen desktop dictation](docs/vowen.md)
 - [macOS agent validation](docs/macos-agent-validation.md)
 
 ## Phase 0 and Phase 1 Setup
@@ -50,6 +51,7 @@ Windows, from PowerShell:
 ./setup.ps1 -Phase quake
 ./setup.ps1 -Phase neovim
 ./setup.ps1 -Phase yazi
+./setup.ps1 -Phase vowen
 ```
 
 On Windows, install MSYS2 at `C:\msys64`, open the UCRT64 environment, and install its `git`, `jq`, `mingw-w64-ucrt-x86_64-ripgrep`, `mingw-w64-ucrt-x86_64-fd`, and `mingw-w64-ucrt-x86_64-fzf` packages. Git for Windows may be used to clone this repository. `setup.ps1 -Phase shell` verifies MSYS2 UCRT64, installs or verifies chezmoi, backs up known Phase 1 shell targets, applies chezmoi, then validates the configured UCRT64 shell automatically. It never installs WSL or Git for Windows.
@@ -64,6 +66,7 @@ Windows, from MSYS2 UCRT64 Bash:
 ./setup.sh --phase quake --dry-run
 ./setup.sh --phase neovim --install-missing
 ./setup.sh --phase yazi --install-missing
+./setup.sh --phase vowen
 ```
 
 macOS / Ubuntu:
@@ -95,6 +98,7 @@ Run the phase-aware doctor:
 ./scripts/doctor --phase quake
 ./scripts/doctor --phase neovim
 ./scripts/doctor --phase yazi
+./scripts/doctor --phase vowen
 ```
 
 After setup completes, these helpers should be available in a fresh MSYS2 UCRT64 session:

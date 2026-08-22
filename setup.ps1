@@ -1,10 +1,11 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('foundation', 'shell', 'wezterm', 'quake', 'neovim', 'yazi', 'all')]
+    [ValidateSet('foundation', 'shell', 'wezterm', 'quake', 'neovim', 'yazi', 'vowen', 'all')]
     [string]$Phase = 'shell',
     [switch]$DryRun,
     [switch]$SkipInstall,
     [switch]$SkipApply,
+    [switch]$InstallVowen,
     [ValidateSet('pi', 'codex')][string]$Agent
 )
 
@@ -29,6 +30,20 @@ Test-FoundationPhase -RepoRoot $RepoRoot
 if ($Agent) {
     if ($Platform -ne 'windows') { throw 'Agent installation through setup.ps1 is supported on Windows only.' }
     if ($SkipInstall) { Write-SetupInfo "skipping $Agent install/verify by request" } else { Ensure-WindowsAgent -Agent $Agent -DryRun:$DryRun }
+    exit 0
+}
+
+if ($Phase -eq 'vowen') {
+    if ($Platform -ne 'windows') {
+        throw 'Vowen installation through setup.ps1 is supported on Windows only. On macOS, run ./setup.sh --phase vowen [--install-missing].'
+    }
+    Ensure-WindowsVowen -Install:$InstallVowen -DryRun:$DryRun
+    Invoke-WindowsVowenValidation -RepoRoot $RepoRoot -DryRun:$DryRun
+    if ($DryRun) {
+        Write-Host 'Dry run complete; no changes were made.'
+    } else {
+        Write-Host "Phase '$Phase' setup completed. Complete the Vowen installer and permissions manually, then rerun doctor --phase vowen."
+    }
     exit 0
 }
 

@@ -31,6 +31,9 @@ assert_contains "$neovim_output" 'phase: neovim' 'setup.sh parses neovim phase'
 yazi_output=$("$repo_root/setup.sh" --phase yazi --dry-run)
 assert_contains "$yazi_output" 'phase: yazi' 'setup.sh parses yazi phase'
 
+vowen_output=$("$repo_root/setup.sh" --phase vowen --dry-run)
+assert_contains "$vowen_output" 'phase: vowen' 'setup.sh parses optional Vowen phase'
+
 default_output=$("$repo_root/setup.sh" --dry-run)
 assert_contains "$default_output" 'phase: shell' 'setup.sh defaults to current implemented phase'
 
@@ -59,6 +62,9 @@ assert_contains "$powershell_setup" "'wezterm'" 'setup.ps1 accepts wezterm phase
 assert_contains "$powershell_setup" "'quake'" 'setup.ps1 accepts quake phase'
 assert_contains "$powershell_setup" "'neovim'" 'setup.ps1 accepts neovim phase'
 assert_contains "$powershell_setup" "'yazi'" 'setup.ps1 accepts yazi phase'
+assert_contains "$powershell_setup" "'vowen'" 'setup.ps1 accepts Vowen phase'
+assert_contains "$powershell_setup" '[switch]$InstallVowen' 'setup.ps1 requires an explicit Vowen install opt-in'
+assert_contains "$powershell_setup" 'Ensure-WindowsVowen -Install:$InstallVowen' 'setup.ps1 routes Vowen through the explicit install option'
 assert_contains "$powershell_setup" 'Ensure-WindowsPhaseOneTools' 'setup.ps1 verifies Windows Phase 1 prerequisites'
 assert_contains "$powershell_setup" 'Ensure-WindowsHerdr -DryRun:$DryRun' 'setup.ps1 installs or verifies Herdr with the shell phase'
 assert_contains "$powershell_setup" 'Ensure-WindowsAgent -Agent $Agent' 'setup.ps1 has a separate Windows agent setup path'
@@ -125,6 +131,9 @@ assert_contains "$common_ps1" "PackageId 'AutoHotkey.AutoHotkey'" 'Windows boots
 assert_contains "$common_ps1" "PackageId 'Neovim.Neovim'" 'Windows bootstrap knows Neovim package'
 assert_contains "$common_ps1" "PackageId 'sxyazi.yazi'" 'Windows bootstrap knows Yazi package'
 assert_contains "$common_ps1" 'Ensure-WindowsHerdr' 'Windows bootstrap has a Herdr installer'
+assert_contains "$common_ps1" 'function Ensure-WindowsVowen' 'Windows bootstrap has an optional Vowen installer handoff'
+assert_contains "$common_ps1" "Start-Process 'https://vowen.ai/windows/download/'" 'Windows Vowen setup opens only the official download page'
+assert_not_contains "$common_ps1" 'Invoke-WebRequest.*vowen' 'Windows Vowen setup does not download an installer directly'
 assert_contains "$common_ps1" 'Ensure-WindowsAgent' 'Windows bootstrap has a separate agent installer'
 assert_contains "$common_ps1" "PackageId 'OpenJS.NodeJS.LTS'" 'Windows agent setup can install Node.js LTS'
 assert_contains "$common_ps1" '@earendil-works/pi-coding-agent' 'Windows agent setup knows the Pi npm package'
@@ -169,6 +178,11 @@ assert_contains "$common_sh" ".config/yazi" 'setup.sh backs up Yazi config befor
 assert_contains "$common_sh" 'WORKSTATION_REPO_ROOT' 'setup.sh writes machine-local repo root env'
 assert_contains "$common_sh" 'setup_validate_interactive_shell' 'setup.sh has interactive shell validation helper'
 
+vowen_phase=$(cat "$repo_root/scripts/setup/phases/vowen.sh")
+assert_contains "$vowen_phase" 'https://vowen.ai/mac/download/' 'macOS Vowen setup uses the official download page'
+assert_contains "$vowen_phase" 'https://vowen.ai/windows/download/' 'MSYS2 Vowen setup uses the official download page'
+assert_not_contains "$vowen_phase" 'curl ' 'Vowen setup does not use curl-to-shell'
+
 doctor_source=$(git -C "$repo_root" ls-files --stage chezmoi/dot_config/workstation/executable_doctor)
 assert_contains "$doctor_source" '100755' 'managed workstation doctor source is executable'
 assert_contains "$doctor_source" 'executable_doctor' 'managed workstation doctor uses chezmoi executable attribute'
@@ -179,6 +193,8 @@ assert_contains "$doctor_config" 'optional_command just' 'doctor reports Just wh
 assert_contains "$doctor_config" 'optional_command starship' 'doctor reports Starship when available'
 assert_contains "$doctor_config" 'optional_command pi' 'doctor reports Pi when available'
 assert_contains "$doctor_config" 'optional_command codex' 'doctor reports Codex when available'
+assert_contains "$doctor_config" 'check_vowen' 'doctor implements optional Vowen detection'
+assert_contains "$doctor_config" 'Vowen shortcut policy' 'doctor reports the Vowen shortcut policy'
 assert_contains "$common_sh" 'macos_install_formulae' 'setup.sh has macOS Homebrew formula helper'
 assert_contains "$common_sh" 'macos_install_cask' 'setup.sh has macOS Homebrew cask helper'
 assert_contains "$common_sh" 'Install or approve Homebrew yourself' 'macOS setup never installs Homebrew automatically'
