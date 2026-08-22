@@ -5,10 +5,10 @@ die() { printf '[setup] error: %s\n' "$*" >&2; exit 2; }
 
 setup_usage() {
   cat <<'EOF'
-usage: setup.sh [--phase foundation|shell|wezterm|quake|neovim|yazi|all] [--dry-run] [--install-missing]
+usage: setup.sh [--phase foundation|shell|wezterm|quake|neovim|yazi|vowen|all] [--dry-run] [--install-missing]
        setup.sh --agent pi|codex [--install-missing] [--dry-run]
 
-Phases 0, 1, 2, Windows Phase 3, Phase 4, and Phase 5 are implemented.
+Phases 0-5 are implemented; Phase 8 provides optional Vowen installation handoff and manual validation.
 EOF
 }
 

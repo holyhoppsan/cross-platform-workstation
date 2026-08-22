@@ -248,6 +248,7 @@ Windows:
 ./setup.ps1 -Phase quake
 ./setup.ps1 -Phase neovim
 ./setup.ps1 -Phase yazi
+./setup.ps1 -Phase vowen
 ./setup.ps1 -Phase rider
 ./setup.ps1 -Phase agents
 ./setup.ps1 -Phase all
@@ -262,6 +263,7 @@ macOS / Ubuntu:
 ./setup.sh --phase quake
 ./setup.sh --phase neovim
 ./setup.sh --phase yazi
+./setup.sh --phase vowen
 ./setup.sh --phase rider
 ./setup.sh --phase agents
 ./setup.sh --phase all
@@ -1142,7 +1144,7 @@ Tasks:
 
 ## Phase 8: Vowen Desktop Dictation
 
-Status: Planned; opt-in installation and Windows/macOS validation required
+Status: In progress; opt-in installer handoff and optional detection implemented, Windows/macOS validation required
 
 Goal: Add Vowen as an optional, system-wide desktop dictation tool before remote-access work, while preserving WezTerm clipboard and shortcut behavior.
 
@@ -1155,11 +1157,11 @@ Scope:
 
 Tasks:
 
-* [ ] Review Vowen's current official Windows and macOS installation methods and package-manager availability.
-* [ ] Add an explicit opt-in setup command that downloads or launches only the official installer after approval.
-* [ ] Add Windows and macOS doctor detection without making Vowen required.
-* [ ] Document required microphone/Accessibility permissions and model download/storage expectations.
-* [ ] Choose a Vowen hotkey that does not conflict with `Ctrl+`` Quake mode or WezTerm clipboard bindings.
+* [x] Review Vowen's current official Windows and macOS installation methods and package-manager availability.
+* [x] Add an explicit opt-in setup command that opens only the official installer download page after approval.
+* [x] Add Windows and macOS doctor detection without making Vowen required.
+* [x] Document required microphone/Accessibility permissions and model download/storage expectations.
+* [x] Choose Vowen's documented default hotkeys (`Ctrl+Shift` on Windows and `Fn` on macOS); neither conflicts with `Ctrl+`` Quake mode or WezTerm clipboard bindings by definition, but manual validation remains required.
 * [ ] Validate dictation into a fresh WezTerm session on Windows and macOS, including text insertion and paste behavior.
 
 Validation:
@@ -1172,6 +1174,7 @@ Validation:
 Notes:
 
 * Vowen supports macOS 14+ and Windows 10+ x64 according to its official documentation. It provides system-wide dictation, so shortcut and insertion behavior must be validated manually on each machine.
+* Vowen has no package-manager route used by this repository. The opt-in setup commands open only `https://vowen.ai/windows/download/` or `https://vowen.ai/mac/download/`; the user downloads and reviews the platform installer manually.
 
 ## Phase 9: Tailscale Remote Access
 
@@ -2689,3 +2692,11 @@ Format:
 - Validation performed: Vowen's current official documentation was reviewed. It supports Windows 10+ x64 and macOS 14+ on Apple Silicon or Intel, and provides system-wide dictation; no installer or permission change has been made.
 - Known gaps: Vowen installation method, package-manager availability, selected hotkey, microphone/Accessibility permissions, and WezTerm text-insertion behavior remain unvalidated on both platforms.
 - Next actions: Implement an explicit, opt-in Vowen installation and doctor path only after selecting the preferred install method and shortcut policy.
+
+### 2026-08-22
+
+- Summary of changes: Implemented Phase 8's optional Vowen setup handoff, detection, and manual validation documentation. Vowen is excluded from bulk setup; Windows requires `-InstallVowen` and macOS requires `--install-missing` before setup opens an official Vowen download page. Neither path downloads, installs, bypasses platform security, or changes privacy permissions.
+- Phases touched: Phase 8 Vowen desktop dictation.
+- Validation performed: Repository tests, Bash syntax checks, and `git diff --check` passed. On Windows, `setup.ps1 -Phase vowen` detected the existing Vowen executable at the standard per-user location and `doctor --phase vowen` passed through MSYS2 UCRT64 Bash.
+- Known gaps: Vowen installation handoff and actual dictation have not yet been manually validated on macOS. On Windows, microphone permission, dictated text insertion in WezTerm, normal clipboard paste, and Quake hotkey coexistence still require manual GUI validation.
+- Next actions: Complete the documented fresh-WezTerm dictation test on Windows and macOS, then mark only the platform-specific validation items that actually pass.

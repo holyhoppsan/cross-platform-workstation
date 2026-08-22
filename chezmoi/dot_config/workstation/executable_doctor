@@ -5,7 +5,7 @@ original_args=("$@")
 
 usage() {
   cat <<'EOF'
-usage: doctor [--phase foundation|shell|wezterm|quake|neovim|yazi|all] [--help]
+usage: doctor [--phase foundation|shell|wezterm|quake|neovim|yazi|vowen|all] [--help]
 
 Later phases are documented in PLAN.md but are not implemented yet.
 EOF
@@ -36,7 +36,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$phase" in
-  foundation|shell|wezterm|quake|neovim|yazi|all) ;;
+  foundation|shell|wezterm|quake|neovim|yazi|vowen|all) ;;
   rider|project|agents|models)
     printf '[fail] %-24s %s\n' "phase $phase" 'not implemented yet'
     exit 2
@@ -471,6 +471,41 @@ check_yazi() {
   ok 'Yazi agent status' 'not an AI agent'
 }
 
+check_vowen() {
+  check_shell
+
+  local vowen_path=''
+  if [ "$WORKSTATION_OS" = macos ]; then
+    for candidate in /Applications/Vowen.app "$HOME/Applications/Vowen.app"; do
+      if [ -d "$candidate" ]; then
+        vowen_path=$candidate
+        break
+      fi
+    done
+  elif [ "$WORKSTATION_OS" = windows ]; then
+    for candidate in \
+      "$HOME/AppData/Local/Programs/Vowen/Vowen.exe" \
+      "$HOME/AppData/Local/Vowen/Vowen.exe" \
+      '/c/Program Files/Vowen/Vowen.exe'; do
+      if [ -r "$candidate" ]; then
+        vowen_path=$candidate
+        break
+      fi
+    done
+  else
+    warn 'Vowen' 'optional setup is supported only on Windows and macOS'
+    return
+  fi
+
+  if [ -n "$vowen_path" ]; then
+    ok 'Vowen' "$vowen_path"
+  else
+    warn 'Vowen' 'optional; not detected (use the Phase 8 setup command to open the official download page)'
+  fi
+  ok 'Vowen shortcut policy' 'Windows Ctrl+Shift; macOS Fn; neither uses Ctrl+`'
+  warn 'Vowen manual validation' 'grant microphone and macOS Accessibility permission, then verify text insertion in a fresh WezTerm session'
+}
+
 case "$phase" in
   foundation) check_foundation ;;
   shell) check_shell ;;
@@ -478,6 +513,7 @@ case "$phase" in
   quake) check_quake ;;
   neovim) check_neovim ;;
   yazi) check_yazi ;;
+  vowen) check_vowen ;;
   all)
     check_quake
     check_neovim
