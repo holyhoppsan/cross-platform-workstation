@@ -32,7 +32,7 @@ fi
 "$command_name" --version
 
 if [ "$agent" = pi ]; then
-  for pi_plugin in 'npm:@narumitw/pi-usage' 'npm:pi-mcp-adapter'; do
+  for pi_plugin in 'npm:@narumitw/pi-usage' 'npm:pi-mcp-adapter' 'npm:@pandi-coding-agent/mdview'; do
     if "$command_name" list 2>/dev/null | grep -Fq "$pi_plugin"; then
       info "Pi plugin already available: $pi_plugin"
     else

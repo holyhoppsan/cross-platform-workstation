@@ -1488,7 +1488,7 @@ Deliverables:
 
 Tasks:
 
-* [x] Add independent Pi installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS. Pi setup also ensures the opt-in global `npm:@narumitw/pi-usage` extension and `npm:pi-mcp-adapter`; both were validated on Windows and macOS.
+* [x] Add independent Pi installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS. Pi setup also ensures the global `npm:@narumitw/pi-usage`, `npm:pi-mcp-adapter`, and `npm:@pandi-coding-agent/mdview` extensions; the Markdown viewer installation requires Windows/macOS validation.
 * [x] Add optional Pi MCP support through `pi-mcp-adapter`. Status: installation is implemented for the Pi-only setup path. The repository installs only the adapter; every machine's MCP server selection, imports, endpoints, and OAuth authentication remain explicit user-local configuration and are never committed.
 * [x] Add independent Codex installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS.
 * [x] Make Windows global npm commands reachable from the managed MSYS2 UCRT64 shell. Status: the managed PATH includes Node.js and the per-user npm command directory; Pi and Codex were version-checked from a fresh UCRT64 interactive Bash session.
@@ -2708,3 +2708,11 @@ Format:
 - Validation performed: PowerShell parsing, Bash syntax checks, `tests/setup_test.bash`, and `git diff --check` passed after this correction; macOS validation remains pending.
 - Known gaps: The correction must be pulled and run on macOS before `~/.local/bin/workstation-doctor --phase vowen` can report the optional Vowen status there.
 - Next actions: Push the correction, then run `./setup.sh --phase vowen` from the Mac checkout and verify the local doctor command.
+
+### 2026-08-24
+
+- Summary of changes: Added `npm:@pandi-coding-agent/mdview` to Pi's idempotent global default-extension list on both Windows and macOS. It provides the `/mdview` Markdown viewer and `view_markdown` model tool; Codex remains independent.
+- Phases touched: Phase 12 AI agent launcher.
+- Validation performed: PowerShell parsing, Bash syntax checks, and `tests/setup_test.bash` passed. On Windows, `setup.ps1 -Agent pi` installed the extension and `pi list` reported `npm:@pandi-coding-agent/mdview`.
+- Known gaps: The third-party Markdown viewer must still be installed and tested through the Pi setup command on macOS before it is recorded as cross-platform validated. Interactive `/mdview` rendering has not yet been manually tested on either platform.
+- Next actions: Commit and push the default-plugin change, then run `./setup.sh --agent pi --install-missing` on macOS and test `/mdview PLAN.md` in a new Pi session.

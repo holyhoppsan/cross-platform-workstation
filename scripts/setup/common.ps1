@@ -398,6 +398,7 @@ function Ensure-WindowsAgent {
         if ($Agent -eq 'pi') {
             Write-SetupInfo 'would install Pi plugin: npm:@narumitw/pi-usage'
             Write-SetupInfo 'would install Pi plugin: npm:pi-mcp-adapter'
+            Write-SetupInfo 'would install Pi plugin: npm:@pandi-coding-agent/mdview'
         }
         return
     }
@@ -415,7 +416,7 @@ function Ensure-WindowsAgent {
     & $agentCommand --version
     if ($LASTEXITCODE -ne 0) { throw "$Agent was installed but its version check failed." }
     if ($Agent -eq 'pi') {
-        foreach ($plugin in @('npm:@narumitw/pi-usage', 'npm:pi-mcp-adapter')) {
+        foreach ($plugin in @('npm:@narumitw/pi-usage', 'npm:pi-mcp-adapter', 'npm:@pandi-coding-agent/mdview')) {
             $installedPackages = & $agentCommand list 2>&1
             if ($LASTEXITCODE -ne 0) { throw 'Pi could not list installed packages.' }
             if ($installedPackages -match [regex]::Escape($plugin)) {
