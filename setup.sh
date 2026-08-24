@@ -127,6 +127,7 @@ case "$phase" in
   vowen)
     "$repo_root/scripts/setup/phases/foundation.sh" "$repo_root"
     "$repo_root/scripts/setup/phases/vowen.sh" "$repo_root" "$install_missing"
+    setup_apply_chezmoi "$repo_root"
     "$repo_root/scripts/doctor" --phase vowen
     ;;
   all)

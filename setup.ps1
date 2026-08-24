@@ -38,6 +38,11 @@ if ($Phase -eq 'vowen') {
         throw 'Vowen installation through setup.ps1 is supported on Windows only. On macOS, run ./setup.sh --phase vowen [--install-missing].'
     }
     Ensure-WindowsVowen -Install:$InstallVowen -DryRun:$DryRun
+    if ($SkipApply) {
+        Write-SetupInfo 'skipping chezmoi apply by request'
+    } else {
+        Invoke-ChezmoiApply -RepoRoot $RepoRoot -DryRun:$DryRun
+    }
     Invoke-WindowsVowenValidation -RepoRoot $RepoRoot -DryRun:$DryRun
     if ($DryRun) {
         Write-Host 'Dry run complete; no changes were made.'

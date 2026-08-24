@@ -65,6 +65,8 @@ assert_contains "$powershell_setup" "'yazi'" 'setup.ps1 accepts yazi phase'
 assert_contains "$powershell_setup" "'vowen'" 'setup.ps1 accepts Vowen phase'
 assert_contains "$powershell_setup" '[switch]$InstallVowen' 'setup.ps1 requires an explicit Vowen install opt-in'
 assert_contains "$powershell_setup" 'Ensure-WindowsVowen -Install:$InstallVowen' 'setup.ps1 routes Vowen through the explicit install option'
+assert_contains "$powershell_setup" "if (\$Phase -eq 'vowen')" 'setup.ps1 has a dedicated Vowen phase path'
+assert_contains "$powershell_setup" 'Invoke-ChezmoiApply -RepoRoot $RepoRoot -DryRun:$DryRun' 'setup.ps1 applies managed doctor updates for Vowen'
 assert_contains "$powershell_setup" 'Ensure-WindowsPhaseOneTools' 'setup.ps1 verifies Windows Phase 1 prerequisites'
 assert_contains "$powershell_setup" 'Ensure-WindowsHerdr -DryRun:$DryRun' 'setup.ps1 installs or verifies Herdr with the shell phase'
 assert_contains "$powershell_setup" 'Ensure-WindowsAgent -Agent $Agent' 'setup.ps1 has a separate Windows agent setup path'
@@ -182,6 +184,8 @@ vowen_phase=$(cat "$repo_root/scripts/setup/phases/vowen.sh")
 assert_contains "$vowen_phase" 'https://vowen.ai/mac/download/' 'macOS Vowen setup uses the official download page'
 assert_contains "$vowen_phase" 'https://vowen.ai/windows/download/' 'MSYS2 Vowen setup uses the official download page'
 assert_not_contains "$vowen_phase" 'curl ' 'Vowen setup does not use curl-to-shell'
+setup_entrypoint=$(cat "$repo_root/setup.sh")
+assert_contains "$setup_entrypoint" 'setup_apply_chezmoi "$repo_root"' 'setup.sh applies managed doctor updates for Vowen'
 
 doctor_source=$(git -C "$repo_root" ls-files --stage chezmoi/dot_config/workstation/executable_doctor)
 assert_contains "$doctor_source" '100755' 'managed workstation doctor source is executable'

@@ -2700,3 +2700,11 @@ Format:
 - Validation performed: Repository tests, Bash syntax checks, and `git diff --check` passed. On Windows, `setup.ps1 -Phase vowen` detected the existing Vowen executable at the standard per-user location and `doctor --phase vowen` passed through MSYS2 UCRT64 Bash.
 - Known gaps: Vowen installation handoff and actual dictation have not yet been manually validated on macOS. On Windows, microphone permission, dictated text insertion in WezTerm, normal clipboard paste, and Quake hotkey coexistence still require manual GUI validation.
 - Next actions: Complete the documented fresh-WezTerm dictation test on Windows and macOS, then mark only the platform-specific validation items that actually pass.
+
+### 2026-08-24
+
+- Summary of changes: Corrected the Phase 8 setup flow so it applies chezmoi before running Vowen doctor validation. This updates the locally installed `workstation-doctor` command with the new `vowen` phase rather than validating only the checkout copy.
+- Phases touched: Phase 8 Vowen desktop dictation.
+- Validation performed: PowerShell parsing, Bash syntax checks, `tests/setup_test.bash`, and `git diff --check` passed after this correction; macOS validation remains pending.
+- Known gaps: The correction must be pulled and run on macOS before `~/.local/bin/workstation-doctor --phase vowen` can report the optional Vowen status there.
+- Next actions: Push the correction, then run `./setup.sh --phase vowen` from the Mac checkout and verify the local doctor command.

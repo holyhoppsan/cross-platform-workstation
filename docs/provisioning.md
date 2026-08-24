@@ -76,10 +76,10 @@ Vowen is an optional desktop dictation app. It is not an AI coding agent, MCP
 server, model profile, or managed dotfile. It is deliberately excluded from
 `--phase all`.
 
-The Phase 8 commands only detect Vowen and, with an explicit opt-in, open the
-official Vowen download page in the default browser. They do not download an
-installer, run a silent installer, bypass Windows SmartScreen, or alter OS
-privacy permissions:
+The Phase 8 commands apply the managed workstation files (including the
+phase-aware `doctor`) and, with an explicit opt-in, open the official Vowen
+download page in the default browser. They do not download an installer, run a
+silent installer, bypass Windows SmartScreen, or alter OS privacy permissions:
 
 ```powershell
 ./setup.ps1 -Phase vowen
