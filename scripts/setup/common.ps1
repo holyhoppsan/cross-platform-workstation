@@ -152,11 +152,13 @@ function Resolve-InstalledCommand {
     if ($Env:LocalAppData) {
         $candidateRoots += Join-Path $Env:LocalAppData 'Microsoft\WindowsApps'
         $candidateRoots += Join-Path $Env:LocalAppData 'Microsoft\WinGet\Packages'
+        $candidateRoots += Join-Path $Env:LocalAppData 'Pandoc'
     }
     if ($Env:ProgramFiles) {
         $candidateRoots += Join-Path $Env:ProgramFiles 'WinGet\Packages'
         $candidateRoots += Join-Path $Env:ProgramFiles 'WezTerm'
         $candidateRoots += Join-Path $Env:ProgramFiles 'Neovim\bin'
+        $candidateRoots += Join-Path $Env:ProgramFiles 'Pandoc'
         $candidateRoots += Join-Path $Env:ProgramFiles 'Yazi'
         $candidateRoots += Join-Path $Env:ProgramFiles 'AutoHotkey\v2'
         $candidateRoots += Join-Path $Env:ProgramFiles 'AutoHotkey'
@@ -309,6 +311,12 @@ function Ensure-WindowsYazi {
     Ensure-WindowsPackageCommand -Command 'yazi.exe' -PackageId 'sxyazi.yazi' -Name 'Yazi' -DryRun:$DryRun
 }
 
+function Ensure-WindowsPandoc {
+    param([switch]$DryRun)
+
+    Ensure-WindowsPackageCommand -Command 'pandoc.exe' -PackageId 'JohnMacFarlane.Pandoc' -Name 'Pandoc' -DryRun:$DryRun
+}
+
 function Get-WindowsVowenInstallation {
     $candidates = @()
     if ($Env:LocalAppData) {
@@ -393,12 +401,16 @@ function Ensure-WindowsHerdr {
 function Ensure-WindowsAgent {
     param([Parameter(Mandatory)][ValidateSet('pi', 'codex')][string]$Agent, [switch]$DryRun)
     Ensure-WindowsPackageCommand -Command 'node.exe' -PackageId 'OpenJS.NodeJS.LTS' -Name 'Node.js LTS' -DryRun:$DryRun
+    if ($Agent -eq 'pi') {
+        Ensure-WindowsPandoc -DryRun:$DryRun
+    }
     if ($DryRun) {
         Write-SetupInfo "would install $Agent with npm"
         if ($Agent -eq 'pi') {
             Write-SetupInfo 'would install Pi plugin: npm:@narumitw/pi-usage'
             Write-SetupInfo 'would install Pi plugin: npm:pi-mcp-adapter'
-            Write-SetupInfo 'would install Pi plugin: npm:@pandi-coding-agent/mdview'
+            Write-SetupInfo 'would install Pi plugin: npm:pi-markdown-preview'
+            Write-SetupInfo 'would remove superseded Pi plugin: npm:@pandi-coding-agent/mdview'
         }
         return
     }
@@ -416,7 +428,7 @@ function Ensure-WindowsAgent {
     & $agentCommand --version
     if ($LASTEXITCODE -ne 0) { throw "$Agent was installed but its version check failed." }
     if ($Agent -eq 'pi') {
-        foreach ($plugin in @('npm:@narumitw/pi-usage', 'npm:pi-mcp-adapter', 'npm:@pandi-coding-agent/mdview')) {
+        foreach ($plugin in @('npm:@narumitw/pi-usage', 'npm:pi-mcp-adapter', 'npm:pi-markdown-preview')) {
             $installedPackages = & $agentCommand list 2>&1
             if ($LASTEXITCODE -ne 0) { throw 'Pi could not list installed packages.' }
             if ($installedPackages -match [regex]::Escape($plugin)) {
@@ -426,6 +438,13 @@ function Ensure-WindowsAgent {
                 & $agentCommand install $plugin
                 if ($LASTEXITCODE -ne 0) { throw "Pi failed to install plugin $plugin." }
             }
+        }
+        $installedPackages = & $agentCommand list 2>&1
+        if ($LASTEXITCODE -ne 0) { throw 'Pi could not list installed packages.' }
+        if ($installedPackages -match [regex]::Escape('npm:@pandi-coding-agent/mdview')) {
+            Write-SetupInfo 'removing superseded Pi plugin: npm:@pandi-coding-agent/mdview'
+            & $agentCommand remove 'npm:@pandi-coding-agent/mdview'
+            if ($LASTEXITCODE -ne 0) { throw 'Pi failed to remove the superseded Markdown viewer plugin.' }
         }
     }
 }

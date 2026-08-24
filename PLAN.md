@@ -1488,7 +1488,7 @@ Deliverables:
 
 Tasks:
 
-* [x] Add independent Pi installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS. Pi setup also ensures the global `npm:@narumitw/pi-usage`, `npm:pi-mcp-adapter`, and `npm:@pandi-coding-agent/mdview` extensions; the Markdown viewer installation requires Windows/macOS validation.
+* [x] Add independent Pi installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS. Pi setup also ensures the global `npm:@narumitw/pi-usage`, `npm:pi-mcp-adapter`, and `npm:pi-markdown-preview` extensions; it installs Pandoc as the preview prerequisite and removes the superseded Pandi Markdown viewer. The replacement requires Windows/macOS validation.
 * [x] Add optional Pi MCP support through `pi-mcp-adapter`. Status: installation is implemented for the Pi-only setup path. The repository installs only the adapter; every machine's MCP server selection, imports, endpoints, and OAuth authentication remain explicit user-local configuration and are never committed.
 * [x] Add independent Codex installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS.
 * [x] Make Windows global npm commands reachable from the managed MSYS2 UCRT64 shell. Status: the managed PATH includes Node.js and the per-user npm command directory; Pi and Codex were version-checked from a fresh UCRT64 interactive Bash session.
@@ -2716,3 +2716,11 @@ Format:
 - Validation performed: PowerShell parsing, Bash syntax checks, and `tests/setup_test.bash` passed. On Windows, `setup.ps1 -Agent pi` installed the extension and `pi list` reported `npm:@pandi-coding-agent/mdview`.
 - Known gaps: The third-party Markdown viewer must still be installed and tested through the Pi setup command on macOS before it is recorded as cross-platform validated. Interactive `/mdview` rendering has not yet been manually tested on either platform.
 - Next actions: Commit and push the default-plugin change, then run `./setup.sh --agent pi --install-missing` on macOS and test `/mdview PLAN.md` in a new Pi session.
+
+### 2026-08-24
+
+- Summary of changes: Replaced the lightweight Pandi Pi Markdown viewer with `npm:pi-markdown-preview`, which supports rich WezTerm/browser/PDF rendering. Pi setup installs Pandoc through the native package manager and removes the superseded Pandi extension after the replacement has been installed.
+- Phases touched: Phase 12 AI agent launcher; Phase 1 Windows shell PATH.
+- Validation performed: PowerShell parsing, Bash syntax checks, `tests/setup_test.bash`, and `tests/functions_test.bash` passed. On Windows, Pi setup installed Pandoc 3.10.2 and `npm:pi-markdown-preview`, removed the Pandi package, and `pi list` confirmed only the replacement. A simulated fresh MSYS2 UCRT64 environment resolved and ran `pandoc` successfully.
+- Known gaps: A Chromium-based browser is required for terminal previews and a LaTeX engine is optional for PDF export; neither is installed by this repository. macOS replacement and interactive `/preview` validation remain pending; Windows interactive preview rendering is also pending.
+- Next actions: Commit and push the replacement, then run `./setup.sh --agent pi --install-missing` on macOS and use `/preview PLAN.md` in a fresh Pi session.

@@ -32,7 +32,13 @@ fi
 "$command_name" --version
 
 if [ "$agent" = pi ]; then
-  for pi_plugin in 'npm:@narumitw/pi-usage' 'npm:pi-mcp-adapter' 'npm:@pandi-coding-agent/mdview'; do
+  if ! has_command pandoc; then
+    [ "$install_missing" = true ] || die 'Pandoc is required for Pi Markdown preview. Rerun with ./setup.sh --agent pi --install-missing.'
+    [ "$platform" = macos ] || die 'Pi Markdown preview setup through setup.sh is supported on macOS only; use setup.ps1 on Windows.'
+    macos_install_formulae pandoc
+  fi
+
+  for pi_plugin in 'npm:@narumitw/pi-usage' 'npm:pi-mcp-adapter' 'npm:pi-markdown-preview'; do
     if "$command_name" list 2>/dev/null | grep -Fq "$pi_plugin"; then
       info "Pi plugin already available: $pi_plugin"
     else
@@ -40,4 +46,9 @@ if [ "$agent" = pi ]; then
       "$command_name" install "$pi_plugin"
     fi
   done
+
+  if "$command_name" list 2>/dev/null | grep -Fq 'npm:@pandi-coding-agent/mdview'; then
+    info 'removing superseded Pi plugin: npm:@pandi-coding-agent/mdview'
+    "$command_name" remove 'npm:@pandi-coding-agent/mdview'
+  fi
 fi
