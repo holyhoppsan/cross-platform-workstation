@@ -106,6 +106,15 @@ creates firewall rules. Follow [Tailscale remote access](tailscale.md) to
 authenticate the Windows laptop and iPhone, then explicitly create the two
 Tailscale-scoped firewall rules from elevated PowerShell.
 
+To prepare a Mac as a ShadowTerm Mosh host without exposing it automatically:
+
+```bash
+./setup.sh --phase tailscale --enable-mosh-host --install-missing
+```
+
+This adds only the Mosh package. Enabling Remote Login, adding the phone's SSH
+public key, and joining a tailnet are manual per-machine decisions.
+
 ## Install Policy
 
 Setup must not:

@@ -66,6 +66,11 @@ Tailscale CGNAT source addresses and creates two inbound rules: TCP 22 and UDP
 firewall access. Tailnet membership, macOS VPN approval, and policy remain
 manual, user-controlled settings outside version control.
 
+A macOS host is prepared only through the explicit `--enable-mosh-host` Phase
+9 option, which installs or verifies the `mosh` executable. It does not enable
+Remote Login, modify `authorized_keys`, change macOS firewall rules, or set up
+MCP. Those remain manual host-security decisions.
+
 ### Future Phases
 
 Rider, worktree commands, AI agents, notifications, and model tooling are future phases. macOS and Ubuntu Quake adapters also remain future platform work. Placeholder directories may exist so the repository shape is stable, but functional implementations must wait for their phase.

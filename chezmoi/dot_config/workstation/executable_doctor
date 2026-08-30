@@ -546,6 +546,12 @@ check_tailscale() {
     warn 'Tailscale firewall' 'manual: use platform/windows/setup-tailscale-mosh.ps1 with the iPhone Tailscale IPv4; no router ports are used'
     warn 'Tailscale validation' 'test ShadowTerm Mosh from an external network after tailnet policy and firewall rules are reviewed'
   else
+    if command -v mosh-server >/dev/null 2>&1; then
+      ok 'Mosh server' "$(mosh-server --version 2>/dev/null | head -n 1)"
+    else
+      warn 'Mosh server' 'optional; rerun setup.sh --phase tailscale --enable-mosh-host --install-missing to prepare this Mac as a ShadowTerm host'
+    fi
+    warn 'macOS Remote Login' 'manual: enable Remote Login for the intended user before accepting ShadowTerm SSH/Mosh connections'
     warn 'Tailscale configuration' 'installation is complete; tailnet sign-in and use are optional and remain manual'
   fi
 }

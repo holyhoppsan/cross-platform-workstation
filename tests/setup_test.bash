@@ -37,6 +37,9 @@ assert_contains "$vowen_output" 'phase: vowen' 'setup.sh parses optional Vowen p
 tailscale_output=$("$repo_root/setup.sh" --phase tailscale --dry-run)
 assert_contains "$tailscale_output" 'phase: tailscale' 'setup.sh parses Tailscale phase'
 
+tailscale_mosh_output=$("$repo_root/setup.sh" --phase tailscale --enable-mosh-host --dry-run)
+assert_contains "$tailscale_mosh_output" 'enable_mosh_host: true' 'setup.sh parses macOS Mosh host preparation option'
+
 default_output=$("$repo_root/setup.sh" --dry-run)
 assert_contains "$default_output" 'phase: shell' 'setup.sh defaults to current implemented phase'
 
@@ -213,6 +216,7 @@ assert_not_contains "$vowen_phase" 'curl ' 'Vowen setup does not use curl-to-she
 tailscale_phase=$(cat "$repo_root/scripts/setup/phases/tailscale.sh")
 assert_contains "$tailscale_phase" 'macos_install_cask tailscale' 'macOS Tailscale setup installs the app through Homebrew'
 assert_contains "$tailscale_phase" '/Applications/Tailscale.app' 'macOS Tailscale setup verifies the app bundle'
+assert_contains "$tailscale_phase" 'macos_install_formulae mosh' 'macOS Tailscale setup can prepare a Mosh host'
 setup_entrypoint=$(cat "$repo_root/setup.sh")
 assert_contains "$setup_entrypoint" 'setup_apply_chezmoi "$repo_root"' 'setup.sh applies managed doctor updates for Vowen'
 
@@ -230,6 +234,7 @@ assert_contains "$doctor_config" 'check_vowen' 'doctor implements optional Vowen
 assert_contains "$doctor_config" 'check_tailscale' 'doctor implements Tailscale status detection'
 assert_contains "$doctor_config" 'Tailscale IPv4' 'doctor reports the Tailscale host address when connected'
 assert_contains "$doctor_config" '/Applications/Tailscale.app' 'doctor detects the macOS Tailscale app'
+assert_contains "$doctor_config" "'Mosh server'" 'doctor reports optional macOS Mosh host readiness'
 assert_contains "$doctor_config" 'Vowen shortcut policy' 'doctor reports the Vowen shortcut policy'
 assert_contains "$common_sh" 'macos_install_formulae' 'setup.sh has macOS Homebrew formula helper'
 assert_contains "$common_sh" 'macos_install_cask' 'setup.sh has macOS Homebrew cask helper'

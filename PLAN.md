@@ -1180,7 +1180,7 @@ Notes:
 
 ## Phase 9: Tailscale Remote Access
 
-Status: In progress; Windows client install/doctor validated, macOS client and tailnet/off-LAN validation pending
+Status: In progress; Windows client install/doctor and macOS client install validated, macOS Mosh-host preparation and tailnet/off-LAN validation pending
 
 Goal: Extend the validated MSYS2 SSH/Mosh service beyond the LAN through the user's private tailnet, without router port forwarding or Tailscale SSH.
 
@@ -1188,6 +1188,7 @@ Requirements:
 
 * Install and authenticate Tailscale on the Windows laptop and iPhone using the same tailnet.
 * Allow the Tailscale macOS client to be installed without requiring authentication or use on every Mac.
+* Prepare a Mac for ShadowTerm Mosh only through an explicit opt-in that does not enable Remote Login or add SSH credentials.
 * Keep MSYS2 `msys2_sshd` plus Mosh as the application services; Tailscale provides only private network transport.
 * Do not enable public-internet router port forwarding.
 * Add separate Windows firewall rules limited to Tailscale source addresses and the required TCP 22 / UDP 60001 ports; preserve the existing LAN-only rules.
@@ -1198,11 +1199,13 @@ Tasks:
 
 * [x] Add a normal-user Windows setup phase that installs or verifies the Tailscale client through WinGet and reports connection status without authenticating.
 * [x] Add an optional macOS setup path that installs or verifies the Tailscale app through Homebrew without authenticating or creating a VPN configuration.
+* [x] Add an explicit macOS Mosh-host preparation option that installs or verifies only Mosh and keeps Remote Login, SSH keys, firewall, Tailscale login, and MCP manual.
 * [x] Add a separate elevated, explicit firewall command that accepts only specified Tailscale CGNAT source addresses and creates TCP 22 / UDP 60001 rules.
 * [x] Document the iPhone, tailnet-policy, ShadowTerm, and rollback procedure without recording addresses or credentials.
 * [ ] Sign LFG Laptop Herdr and iPhone into the same tailnet and review access policy.
 * [ ] Create the firewall rules using the iPhone's current Tailscale IPv4 address.
 * [ ] Validate off-LAN ShadowTerm Mosh and a network-transition resume.
+* [ ] Validate a ShadowTerm SSH/Mosh connection from iPhone to the MacBook Pro on the LAN, then separately through Tailscale if configured.
 
 Validation:
 
@@ -2777,3 +2780,11 @@ Format:
 - Validation performed: The current branch and updated remote `main` history were searched after the rewrite; no private SSH keys, public authorized keys, Tailscale auth keys, API tokens, or the removed LAN metadata were found.
 - Known gaps: Existing clones, forks, caches, and third-party archives may retain old commit objects independently; collaborators must re-clone or reset to the rewritten `main` before contributing.
 - Next actions: Keep host addresses, SSIDs, public keys, tailnet addresses, endpoint URLs, and authentication material out of future repository notes and configuration.
+
+### 2026-08-30
+
+- Summary of changes: Added the explicit macOS Phase 9 `--enable-mosh-host` option. It installs or verifies Homebrew Mosh for a Mac intended to accept ShadowTerm sessions, while preserving manual control over Remote Login, authorized keys, firewall rules, Tailscale sign-in, and MCP.
+- Phases touched: Phase 9 Tailscale remote access.
+- Validation performed: Portable parser, syntax, and setup-test coverage was added. No macOS SSH service, key, firewall, tailnet, or ShadowTerm connection was changed by this implementation.
+- Known gaps: The MacBook Pro still requires manual Remote Login and ShadowTerm-key setup, plus LAN and optional Tailscale Mosh validation.
+- Next actions: Commit and push when approved; run `./setup.sh --phase tailscale --enable-mosh-host --install-missing` on the MacBook Pro, then follow the Phase 9 Mac-host documentation.

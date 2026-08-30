@@ -8,6 +8,7 @@ repo_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 phase=shell
 dry_run=false
 install_missing=false
+enable_mosh_host=false
 agent=''
 
 while [ "$#" -gt 0 ]; do
@@ -29,6 +30,10 @@ while [ "$#" -gt 0 ]; do
       install_missing=true
       shift
       ;;
+    --enable-mosh-host)
+      enable_mosh_host=true
+      shift
+      ;;
     --agent)
       [ "$#" -ge 2 ] || die '--agent requires pi or codex'
       agent=$2
@@ -43,6 +48,10 @@ while [ "$#" -gt 0 ]; do
       ;;
   esac
 done
+
+if [ "$enable_mosh_host" = true ] && [ "$phase" != tailscale ]; then
+  die '--enable-mosh-host is supported only with --phase tailscale'
+fi
 
 if [ -n "$agent" ]; then
   case "$agent" in pi|codex) ;; *) die "unknown agent: $agent" ;; esac
@@ -65,6 +74,7 @@ info "platform: $platform"
 info "phase: $phase"
 info "dry_run: $dry_run"
 info "install_missing: $install_missing"
+info "enable_mosh_host: $enable_mosh_host"
 
 if [ "$dry_run" = true ]; then
   info 'dry run only; no changes made'
@@ -133,7 +143,7 @@ case "$phase" in
   tailscale)
     "$repo_root/scripts/setup/phases/foundation.sh" "$repo_root"
     "$repo_root/scripts/setup/phases/shell.sh" "$repo_root" "$install_missing"
-    "$repo_root/scripts/setup/phases/tailscale.sh" "$repo_root" "$install_missing"
+    "$repo_root/scripts/setup/phases/tailscale.sh" "$repo_root" "$install_missing" "$enable_mosh_host"
     setup_apply_chezmoi "$repo_root"
     "$repo_root/scripts/doctor" --phase tailscale
     setup_validate_interactive_shell "$repo_root"
