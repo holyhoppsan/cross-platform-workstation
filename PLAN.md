@@ -2769,3 +2769,11 @@ Format:
 - Validation performed: The MacBook Pro reached the phase script invocation and reported the missing execute permission. The repaired script still requires macOS rerun and validation.
 - Known gaps: macOS Tailscale installation and doctor validation remain pending; no tailnet configuration has been changed.
 - Next actions: Commit and push the executable-mode correction, then pull and rerun `./setup.sh --phase tailscale --install-missing` on the MacBook Pro.
+
+### 2026-08-30
+
+- Summary of changes: Removed previously recorded LAN-specific validation metadata from the repository and rewrote the reachable `main` history to remove the prior occurrences.
+- Phases touched: Repository security hygiene; Phase 5.5 Windows MSYS2 and Mosh remote access.
+- Validation performed: The current branch and updated remote `main` history were searched after the rewrite; no private SSH keys, public authorized keys, Tailscale auth keys, API tokens, or the removed LAN metadata were found.
+- Known gaps: Existing clones, forks, caches, and third-party archives may retain old commit objects independently; collaborators must re-clone or reset to the rewritten `main` before contributing.
+- Next actions: Keep host addresses, SSIDs, public keys, tailnet addresses, endpoint URLs, and authentication material out of future repository notes and configuration.
