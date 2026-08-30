@@ -1559,6 +1559,9 @@ Moshi boundaries:
   require it.
 * The macOS setup may install or verify the public Homebrew formula only after
   an explicit Moshi-specific option is supplied.
+* If Homebrew requires a third-party-tap trust decision, setup must stop and
+  print the narrow formula-specific `brew trust --formula` command. It must
+  never grant that trust itself.
 * The setup must not pair a phone token, start the service, or run
   `moshi-hook install`: these actions respectively store a credential, create
   a background service, and modify agent configuration outside the repository.

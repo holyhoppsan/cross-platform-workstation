@@ -42,6 +42,16 @@ The setup command may add Moshi's documented Homebrew tap and install the
 `moshi-hook` formula. It does **not** pair the Mac with the phone, start a
 background service, or alter Codex/Pi configuration.
 
+Some Homebrew versions require an explicit trust decision before loading a
+formula from a third-party tap. If setup reports that requirement, review the
+formula and run this once yourself, then rerun setup:
+
+```bash
+brew trust --formula rjyo/moshi/moshi-hook
+```
+
+The repository never grants tap trust automatically.
+
 After installation, in Moshi open **Settings -> Hooks**, copy the pairing
 token, and run these commands manually on the intended Mac:
 

@@ -23,7 +23,8 @@ fi
 require_command brew
 info 'adding the documented Moshi Homebrew tap'
 brew tap rjyo/moshi || die 'Homebrew failed while adding the Moshi tap.'
-macos_install_formulae moshi-hook
+info 'installing or verifying macOS Homebrew formula: moshi-hook'
+brew install moshi-hook || die 'Homebrew requires explicit trust for this third-party formula. Review it, run: brew trust --formula rjyo/moshi/moshi-hook, then rerun this setup command.'
 has_command moshi-hook || die 'Moshi hook installation completed but moshi-hook was not found on PATH.'
 moshi-hook version
 info 'Moshi hook is installed only; pairing, service activation, and agent-hook installation remain manual.'

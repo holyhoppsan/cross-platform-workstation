@@ -246,7 +246,9 @@ assert_contains "$doctor_config" 'Vowen shortcut policy' 'doctor reports the Vow
 
 moshi_hook_setup=$(cat "$repo_root/scripts/setup/moshi-hook.sh")
 assert_contains "$moshi_hook_setup" 'brew tap rjyo/moshi' 'Moshi hook setup adds the documented Homebrew tap'
-assert_contains "$moshi_hook_setup" 'macos_install_formulae moshi-hook' 'Moshi hook setup installs the Homebrew formula'
+assert_contains "$moshi_hook_setup" 'brew install moshi-hook' 'Moshi hook setup installs the Homebrew formula'
+assert_contains "$moshi_hook_setup" 'brew trust --formula rjyo/moshi/moshi-hook' 'Moshi hook setup explains the narrow required Homebrew trust action'
+assert_not_contains "$moshi_hook_setup" 'brew trust rjyo/moshi' 'Moshi hook setup does not grant broad tap trust automatically'
 assert_not_contains "$moshi_hook_setup" 'moshi-hook pair' 'Moshi hook setup does not pair credentials automatically'
 assert_not_contains "$moshi_hook_setup" 'brew services start' 'Moshi hook setup does not start a background service automatically'
 assert_contains "$common_sh" 'macos_install_formulae' 'setup.sh has macOS Homebrew formula helper'

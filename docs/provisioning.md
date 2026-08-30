@@ -130,6 +130,10 @@ Pairing, service activation, and installation of Moshi-managed agent hooks are
 manual and intentionally remain outside the repository. See [Moshi mobile
 terminal](moshi.md).
 
+If Homebrew asks to trust the third-party formula, review it and run the
+formula-specific `brew trust --formula rjyo/moshi/moshi-hook` command manually;
+setup will never grant that trust itself.
+
 ## Install Policy
 
 Setup must not:
