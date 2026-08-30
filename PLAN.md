@@ -2761,3 +2761,11 @@ Format:
 - Validation performed: `setup.ps1 -Phase tailscale`, `tailscale.exe version`, `tailscale.exe ip -4`, and `scripts/setup/verify.ps1 -Phase tailscale` completed. The client reported `NeedsLogin` and no Tailscale IP, which is expected because setup intentionally does not authenticate or configure the tailnet.
 - Known gaps: No tailnet login, firewall rule, phone configuration, off-LAN Mosh test, or macOS installation has been performed.
 - Next actions: Commit and push, then run `./setup.sh --phase tailscale --install-missing` on the MacBook Pro. Open its Tailscale app and sign in only if that machine should join the tailnet.
+
+### 2026-08-30
+
+- Summary of changes: Corrected the Phase 9 macOS setup script's tracked executable mode after the first MacBook Pro run exposed a `Permission denied` failure before the Tailscale cask could be checked.
+- Phases touched: Phase 9 Tailscale remote access.
+- Validation performed: The MacBook Pro reached the phase script invocation and reported the missing execute permission. The repaired script still requires macOS rerun and validation.
+- Known gaps: macOS Tailscale installation and doctor validation remain pending; no tailnet configuration has been changed.
+- Next actions: Commit and push the executable-mode correction, then pull and rerun `./setup.sh --phase tailscale --install-missing` on the MacBook Pro.
