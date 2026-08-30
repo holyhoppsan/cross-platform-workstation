@@ -159,6 +159,7 @@ function Resolve-InstalledCommand {
         $candidateRoots += Join-Path $Env:ProgramFiles 'WezTerm'
         $candidateRoots += Join-Path $Env:ProgramFiles 'Neovim\bin'
         $candidateRoots += Join-Path $Env:ProgramFiles 'Pandoc'
+        $candidateRoots += Join-Path $Env:ProgramFiles 'Tailscale'
         $candidateRoots += Join-Path $Env:ProgramFiles 'Yazi'
         $candidateRoots += Join-Path $Env:ProgramFiles 'AutoHotkey\v2'
         $candidateRoots += Join-Path $Env:ProgramFiles 'AutoHotkey'
@@ -315,6 +316,12 @@ function Ensure-WindowsPandoc {
     param([switch]$DryRun)
 
     Ensure-WindowsPackageCommand -Command 'pandoc.exe' -PackageId 'JohnMacFarlane.Pandoc' -Name 'Pandoc' -DryRun:$DryRun
+}
+
+function Ensure-WindowsTailscale {
+    param([switch]$DryRun)
+
+    Ensure-WindowsPackageCommand -Command 'tailscale.exe' -PackageId 'Tailscale.Tailscale' -Name 'Tailscale' -DryRun:$DryRun
 }
 
 function Get-WindowsVowenInstallation {
@@ -793,6 +800,26 @@ function Invoke-WindowsVowenValidation {
 
     Write-SetupInfo 'checking optional Vowen status through MSYS2 UCRT64 Bash'
     Invoke-Msys2Bash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase vowen'
+}
+
+function Invoke-WindowsTailscaleValidation {
+    param(
+        [Parameter(Mandatory)][string]$RepoRoot,
+        [switch]$DryRun
+    )
+
+    $bash = Get-WindowsMsys2BashPath
+    if (-not $bash) {
+        throw 'MSYS2 UCRT64 Bash was not found for Tailscale validation.'
+    }
+
+    if ($DryRun) {
+        Write-SetupInfo 'would run doctor --phase tailscale through MSYS2 UCRT64 Bash'
+        return
+    }
+
+    Write-SetupInfo 'checking Tailscale status through MSYS2 UCRT64 Bash'
+    Invoke-Msys2Bash -BashPath $bash -WorkingDirectory $RepoRoot -Command './scripts/doctor --phase tailscale'
 }
 
 function Test-ShellPhase {

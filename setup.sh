@@ -55,7 +55,7 @@ if [ -n "$agent" ]; then
 fi
 
 case "$phase" in
-  foundation|shell|wezterm|quake|neovim|yazi|vowen|all) ;;
+  foundation|shell|wezterm|quake|neovim|yazi|vowen|tailscale|all) ;;
   *) die "phase is not implemented in this deliverable: $phase" ;;
 esac
 
@@ -129,6 +129,14 @@ case "$phase" in
     "$repo_root/scripts/setup/phases/vowen.sh" "$repo_root" "$install_missing"
     setup_apply_chezmoi "$repo_root"
     "$repo_root/scripts/doctor" --phase vowen
+    ;;
+  tailscale)
+    "$repo_root/scripts/setup/phases/foundation.sh" "$repo_root"
+    "$repo_root/scripts/setup/phases/shell.sh" "$repo_root" "$install_missing"
+    "$repo_root/scripts/setup/phases/tailscale.sh" "$repo_root" "$install_missing"
+    setup_apply_chezmoi "$repo_root"
+    "$repo_root/scripts/doctor" --phase tailscale
+    setup_validate_interactive_shell "$repo_root"
     ;;
   all)
     "$repo_root/scripts/setup/phases/foundation.sh" "$repo_root"

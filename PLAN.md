@@ -227,7 +227,7 @@ Do not include Yazi in the AI agent list.
 | 6     | macOS bootstrap and agent validation      | Completed for Apple Silicon core workflow and Pi/Codex installation; remaining tab/workspace checks belong to Phase 2 |
 | 7     | `just` command runner                     | In progress; executable installed and validated on Windows/macOS, awaiting workflow examples |
 | 8     | Vowen desktop dictation                   | Planned; opt-in installation and validation |
-| 9     | Tailscale remote access                   | Planned                                  |
+| 9     | Tailscale remote access                   | In progress; Windows client install/doctor validated, macOS client and tailnet/off-LAN validation pending |
 | 10    | Rider and minimal Unreal launching        | In progress; Windows Rider MCP validated, launcher work remains |
 | 11    | Project and worktree workflow             | Not started                               |
 | 12    | AI agent launcher                         | In progress; Pi/Codex installation validated on Windows/macOS, launcher work remains |
@@ -249,6 +249,7 @@ Windows:
 ./setup.ps1 -Phase neovim
 ./setup.ps1 -Phase yazi
 ./setup.ps1 -Phase vowen
+./setup.ps1 -Phase tailscale
 ./setup.ps1 -Phase rider
 ./setup.ps1 -Phase agents
 ./setup.ps1 -Phase all
@@ -264,6 +265,7 @@ macOS / Ubuntu:
 ./setup.sh --phase neovim
 ./setup.sh --phase yazi
 ./setup.sh --phase vowen
+./setup.sh --phase tailscale
 ./setup.sh --phase rider
 ./setup.sh --phase agents
 ./setup.sh --phase all
@@ -1178,18 +1180,29 @@ Notes:
 
 ## Phase 9: Tailscale Remote Access
 
-Status: Planned
+Status: In progress; Windows client install/doctor validated, macOS client and tailnet/off-LAN validation pending
 
 Goal: Extend the validated MSYS2 SSH/Mosh service beyond the LAN through the user's private tailnet, without router port forwarding or Tailscale SSH.
 
 Requirements:
 
 * Install and authenticate Tailscale on the Windows laptop and iPhone using the same tailnet.
+* Allow the Tailscale macOS client to be installed without requiring authentication or use on every Mac.
 * Keep MSYS2 `msys2_sshd` plus Mosh as the application services; Tailscale provides only private network transport.
 * Do not enable public-internet router port forwarding.
 * Add separate Windows firewall rules limited to Tailscale source addresses and the required TCP 22 / UDP 60001 ports; preserve the existing LAN-only rules.
 * Use the laptop's Tailscale IP or MagicDNS name in a separate ShadowTerm host entry.
 * Keep tailnet access policy restricted to the user's devices before testing from an external network.
+
+Tasks:
+
+* [x] Add a normal-user Windows setup phase that installs or verifies the Tailscale client through WinGet and reports connection status without authenticating.
+* [x] Add an optional macOS setup path that installs or verifies the Tailscale app through Homebrew without authenticating or creating a VPN configuration.
+* [x] Add a separate elevated, explicit firewall command that accepts only specified Tailscale CGNAT source addresses and creates TCP 22 / UDP 60001 rules.
+* [x] Document the iPhone, tailnet-policy, ShadowTerm, and rollback procedure without recording addresses or credentials.
+* [ ] Sign LFG Laptop Herdr and iPhone into the same tailnet and review access policy.
+* [ ] Create the firewall rules using the iPhone's current Tailscale IPv4 address.
+* [ ] Validate off-LAN ShadowTerm Mosh and a network-transition resume.
 
 Validation:
 
@@ -2724,3 +2737,27 @@ Format:
 - Validation performed: PowerShell parsing, Bash syntax checks, `tests/setup_test.bash`, and `tests/functions_test.bash` passed. On Windows, Pi setup installed Pandoc 3.10.2 and `npm:pi-markdown-preview`, removed the Pandi package, and `pi list` confirmed only the replacement. A simulated fresh MSYS2 UCRT64 environment resolved and ran `pandoc` successfully.
 - Known gaps: A Chromium-based browser is required for terminal previews and a LaTeX engine is optional for PDF export; neither is installed by this repository. macOS replacement and interactive `/preview` validation remain pending; Windows interactive preview rendering is also pending.
 - Next actions: Commit and push the replacement, then run `./setup.sh --agent pi --install-missing` on macOS and use `/preview PLAN.md` in a fresh Pi session.
+
+### 2026-08-30
+
+- Summary of changes: Began Phase 9 with a normal-user Windows Tailscale setup phase, Tailscale-aware doctor status, and separately elevated firewall automation for the existing MSYS2 SSH/Mosh service. The firewall command accepts explicit Tailscale CGNAT source addresses only and manages TCP 22 plus UDP 60001; it has a matching firewall-only rollback command.
+- Phases touched: Phase 9 Tailscale remote access; Phase 1 Windows shell PATH behavior.
+- Validation performed: PowerShell parser checks, Bash syntax checks, setup parsing tests, and diff whitespace checks were run. No Tailscale client installation, tailnet authentication, firewall change, or off-LAN connection was performed by repository validation.
+- Known gaps: LFG Laptop Herdr and the iPhone still need to join the same tailnet, the user must review their tailnet policy, and the two rules must be explicitly applied with the phone's Tailscale IPv4 address. Off-LAN ShadowTerm/Mosh and network-transition recovery are unvalidated.
+- Next actions: Run `./setup.ps1 -Phase tailscale` in normal PowerShell, sign in through the Tailscale Windows app and iPhone app, review the policy, then follow `docs/tailscale.md` to dry-run and explicitly apply the two restricted firewall rules.
+
+### 2026-08-30
+
+- Summary of changes: Extended Phase 9 client provisioning to macOS. `./setup.sh --phase tailscale --install-missing` installs or verifies Homebrew's Tailscale app cask, applies the phase-aware doctor, and reports whether it is signed in. Installation never requires or performs tailnet configuration, so the app can be present but unused on a Mac.
+- Phases touched: Phase 9 Tailscale remote access.
+- Validation performed: Portable parser and setup-test coverage was added; macOS installation and manual app behavior remain unvalidated.
+- Known gaps: Tailscale's macOS VPN approval and sign-in are intentionally user-controlled. Windows host firewall and off-LAN ShadowTerm validation remain pending.
+- Next actions: Test the macOS setup command on the MacBook Pro; only sign in through its app if that Mac should join the tailnet.
+
+### 2026-08-30
+
+- Summary of changes: Validated the normal-user Windows Phase 9 setup on LFG Laptop Herdr. It installed Tailscale 1.102.3 through WinGet, the Tailscale Windows service started, and the MSYS2 UCRT64 doctor resolved the client through the managed PATH.
+- Phases touched: Phase 9 Tailscale remote access.
+- Validation performed: `setup.ps1 -Phase tailscale`, `tailscale.exe version`, `tailscale.exe ip -4`, and `scripts/setup/verify.ps1 -Phase tailscale` completed. The client reported `NeedsLogin` and no Tailscale IP, which is expected because setup intentionally does not authenticate or configure the tailnet.
+- Known gaps: No tailnet login, firewall rule, phone configuration, off-LAN Mosh test, or macOS installation has been performed.
+- Next actions: Commit and push, then run `./setup.sh --phase tailscale --install-missing` on the MacBook Pro. Open its Tailscale app and sign in only if that machine should join the tailnet.

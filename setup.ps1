@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('foundation', 'shell', 'wezterm', 'quake', 'neovim', 'yazi', 'vowen', 'all')]
+    [ValidateSet('foundation', 'shell', 'wezterm', 'quake', 'neovim', 'yazi', 'vowen', 'tailscale', 'all')]
     [string]$Phase = 'shell',
     [switch]$DryRun,
     [switch]$SkipInstall,
@@ -48,6 +48,30 @@ if ($Phase -eq 'vowen') {
         Write-Host 'Dry run complete; no changes were made.'
     } else {
         Write-Host "Phase '$Phase' setup completed. Complete the Vowen installer and permissions manually, then rerun doctor --phase vowen."
+    }
+    exit 0
+}
+
+if ($Phase -eq 'tailscale') {
+    if ($Platform -ne 'windows') {
+        throw 'Tailscale remote-server setup is currently implemented for the Windows MSYS2 SSH/Mosh host only.'
+    }
+    Test-ShellPhase -RepoRoot $RepoRoot -Platform $Platform
+    if ($SkipInstall) {
+        Write-SetupInfo 'skipping Tailscale install/verify by request'
+    } else {
+        Ensure-WindowsTailscale -DryRun:$DryRun
+    }
+    if ($SkipApply) {
+        Write-SetupInfo 'skipping chezmoi apply by request'
+    } else {
+        Invoke-ChezmoiApply -RepoRoot $RepoRoot -DryRun:$DryRun
+    }
+    Invoke-WindowsTailscaleValidation -RepoRoot $RepoRoot -DryRun:$DryRun
+    if ($DryRun) {
+        Write-Host 'Dry run complete; no changes were made.'
+    } else {
+        Write-Host "Phase '$Phase' setup completed. Sign in to Tailscale in its Windows app, then follow docs/tailscale.md to add the explicit Tailscale-only SSH/Mosh firewall rules."
     }
     exit 0
 }

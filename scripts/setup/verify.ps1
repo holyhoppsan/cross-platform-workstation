@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('foundation', 'shell', 'wezterm', 'quake', 'neovim', 'yazi', 'all')]
+    [ValidateSet('foundation', 'shell', 'wezterm', 'quake', 'neovim', 'yazi', 'tailscale', 'all')]
     [string]$Phase = 'shell'
 )
 
@@ -24,6 +24,8 @@ if ($Platform -eq 'windows') {
         Invoke-WindowsNeovimValidation -RepoRoot $RepoRoot
     } elseif ($Phase -eq 'yazi') {
         Invoke-WindowsYaziValidation -RepoRoot $RepoRoot
+    } elseif ($Phase -eq 'tailscale') {
+        Invoke-WindowsTailscaleValidation -RepoRoot $RepoRoot
     } elseif ($Phase -eq 'all') {
         Invoke-WindowsShellValidation -RepoRoot $RepoRoot
         Invoke-WindowsWezTermValidation -RepoRoot $RepoRoot

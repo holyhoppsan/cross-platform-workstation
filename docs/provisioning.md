@@ -15,6 +15,7 @@ Supported entrypoints:
 ./setup.ps1 -Phase foundation
 ./setup.ps1 -Phase shell
 ./setup.ps1 -Phase wezterm
+./setup.ps1 -Phase tailscale
 ```
 
 On Windows, install MSYS2 at `C:\msys64`, use its UCRT64 environment, and use `setup.ps1` as the primary bootstrap entrypoint. Git for Windows may be used to clone the repository, but `setup.sh` is run from MSYS2 UCRT64 Bash.
@@ -93,6 +94,17 @@ silent installer, bypass Windows SmartScreen, or alter OS privacy permissions:
 
 After manually installing Vowen, run `doctor --phase vowen`. Complete the
 per-machine validation steps in [Vowen desktop dictation](vowen.md).
+
+## Phase 9: Tailscale remote access
+
+On the Windows MSYS2 SSH/Mosh host, `./setup.ps1 -Phase tailscale` installs or
+verifies the Tailscale client through WinGet, applies the managed doctor, and
+reports connection status. On macOS, `./setup.sh --phase tailscale
+--install-missing` installs or verifies the Tailscale app through Homebrew.
+Neither command logs in, changes tailnet policy, enables Tailscale SSH, or
+creates firewall rules. Follow [Tailscale remote access](tailscale.md) to
+authenticate the Windows laptop and iPhone, then explicitly create the two
+Tailscale-scoped firewall rules from elevated PowerShell.
 
 ## Install Policy
 

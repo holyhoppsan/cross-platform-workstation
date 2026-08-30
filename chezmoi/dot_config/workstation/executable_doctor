@@ -5,7 +5,7 @@ original_args=("$@")
 
 usage() {
   cat <<'EOF'
-usage: doctor [--phase foundation|shell|wezterm|quake|neovim|yazi|vowen|all] [--help]
+usage: doctor [--phase foundation|shell|wezterm|quake|neovim|yazi|vowen|tailscale|all] [--help]
 
 Later phases are documented in PLAN.md but are not implemented yet.
 EOF
@@ -36,7 +36,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$phase" in
-  foundation|shell|wezterm|quake|neovim|yazi|vowen|all) ;;
+  foundation|shell|wezterm|quake|neovim|yazi|vowen|tailscale|all) ;;
   rider|project|agents|models)
     printf '[fail] %-24s %s\n' "phase $phase" 'not implemented yet'
     exit 2
@@ -506,6 +506,50 @@ check_vowen() {
   warn 'Vowen manual validation' 'grant microphone and macOS Accessibility permission, then verify text insertion in a fresh WezTerm session'
 }
 
+check_tailscale() {
+  check_shell
+
+  local tailscale_cmd tailscale_ip
+  if [ "$WORKSTATION_OS" = macos ]; then
+    if [ ! -d /Applications/Tailscale.app ]; then
+      fail 'Tailscale' 'app not found; rerun setup.sh --phase tailscale --install-missing'
+      return
+    fi
+    ok 'Tailscale app' '/Applications/Tailscale.app'
+    tailscale_cmd=$(find_command tailscale || true)
+    if [ -z "$tailscale_cmd" ] && [ -x /Applications/Tailscale.app/Contents/MacOS/Tailscale ]; then
+      tailscale_cmd=/Applications/Tailscale.app/Contents/MacOS/Tailscale
+    fi
+  elif [ "$WORKSTATION_OS" = windows ]; then
+    tailscale_cmd=$(find_command tailscale tailscale.exe || true)
+    if [ -z "$tailscale_cmd" ]; then
+      tailscale_cmd=$(find_windows_file '/c/Program Files/Tailscale/tailscale.exe' || true)
+    fi
+  else
+    warn 'Tailscale' 'setup is currently implemented for Windows and macOS only'
+    return
+  fi
+
+  if [ -z "$tailscale_cmd" ]; then
+    warn 'Tailscale CLI' 'not found; launch the installed app and complete its setup manually'
+    return
+  fi
+
+  ok 'Tailscale' "$("$tailscale_cmd" version 2>/dev/null | head -n 1)"
+  tailscale_ip=$("$tailscale_cmd" ip -4 2>/dev/null | head -n 1 || true)
+  if [ -n "$tailscale_ip" ]; then
+    ok 'Tailscale IPv4' "$tailscale_ip"
+  else
+    warn 'Tailscale login' 'not connected; sign in through the Tailscale app if this machine should join a tailnet'
+  fi
+  if [ "$WORKSTATION_OS" = windows ]; then
+    warn 'Tailscale firewall' 'manual: use platform/windows/setup-tailscale-mosh.ps1 with the iPhone Tailscale IPv4; no router ports are used'
+    warn 'Tailscale validation' 'test ShadowTerm Mosh from an external network after tailnet policy and firewall rules are reviewed'
+  else
+    warn 'Tailscale configuration' 'installation is complete; tailnet sign-in and use are optional and remain manual'
+  fi
+}
+
 case "$phase" in
   foundation) check_foundation ;;
   shell) check_shell ;;
@@ -514,6 +558,7 @@ case "$phase" in
   neovim) check_neovim ;;
   yazi) check_yazi ;;
   vowen) check_vowen ;;
+  tailscale) check_tailscale ;;
   all)
     check_quake
     check_neovim

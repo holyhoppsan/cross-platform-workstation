@@ -54,6 +54,18 @@ Shell helpers must quote variables and preserve paths containing spaces.
 
 Phase 5.5 uses MSYS2's own `msys2_sshd` service, not native Windows OpenSSH or WSL. `platform/windows/setup-msys2-mosh.ps1` runs an adapted version of MSYS2's published service recipe, installs a supplied public key for the selected Windows account, and can separately create `LocalSubnet`/Private-profile firewall rules for SSH TCP 22 and Mosh UDP 60001. The initial reachability scope is LAN only. ShadowTerm performs the SSH bootstrap and launches `mosh-server`; Herdr, rather than tmux, owns session persistence.
 
+### Tailscale Remote Access
+
+Phase 9 keeps the MSYS2 SSH/Mosh service as the endpoint and uses Tailscale
+strictly as private transport. Normal setup installs or verifies the Windows
+client through WinGet or the macOS app through Homebrew, but never
+authenticates a tailnet. The separately elevated
+`platform/windows/setup-tailscale-mosh.ps1` accepts only explicit
+Tailscale CGNAT source addresses and creates two inbound rules: TCP 22 and UDP
+60001. It does not enable Tailscale SSH, router port forwarding, or broad
+firewall access. Tailnet membership, macOS VPN approval, and policy remain
+manual, user-controlled settings outside version control.
+
 ### Future Phases
 
 Rider, worktree commands, AI agents, notifications, and model tooling are future phases. macOS and Ubuntu Quake adapters also remain future platform work. Placeholder directories may exist so the repository shape is stable, but functional implementations must wait for their phase.
