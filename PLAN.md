@@ -231,7 +231,7 @@ Do not include Yazi in the AI agent list.
 | 10    | Rider and minimal Unreal launching        | In progress; Windows Rider MCP validated, launcher work remains |
 | 11    | Project and worktree workflow             | Not started                               |
 | 12    | AI agent launcher                         | In progress; Pi/Codex installation validated on Windows/macOS, launcher work remains |
-| 13    | Agent notifications and status            | Not started                               |
+| 13    | Agent notifications and status            | Planned; optional Moshi host integration defined |
 | 14    | Optional model tooling                    | Not started                               |
 | 15    | Polish and hardening                      | Not started                               |
 
@@ -1540,7 +1540,7 @@ Deferred items:
 
 ## Phase 13: Agent Notifications and Status
 
-Status: Not started
+Status: Planned; optional Moshi host integration defined
 
 Goal: Add basic agent status integration.
 
@@ -1549,6 +1549,23 @@ Scope:
 * Add portable `agent-notify`.
 * Integrate with terminal title/status where practical.
 * Keep state outside repository.
+* On macOS, optionally install or verify the Moshi `moshi-hook` Homebrew formula.
+* Keep Moshi pairing, daemon activation, and agent-hook configuration manual and opt-in.
+
+Moshi boundaries:
+
+* `moshi-hook` is optional host software for Moshi agent status, notifications,
+  approvals, and enhanced Herdr awareness; SSH/Mosh terminal access does not
+  require it.
+* The macOS setup may install or verify the public Homebrew formula only after
+  an explicit Moshi-specific option is supplied.
+* The setup must not pair a phone token, start the service, or run
+  `moshi-hook install`: these actions respectively store a credential, create
+  a background service, and modify agent configuration outside the repository.
+* The pairing token and Moshi-managed host state are secrets/local state and
+  must never be committed.
+* Windows MSYS2 support is not part of this initial Moshi-host step; do not add
+  WSL as a workaround.
 
 Supported states:
 
@@ -1575,6 +1592,9 @@ Deliverables:
 
 Tasks:
 
+* [x] Add an explicit macOS-only option that installs or verifies `moshi-hook` through its documented Homebrew tap. Status: implemented but not yet manually validated on macOS.
+* [x] Add doctor detection for the installed `moshi-hook` binary and clearly distinguish installed from paired/running. Status: implemented but not yet manually validated on macOS.
+* [x] Add `docs/moshi.md` covering the two-host free-tier setup, Tailscale/Mosh connection details, and the manual pairing/service/agent-hook steps. Status: documented; connection and hook workflow remain manually unvalidated.
 * [ ] Add `agent-notify`.
 * [ ] Add state file format.
 * [ ] Add terminal title integration.

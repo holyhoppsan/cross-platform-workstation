@@ -5,7 +5,7 @@ original_args=("$@")
 
 usage() {
   cat <<'EOF'
-usage: doctor [--phase foundation|shell|wezterm|quake|neovim|yazi|vowen|tailscale|all] [--help]
+usage: doctor [--phase foundation|shell|wezterm|quake|neovim|yazi|vowen|tailscale|moshi|all] [--help]
 
 Later phases are documented in PLAN.md but are not implemented yet.
 EOF
@@ -36,7 +36,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$phase" in
-  foundation|shell|wezterm|quake|neovim|yazi|vowen|tailscale|all) ;;
+  foundation|shell|wezterm|quake|neovim|yazi|vowen|tailscale|moshi|all) ;;
   rider|project|agents|models)
     printf '[fail] %-24s %s\n' "phase $phase" 'not implemented yet'
     exit 2
@@ -556,6 +556,26 @@ check_tailscale() {
   fi
 }
 
+check_moshi() {
+  check_shell
+
+  if [ "$WORKSTATION_OS" != macos ]; then
+    warn 'Moshi hook' 'optional setup is currently implemented only for macOS; Windows MSYS2 support is deferred'
+    return
+  fi
+
+  local moshi_hook_cmd
+  moshi_hook_cmd=$(find_command moshi-hook || true)
+  if [ -z "$moshi_hook_cmd" ]; then
+    fail 'Moshi hook' 'not found; run ./setup.sh --moshi-hook --install-missing'
+    return
+  fi
+
+  ok 'Moshi hook' "$("$moshi_hook_cmd" version 2>/dev/null | head -n 1)"
+  warn 'Moshi pairing' 'manual: copy a pairing token from Moshi, then run moshi-hook pair --token <token>; do not store the token in this repository'
+  warn 'Moshi service' 'manual: after pairing, run moshi-hook install and brew services start moshi-hook only if you want agent notifications and enhanced Herdr awareness'
+}
+
 case "$phase" in
   foundation) check_foundation ;;
   shell) check_shell ;;
@@ -565,6 +585,7 @@ case "$phase" in
   yazi) check_yazi ;;
   vowen) check_vowen ;;
   tailscale) check_tailscale ;;
+  moshi) check_moshi ;;
   all)
     check_quake
     check_neovim
