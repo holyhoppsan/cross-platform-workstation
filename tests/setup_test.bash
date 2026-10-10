@@ -129,6 +129,8 @@ assert_not_contains "$reset_windows" "Git.Git" 'reset-windows never uninstalls G
 
 common_ps1=$(cat "$repo_root/scripts/setup/common.ps1")
 assert_not_contains "$common_ps1" "PackageId 'Git.Git'" 'setup.ps1 never installs Git'
+assert_contains "$common_ps1" 'function Test-WindowsHost' 'Windows setup supports Windows PowerShell without IsWindows'
+assert_not_contains "$common_ps1" 'if ($IsWindows' 'Windows setup does not directly read the PowerShell 7-only IsWindows variable'
 assert_contains "$common_ps1" 'Test-WindowsProcessElevated' 'Windows setup helpers can detect elevated PowerShell'
 assert_contains "$common_ps1" 'Get-WindowsMsys2BashPath' 'Windows setup locates MSYS2 Bash'
 assert_contains "$common_ps1" 'Ensure-Msys2Ucrt64Packages' 'Windows setup verifies MSYS2 CLI packages'

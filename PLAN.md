@@ -2813,3 +2813,11 @@ Format:
 - Validation performed: Documentation consistency checks, portable repository tests, and diff whitespace checks are required before handoff. No software installation or machine-state change is part of this clarification.
 - Known gaps: None for the documentation boundary. Future setup, test, and doctor changes must preserve `install_wsl = false`, use MSYS2 UCRT64 and Windows-native paths, and tolerate independently managed WSL2 being present.
 - Next actions: Keep repository checkouts, generated state, logs, firewall rule names, scheduled tasks, package ownership, and updater state separate from `workstation-infra`.
+
+### 2026-10-10
+
+- Summary of changes: Corrected Windows setup platform detection so it does not directly read the PowerShell 7-only `$IsWindows`, `$IsMacOS`, or `$IsLinux` automatic variables. Windows PowerShell 5.1 now detects Windows through `OS=Windows_NT`, while PowerShell 7 retains its cross-platform automatic-variable fallback.
+- Phases touched: Phase 0/1 Windows setup bootstrap compatibility.
+- Validation performed: PowerShell parsing, a Windows PowerShell 5.1 platform-detection invocation, portable repository tests, and diff whitespace checks are required before handoff.
+- Known gaps: The complete new-workstation installation still requires user validation after pulling this correction; MSYS2 remains a manual prerequisite.
+- Next actions: Pull the correction on the new workstation and rerun `./setup.ps1 -Phase all -DryRun` from a normal, non-admin PowerShell.

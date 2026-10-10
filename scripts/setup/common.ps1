@@ -8,15 +8,29 @@ function Write-SetupWarn {
     Write-Host "[setup] warning: $Message"
 }
 
+function Test-WindowsHost {
+    if ($Env:OS -eq 'Windows_NT') {
+        return $true
+    }
+
+    $isWindowsVariable = Get-Variable -Name IsWindows -ErrorAction SilentlyContinue
+    return $null -ne $isWindowsVariable -and [bool]$isWindowsVariable.Value
+}
+
 function Get-WorkstationPlatform {
-    if ($IsWindows -or $Env:OS -eq 'Windows_NT') { return 'windows' }
-    if ($IsMacOS) { return 'macos' }
-    if ($IsLinux) { return 'linux' }
+    if (Test-WindowsHost) { return 'windows' }
+
+    $isMacOSVariable = Get-Variable -Name IsMacOS -ErrorAction SilentlyContinue
+    if ($null -ne $isMacOSVariable -and [bool]$isMacOSVariable.Value) { return 'macos' }
+
+    $isLinuxVariable = Get-Variable -Name IsLinux -ErrorAction SilentlyContinue
+    if ($null -ne $isLinuxVariable -and [bool]$isLinuxVariable.Value) { return 'linux' }
+
     return 'unknown'
 }
 
 function Test-WindowsProcessElevated {
-    if (-not ($IsWindows -or $Env:OS -eq 'Windows_NT')) {
+    if (-not (Test-WindowsHost)) {
         return $false
     }
 
@@ -70,7 +84,7 @@ function Get-WindowsMsys2BashPath {
 }
 
 function Update-ProcessPathFromRegistry {
-    if (-not ($IsWindows -or $Env:OS -eq 'Windows_NT')) {
+    if (-not (Test-WindowsHost)) {
         return
     }
 
