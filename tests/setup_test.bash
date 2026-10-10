@@ -175,6 +175,7 @@ assert_contains "$common_ps1" "WezTerm" 'Windows bootstrap searches standard Wez
 assert_contains "$common_ps1" "Neovim\\bin" 'Windows bootstrap searches standard Neovim install path'
 assert_contains "$common_ps1" "Yazi" 'Windows bootstrap searches standard Yazi install path'
 assert_contains "$common_ps1" "AutoHotkey\\v2" 'Windows bootstrap searches standard AutoHotkey v2 install path'
+assert_contains "$common_ps1" "Programs\\AutoHotkey\\v2" 'Windows bootstrap searches per-user AutoHotkey v2 install path'
 assert_contains "$common_ps1" 'Write-WorkstationEnv' 'setup.ps1 writes machine-local repo root env'
 assert_contains "$common_ps1" "PackageId 'Tailscale.Tailscale'" 'Windows bootstrap knows Tailscale package'
 assert_contains "$common_ps1" 'Invoke-WindowsTailscaleValidation' 'Windows bootstrap validates Tailscale phase'

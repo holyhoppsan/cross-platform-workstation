@@ -202,6 +202,8 @@ function Resolve-InstalledCommand {
         $candidateRoots += Join-Path $Env:LocalAppData 'Microsoft\WindowsApps'
         $candidateRoots += Join-Path $Env:LocalAppData 'Microsoft\WinGet\Packages'
         $candidateRoots += Join-Path $Env:LocalAppData 'Pandoc'
+        $candidateRoots += Join-Path $Env:LocalAppData 'Programs\AutoHotkey\v2'
+        $candidateRoots += Join-Path $Env:LocalAppData 'Programs\AutoHotkey'
     }
     if ($Env:ProgramFiles) {
         $candidateRoots += Join-Path $Env:ProgramFiles 'WinGet\Packages'

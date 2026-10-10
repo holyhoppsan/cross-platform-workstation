@@ -2829,3 +2829,11 @@ Format:
 - Validation performed: PowerShell parsing, dry-run behavior, portable repository tests, and diff whitespace checks are required before handoff. Live validation on the new workstation remains pending.
 - Known gaps: Existing MSYS2 terminals retain their old environment until closed and reopened. MSYS2 itself remains a manual prerequisite and is not installed by setup.
 - Next actions: Pull the correction on the new workstation, rerun `./setup.ps1 -Phase all`, then open a fresh WezTerm/MSYS2 UCRT64 session and verify `echo "$HOME"`, `type platform-info`, and `doctor --phase shell`.
+
+### 2026-10-10
+
+- Summary of changes: Added AutoHotkey v2's per-user installation tree under `%LOCALAPPDATA%\Programs\AutoHotkey` to Windows executable discovery. This lets the Quake phase continue in the same setup process after WinGet selects the per-user AutoHotkey installer location.
+- Phases touched: Phase 3 Windows Quake-mode bootstrap.
+- Validation performed: PowerShell parsing, portable setup tests, the full repository suite, and diff whitespace checks are required before handoff. The new-workstation setup reached this point and confirmed AutoHotkey 2.0.30 installed successfully, but same-process discovery of the correction remains pending there.
+- Known gaps: Live validation must confirm the new workstation resolves `AutoHotkey64.exe`, registers the startup shortcut, and completes `doctor --phase quake`; Quake GUI behavior must still be tested manually.
+- Next actions: Pull the correction on the new workstation and rerun `./setup.ps1 -Phase all`; setup is idempotent and should detect already-installed packages.
