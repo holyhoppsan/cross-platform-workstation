@@ -1052,6 +1052,8 @@ Deliverables:
 * MSYS2 UCRT64 detection and WezTerm shell launch support.
 * MSYS2 shell-aware setup, doctor, and test adapters.
 * A reviewed, idempotent Windows MSYS2 SSH service setup path.
+* An aggregated, non-mutating prerequisite preflight and opt-in installation
+  path for the repository-owned MSYS2 SSH/Mosh packages.
 * A documented single-port Mosh firewall configuration and reversal path.
 * ShadowTerm connection and validation documentation.
 
@@ -1060,6 +1062,11 @@ Tasks:
 * [x] Install MSYS2 at `C:\msys64` manually.
 * [x] Verify the UCRT64 environment.
 * [x] Install and verify `mosh`, `openssh`, `cygrunsrv`, and `mingw-w64-ucrt-x86_64-editrights`.
+* [x] Automate aggregated package/command preflight and opt-in installation via
+  `setup-msys2-mosh.ps1 -InstallMissing`, with post-install revalidation before
+  service or firewall mutation. Status: implemented and repository-tested on
+  2026-10-10; clean-machine apply validation on the Dell Precision remains
+  pending.
 * [x] Define and implement the UCRT64-aware `msys2_sshd` service setup.
 * [x] Configure and validate SSH host keys and key-only user access.
 * [x] Configure UCRT64 as the remote SSH shell environment.
@@ -2111,7 +2118,10 @@ This section mirrors and expands the unsupported/deferred policy for quick looku
 
 Current next actions:
 
-1. Review the current tracked changes, run final checks, and commit the validated Windows/MSYS2/Mosh/Yazi work.
+1. Review the Phase 5.5 prerequisite automation, then validate
+   `setup-msys2-mosh.ps1 -Apply -InstallMissing` on the fresh Dell Precision
+   with a reviewed public key; do not mark that clean-machine apply path
+   validated until it succeeds there.
 2. Complete Phase 6 macOS bootstrap and agent-validation preparation before giving an agent access to the MacBook Pro.
 3. Use the Phase 6 runbook to validate macOS only when the MacBook Pro is available.
 4. Review IndyDevDan `just` examples and scope Phase 7 recipes.
@@ -2837,3 +2847,25 @@ Format:
 - Validation performed: PowerShell parsing, portable setup tests, the full repository suite, and diff whitespace checks are required before handoff. The new-workstation setup reached this point and confirmed AutoHotkey 2.0.30 installed successfully, but same-process discovery of the correction remains pending there.
 - Known gaps: Live validation must confirm the new workstation resolves `AutoHotkey64.exe`, registers the startup shortcut, and completes `doctor --phase quake`; Quake GUI behavior must still be tested manually.
 - Next actions: Pull the correction on the new workstation and rerun `./setup.ps1 -Phase all`; setup is idempotent and should detect already-installed packages.
+
+### 2026-10-10
+
+- Summary of changes: Added an explicit `-InstallMissing` mode to the Windows
+  MSYS2 SSH/Mosh installer. It now validates the public-key input before writes,
+  reports all missing prerequisite packages and commands together, previews
+  installation without mutation, reuses the shared UCRT64 package helper to
+  install only missing packages, and revalidates before touching `msys2_sshd` or
+  LAN firewall rules.
+- Phases touched: Phase 5.5 Windows MSYS2 and Mosh remote access.
+- Validation performed: PowerShell 7 and Windows PowerShell 5.1 parsing passed;
+  the focused 26-test MSYS2/Mosh suite and the full portable repository suite
+  passed; Bash syntax and diff whitespace checks passed. Both ordinary
+  preflight and `-InstallMissing` preview passed against the already-complete
+  local MSYS2 installation without mutation. ShellCheck was unavailable. No
+  package, service, authorized-key, or firewall mutation was performed.
+- Known gaps: The `-Apply -InstallMissing` path still requires live elevated
+  validation on the fresh Dell Precision. Package repair remains manual if a
+  package is registered as installed but one of its expected commands is absent.
+- Next actions: Review this implementation, then run its non-mutating preflight
+  and finally the elevated apply command on the Dell Precision with a reviewed
+  public key.
