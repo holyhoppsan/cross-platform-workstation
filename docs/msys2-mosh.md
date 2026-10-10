@@ -1,6 +1,6 @@
 # MSYS2 Mosh LAN proof of concept
 
-This is the Windows-native, WSL-free path for connecting ShadowTerm on the same LAN:
+This is the Windows-native, WSL-independent path for connecting ShadowTerm on the same LAN. It does not install, configure, require, or use WSL; an independently managed WSL2 installation may coexist on the machine:
 
 ```text
 ShadowTerm on phone -- SSH/TCP 22 --> MSYS2 msys2_sshd -- starts --> mosh-server UDP 60001

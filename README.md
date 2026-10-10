@@ -20,7 +20,15 @@ The current deliverable implements Phases 0 through 2, the Windows slice of Phas
 
 Later phases for macOS/Ubuntu Quake mode, Rider, worktrees, agents, model tooling, and hardening are documented in [PLAN.md](PLAN.md), but they are not implemented yet except as placeholders. Yazi is implemented only as a terminal file manager, not as an AI agent.
 
-Windows remains native. MSYS2 UCRT64 Bash is the shell target. WSL is not installed or required. Git for Windows may be used to clone the repository, but it is not the configured interactive shell.
+Windows remains native and WSL-independent. MSYS2 UCRT64 Bash is the shell target, and Windows-native paths and tools are the default. This repository does not install, configure, require, or use WSL. WSL2 may nevertheless be installed on the same machine and managed by a separate infrastructure control plane; its presence alone is not an error. Git for Windows may be used to clone the repository, but it is not the configured interactive shell.
+
+## Repository Ownership Boundary
+
+`cross-platform-workstation` owns the interactive workstation experience: MSYS2 UCRT64, WezTerm, editors and interactive tools, shell configuration, user dotfiles, and terminal behavior.
+
+The separate `workstation-infra` repository owns WSL2 and Docker; Horde Server, MongoDB, and Redis; the native Horde Agent/UBA worker; build toolchains; infrastructure storage and logs; and infrastructure firewall rules, scheduled tasks, and updater state.
+
+The repositories keep separate checkouts, generated state, logs, firewall rule names, scheduled tasks, and package ownership. Neither repository may silently install, remove, or reconfigure resources owned by the other. In particular, `install_wsl` remains `false` here, while tests and doctor must tolerate WSL2 being present.
 
 ## Start Here
 

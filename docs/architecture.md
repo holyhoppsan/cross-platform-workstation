@@ -4,9 +4,18 @@
 
 This repository builds a workstation in explicit phases. Phase 0 establishes the repository foundation. Phase 1 establishes a common Bash workflow. Phase 2 establishes WezTerm as the terminal layer. Phase 3 adds the Windows Quake-mode adapter. Phase 4 adds the Neovim baseline. Phase 5 adds the Yazi terminal file manager. Later phases add the IDE, worktree, AI agent, notification, model, and hardening behavior.
 
-Windows remains native. MSYS2 UCRT64 Bash is the intended Unix-style interactive workflow; Git for Windows may remain only as a temporary clone/bootstrap dependency while that migration is validated. Windows-native tools keep using Windows-native paths when required. WSL paths and WSL dependencies are outside the design.
+Windows remains native and WSL-independent. MSYS2 UCRT64 Bash is the intended Unix-style interactive workflow; Git for Windows may remain only as a temporary clone/bootstrap dependency while that migration is validated. Windows-native tools keep using Windows-native paths when required. This repository does not install, configure, require, or use WSL, and `install_wsl` remains `false`. Having WSL2 installed on the machine is permitted, however, and its presence alone must not fail setup, tests, or doctor.
 
 Shared behavior belongs in `chezmoi/`. Operating-system automation belongs in `platform/`. Optional tools and future integrations may have placeholders, but they must not become required before their phase is implemented.
+
+## Coexistence with `workstation-infra`
+
+The repositories are independent control planes with non-overlapping ownership:
+
+- `cross-platform-workstation` owns MSYS2 UCRT64, WezTerm, editors and interactive tools, shell configuration, user dotfiles, and the terminal experience.
+- `workstation-infra` owns WSL2 and Docker; Horde Server, MongoDB, and Redis; the native Horde Agent/UBA worker; build toolchains; infrastructure storage and logs; and infrastructure firewall rules, scheduled tasks, and updater state.
+
+WSL2 may therefore exist on a workstation while remaining entirely outside this repository's dependency graph and management surface. The repositories must retain separate checkouts, generated state, logs, firewall rule names, scheduled tasks, and package ownership. Neither repository may silently install, remove, or reconfigure resources owned by the other.
 
 ## Component Boundaries
 
@@ -18,7 +27,7 @@ Shared behavior belongs in `chezmoi/`. Operating-system automation belongs in `p
 
 `setup`, `setup.sh`, and `setup.ps1` are thin entrypoints. They parse a phase and dry-run flag, detect the host platform, call modular helpers under `scripts/setup/`, and then run the doctor for the selected phase.
 
-The setup layer is intentionally conservative in Phase 0/1. It verifies and reports; it does not silently install package managers, does not install WSL, and does not overwrite user configuration.
+The setup layer is intentionally conservative in Phase 0/1. It verifies and reports; it does not silently install package managers, does not install or configure WSL, and does not overwrite user configuration. It also does not treat an independently managed WSL2 installation as a failure.
 
 ### Shared Bash
 
@@ -78,5 +87,7 @@ Rider, worktree commands, AI agents, notifications, and model tooling are future
 ## Verification Policy
 
 Portable tests can validate parsing, platform detection, path conversion, setup argument parsing, config shape, and doctor behavior. They do not validate GUI hotkeys, focused-monitor placement, macOS Spaces, Ubuntu Wayland, Windows virtual desktops, or tool-specific integrations.
+
+Tests and doctor enforce that this repository does not depend on WSL; they must not enforce that WSL2 is absent from the machine.
 
 Never mark platform-specific behavior as validated unless it was actually tested on that platform.

@@ -119,7 +119,7 @@ public key, and joining a tailnet are manual per-machine decisions.
 
 Setup must not:
 
-- install WSL
+- install, configure, require, or use WSL (an independently managed WSL2 installation may coexist)
 - install Git
 - silently install Homebrew
 - use curl-to-shell installation

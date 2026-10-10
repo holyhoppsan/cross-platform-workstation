@@ -4,7 +4,7 @@ Phase 1 creates a Bash-first workflow across Windows, macOS, and Ubuntu.
 
 ## Windows
 
-Use the MSYS2 **UCRT64** Bash environment. Do not use WSL. Git for Windows may remain installed only to clone the repository.
+Use the MSYS2 **UCRT64** Bash environment. This workflow does not install, configure, require, or use WSL; Windows-native paths and tools remain the default. WSL2 may be installed for an independent infrastructure control plane, and its presence does not change this shell selection. Git for Windows may remain installed only to clone the repository.
 
 Windows-native tools may still require Windows paths. Use:
 

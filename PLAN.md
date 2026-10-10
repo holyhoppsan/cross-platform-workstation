@@ -8,7 +8,7 @@ This file is the canonical implementation tracker and requirements record for th
 
 Repository: cross-platform-workstation
 
-Goal: Build a phased, version-controlled workstation setup for Windows 11, macOS, and Ubuntu GNOME, using MSYS2 UCRT64 Bash/Bash, WezTerm, Neovim, Yazi, Rider, and AI coding agents while keeping Windows native and WSL-free.
+Goal: Build a phased, version-controlled workstation setup for Windows 11, macOS, and Ubuntu GNOME, using MSYS2 UCRT64 Bash/Bash, WezTerm, Neovim, Yazi, Rider, and AI coding agents while keeping Windows native and WSL-independent.
 
 This repository should eventually allow the user to:
 
@@ -28,7 +28,9 @@ This repository should eventually allow the user to:
 
 ## Non-Negotiable Constraints
 
-* [ ] Do not require WSL.
+* [ ] Do not install, configure, require, or use WSL.
+* [ ] Permit WSL2 to coexist when it is installed and owned by an independent infrastructure control plane; setup, tests, and doctor must not fail merely because it is present.
+* [ ] Keep `install_wsl = false`.
 * [ ] Windows development must remain native.
 * [ ] Windows shell workflow uses MSYS2 UCRT64 Bash.
 * [ ] Windows setup may retain Git for Windows only for clone/bootstrap compatibility; interactive workflow must not require its Bash executable.
@@ -56,7 +58,7 @@ This repository should eventually allow the user to:
 
 ## Unsupported or Deferred
 
-* [ ] WSL as a required dependency
+* [ ] Any WSL dependency or WSL management by this repository
 * [ ] tmux as an active dependency
 * [ ] full Unreal build automation
 * [ ] Visual Studio automation
@@ -91,7 +93,7 @@ This repository should eventually allow the user to:
 
 Use WezTerm as the universal terminal and pane/workspace layer.
 
-Use MSYS2 UCRT64 Bash on Windows to provide a Unix-like command-line workflow without WSL. Git for Windows may remain available only for clone/bootstrap compatibility.
+Use MSYS2 UCRT64 Bash on Windows to provide a Unix-like command-line workflow that does not depend on WSL. Git for Windows may remain available only for clone/bootstrap compatibility. Windows-native paths and tools remain the default.
 
 Use Bash as the common shell layer on all platforms.
 
@@ -113,13 +115,21 @@ Use Rider for Unreal project editing.
 
 Use OpenCode, Pi, Claude Code, Codex, and Goose as agent tools, but do not assume every tool supports every model or every mode.
 
+### Repository Ownership Boundary
+
+`cross-platform-workstation` owns MSYS2 UCRT64, WezTerm, editors and interactive tools, shell configuration, user dotfiles, and the terminal experience.
+
+The separate `workstation-infra` repository owns WSL2 and Docker; Horde Server, MongoDB, and Redis; the native Horde Agent/UBA worker; build toolchains; infrastructure storage and logs; and infrastructure firewall rules, scheduled tasks, and updater state.
+
+The repositories must retain separate checkouts, generated state, logs, firewall rule names, scheduled tasks, and package ownership. Neither may silently install, remove, or reconfigure resources owned by the other. WSL2 may be present, but it remains outside this repository's dependency graph and management surface.
+
 ## Repository Goals
 
 * Preserve workstation configuration in version control.
 * Keep shared behavior in `chezmoi/`.
 * Keep platform automation isolated in `platform/`.
 * Keep setup incremental, idempotent, and testable.
-* Keep Windows native and WSL-free.
+* Keep Windows native and WSL-independent.
 * Make each phase independently understandable and resumable.
 * Keep unchecked, stubbed, blocked, and manually validated work visible.
 
@@ -173,8 +183,8 @@ Windows:
 * AutoHotkey v2
 * winget, when available
 * PowerShell 7, optional but preferred
-* No WSL
-* Do not install WSL
+* WSL-independent; WSL2 may coexist when another control plane owns it
+* Do not install, configure, require, or use WSL
 
 macOS:
 
@@ -371,7 +381,7 @@ Goal: Create a shared Bash-first workflow across Windows, macOS, and Ubuntu.
 
 Scope:
 
-* Windows must use MSYS2 UCRT64 Bash, not WSL.
+* Windows must use MSYS2 UCRT64 Bash, not WSL, for this repository's interactive shell; an independently managed WSL2 installation may coexist.
 * Day-to-day commands should feel similar across all platforms.
 * Prefer Unix-style commands everywhere.
 * Add platform and tool detection.
@@ -388,7 +398,7 @@ Windows:
 * Preserve Windows-native paths where native tools require them.
 * Provide helper functions for path conversion using `cygpath` where necessary.
 * Do not assume Linux-only paths.
-* Do not require WSL.
+* Do not install, configure, require, or use WSL; do not treat its presence as a failure.
 * Do not require tmux or Cygwin.
 * Be careful with quoting for Windows paths containing spaces.
 * Support calling `cmd.exe` and PowerShell safely from Bash only when needed.
@@ -1009,7 +1019,7 @@ Deferred items:
 
 Status: LAN phone connection and temporary-LAN-interruption recovery validated on Windows; Tailscale off-LAN reachability remains pending.
 
-Goal: Replace the Windows interactive Git Bash workflow with MSYS2 UCRT64 Bash and provide a ShadowTerm-compatible Mosh entry path without WSL or tmux.
+Goal: Replace the Windows interactive Git Bash workflow with MSYS2 UCRT64 Bash and provide a ShadowTerm-compatible Mosh entry path without depending on WSL or tmux.
 
 Architecture:
 
@@ -1025,7 +1035,7 @@ Herdr, not tmux, owns persistent panes and agent processes. Mosh provides the ro
 
 Requirements:
 
-* Do not install or require WSL.
+* Do not install, configure, require, or use WSL; allow independently managed WSL2 to coexist.
 * Use MSYS2 installed at `C:\msys64` and launch the UCRT64 environment for interactive terminals.
 * Do not install GCC or `base-devel` solely for this phase.
 * Install Mosh from the MSYS repository; it must be available from UCRT64 as `/usr/bin/mosh-server`.
@@ -1761,7 +1771,7 @@ prefer_uproject = true
 use_winget = true
 install_autohotkey = true
 install_wsl = false
-shell = "git-bash"
+shell = "msys2-ucrt64"
 
 [platform.macos]
 use_homebrew = true
@@ -1954,7 +1964,7 @@ Create documentation for:
 * Avoid curl-pipe-shell installation patterns unless clearly documented and optional.
 * Pin external dependencies where practical.
 * Do not silently overwrite existing user configuration without making backups or asking for confirmation.
-* Do not install WSL.
+* Do not install or configure WSL; tolerate an independently managed WSL2 installation.
 * Do not hard-code private paths, usernames, API keys, or machine-specific secrets.
 
 ## Repository Structure
@@ -2089,7 +2099,7 @@ Initial deferred features:
 
 This section mirrors and expands the unsupported/deferred policy for quick lookup.
 
-* WSL as a required dependency.
+* Any WSL dependency or WSL management by this repository.
 * tmux as an active dependency.
 * Full Unreal build automation.
 * Visual Studio automation.
@@ -2795,3 +2805,11 @@ Format:
 - Validation performed: Portable repository tests and Bash syntax checks are required before handoff. Generic SSH, Mosh, Tailscale, and Herdr support are intentionally unchanged.
 - Known gaps: Any Moshi app, Homebrew tap/formula, pairing state, service, or agent-hook configuration already created on an individual Mac remains local and must be removed explicitly on that Mac if desired.
 - Next actions: Keep remote-access support client-neutral; continue Phase 13 later without a Moshi dependency.
+
+### 2026-10-10
+
+- Summary of changes: Clarified that this repository is WSL-independent rather than requiring WSL2 to be absent, and documented its ownership boundary with the separate `workstation-infra` control plane.
+- Phases touched: Cross-cutting architecture, provisioning, shell, diagnostics, and repository-governance documentation; no implementation phase behavior changed.
+- Validation performed: Documentation consistency checks, portable repository tests, and diff whitespace checks are required before handoff. No software installation or machine-state change is part of this clarification.
+- Known gaps: None for the documentation boundary. Future setup, test, and doctor changes must preserve `install_wsl = false`, use MSYS2 UCRT64 and Windows-native paths, and tolerate independently managed WSL2 being present.
+- Next actions: Keep repository checkouts, generated state, logs, firewall rule names, scheduled tasks, package ownership, and updater state separate from `workstation-infra`.
