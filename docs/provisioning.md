@@ -39,6 +39,7 @@ Phase 1 provisions and verifies the common shell workflow for the selected platf
 Expected behavior:
 
 - detect platform
+- on Windows, set the current user's `HOME` to the native Windows profile when it is missing, so PowerShell, chezmoi, and MSYS2 UCRT64 load the same managed files; report and stop on a conflicting existing value rather than overwriting it
 - verify Bash
 - require MSYS2 UCRT64 Bash when running on Windows
 - verify Git is available for repository use and MSYS2 packages provide the interactive CLI tools

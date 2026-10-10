@@ -62,7 +62,7 @@ Windows, from PowerShell:
 ./setup.ps1 -Phase vowen
 ```
 
-On Windows, install MSYS2 at `C:\msys64`, open the UCRT64 environment, and install its `git`, `jq`, `mingw-w64-ucrt-x86_64-ripgrep`, `mingw-w64-ucrt-x86_64-fd`, and `mingw-w64-ucrt-x86_64-fzf` packages. Git for Windows may be used to clone this repository. `setup.ps1 -Phase shell` verifies MSYS2 UCRT64, installs or verifies chezmoi, backs up known Phase 1 shell targets, applies chezmoi, then validates the configured UCRT64 shell automatically. It never installs WSL or Git for Windows.
+On Windows, install MSYS2 at `C:\msys64`, open the UCRT64 environment, and install its `git`, `jq`, `mingw-w64-ucrt-x86_64-ripgrep`, `mingw-w64-ucrt-x86_64-fd`, and `mingw-w64-ucrt-x86_64-fzf` packages. Git for Windows may be used to clone this repository. `setup.ps1 -Phase shell` aligns the current user's `HOME` with the native Windows profile so PowerShell, chezmoi, and MSYS2 use the same dotfiles; verifies MSYS2 UCRT64; installs or verifies chezmoi; backs up known Phase 1 shell targets; applies chezmoi; and validates the configured UCRT64 shell automatically. It never installs WSL or Git for Windows. An existing conflicting user-level `HOME` is reported and left unchanged for manual resolution.
 
 Windows, from MSYS2 UCRT64 Bash:
 

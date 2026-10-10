@@ -128,9 +128,15 @@ assert_not_contains "$reset_windows" 'RemoveGit' 'reset-windows has no Git remov
 assert_not_contains "$reset_windows" "Git.Git" 'reset-windows never uninstalls Git'
 
 common_ps1=$(cat "$repo_root/scripts/setup/common.ps1")
+setup_ps1=$(cat "$repo_root/setup.ps1")
 assert_not_contains "$common_ps1" "PackageId 'Git.Git'" 'setup.ps1 never installs Git'
 assert_contains "$common_ps1" 'function Test-WindowsHost' 'Windows setup supports Windows PowerShell without IsWindows'
 assert_not_contains "$common_ps1" 'if ($IsWindows' 'Windows setup does not directly read the PowerShell 7-only IsWindows variable'
+assert_contains "$common_ps1" 'function Ensure-WindowsHomeEnvironment' 'Windows setup aligns HOME with the native user profile'
+assert_contains "$common_ps1" "GetEnvironmentVariable('HOME', 'User')" 'Windows HOME setup checks the persistent user value'
+assert_contains "$common_ps1" "SetEnvironmentVariable('HOME', \$expectedHome, 'User')" 'Windows HOME setup persists the native user profile'
+assert_contains "$common_ps1" 'Resolve the conflict explicitly before rerunning setup' 'Windows HOME setup does not silently overwrite a conflicting value'
+assert_contains "$setup_ps1" 'Ensure-WindowsHomeEnvironment -DryRun:$DryRun' 'setup.ps1 aligns HOME before phase setup'
 assert_contains "$common_ps1" 'Test-WindowsProcessElevated' 'Windows setup helpers can detect elevated PowerShell'
 assert_contains "$common_ps1" 'Get-WindowsMsys2BashPath' 'Windows setup locates MSYS2 Bash'
 assert_contains "$common_ps1" 'Ensure-Msys2Ucrt64Packages' 'Windows setup verifies MSYS2 CLI packages'

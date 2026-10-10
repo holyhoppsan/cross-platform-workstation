@@ -27,6 +27,10 @@ if ($Platform -eq 'windows' -and -not $DryRun -and (Test-WindowsProcessElevated)
 
 Test-FoundationPhase -RepoRoot $RepoRoot
 
+if ($Platform -eq 'windows') {
+    Ensure-WindowsHomeEnvironment -DryRun:$DryRun
+}
+
 if ($Agent) {
     if ($Platform -ne 'windows') { throw 'Agent installation through setup.ps1 is supported on Windows only.' }
     if ($SkipInstall) { Write-SetupInfo "skipping $Agent install/verify by request" } else { Ensure-WindowsAgent -Agent $Agent -DryRun:$DryRun }

@@ -17,6 +17,41 @@ function Test-WindowsHost {
     return $null -ne $isWindowsVariable -and [bool]$isWindowsVariable.Value
 }
 
+function Ensure-WindowsHomeEnvironment {
+    param([switch]$DryRun)
+
+    if (-not (Test-WindowsHost)) {
+        return
+    }
+
+    $expectedHome = [Environment]::GetFolderPath([Environment+SpecialFolder]::UserProfile)
+    if (-not $expectedHome) {
+        throw 'Unable to resolve the native Windows user profile for HOME.'
+    }
+
+    $configuredHome = [Environment]::GetEnvironmentVariable('HOME', 'User')
+    if ($configuredHome) {
+        $configuredFullPath = [System.IO.Path]::GetFullPath($configuredHome).TrimEnd('\')
+        $expectedFullPath = [System.IO.Path]::GetFullPath($expectedHome).TrimEnd('\')
+        if (-not $configuredFullPath.Equals($expectedFullPath, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw "User HOME is already set to '$configuredHome'. This setup expects the native Windows profile '$expectedHome' so PowerShell, chezmoi, and MSYS2 share one home. Resolve the conflict explicitly before rerunning setup."
+        }
+
+        $Env:HOME = $expectedHome
+        Write-SetupInfo "Windows HOME already configured: $expectedHome"
+        return
+    }
+
+    if ($DryRun) {
+        Write-SetupInfo "would set the current user's HOME to the native Windows profile: $expectedHome"
+        return
+    }
+
+    Write-SetupInfo "setting the current user's HOME to the native Windows profile: $expectedHome"
+    [Environment]::SetEnvironmentVariable('HOME', $expectedHome, 'User')
+    $Env:HOME = $expectedHome
+}
+
 function Get-WorkstationPlatform {
     if (Test-WindowsHost) { return 'windows' }
 

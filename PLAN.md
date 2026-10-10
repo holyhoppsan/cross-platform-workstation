@@ -2821,3 +2821,11 @@ Format:
 - Validation performed: PowerShell parsing, a Windows PowerShell 5.1 platform-detection invocation, portable repository tests, and diff whitespace checks are required before handoff.
 - Known gaps: The complete new-workstation installation still requires user validation after pulling this correction; MSYS2 remains a manual prerequisite.
 - Next actions: Pull the correction on the new workstation and rerun `./setup.ps1 -Phase all -DryRun` from a normal, non-admin PowerShell.
+
+### 2026-10-10
+
+- Summary of changes: Made Windows setup establish a shared native home when the user-level `HOME` variable is missing. The bootstrap persists the Windows user profile as `HOME` and uses it immediately so PowerShell, chezmoi, and MSYS2 UCRT64 resolve the same managed Bash files. Dry-run only reports the action, and a conflicting existing value causes an explicit stop instead of being overwritten.
+- Phases touched: Phase 0/1 Windows setup bootstrap and shared shell configuration.
+- Validation performed: PowerShell parsing, dry-run behavior, portable repository tests, and diff whitespace checks are required before handoff. Live validation on the new workstation remains pending.
+- Known gaps: Existing MSYS2 terminals retain their old environment until closed and reopened. MSYS2 itself remains a manual prerequisite and is not installed by setup.
+- Next actions: Pull the correction on the new workstation, rerun `./setup.ps1 -Phase all`, then open a fresh WezTerm/MSYS2 UCRT64 session and verify `echo "$HOME"`, `type platform-info`, and `doctor --phase shell`.
