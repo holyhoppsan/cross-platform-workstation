@@ -115,25 +115,6 @@ To prepare a Mac as a ShadowTerm Mosh host without exposing it automatically:
 This adds only the Mosh package. Enabling Remote Login, adding the phone's SSH
 public key, and joining a tailnet are manual per-machine decisions.
 
-## Phase 13: optional macOS Moshi hook
-
-Moshi itself is installed on the phone. Its optional `moshi-hook` host daemon
-can be installed or verified on a Mac without pairing credentials or altering
-agent configuration:
-
-```bash
-./setup.sh --moshi-hook --install-missing
-doctor --phase moshi
-```
-
-Pairing, service activation, and installation of Moshi-managed agent hooks are
-manual and intentionally remain outside the repository. See [Moshi mobile
-terminal](moshi.md).
-
-If Homebrew asks to trust the third-party formula, review it and run the
-formula-specific `brew trust --formula rjyo/moshi/moshi-hook` command manually;
-setup will never grant that trust itself.
-
 ## Install Policy
 
 Setup must not:

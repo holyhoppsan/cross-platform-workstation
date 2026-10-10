@@ -7,9 +7,8 @@ setup_usage() {
   cat <<'EOF'
 usage: setup.sh [--phase foundation|shell|wezterm|quake|neovim|yazi|vowen|tailscale|all] [--dry-run] [--install-missing] [--enable-mosh-host]
        setup.sh --agent pi|codex [--install-missing] [--dry-run]
-       setup.sh --moshi-hook [--install-missing] [--dry-run]
 
-Phases 0-5 are implemented; Phase 8 provides optional Vowen installation handoff, Phase 9 can prepare a macOS Mosh host, and Phase 13 has an optional macOS Moshi-hook installer.
+Phases 0-5 are implemented; Phase 8 provides optional Vowen installation handoff and Phase 9 can prepare a macOS Mosh host.
 EOF
 }
 

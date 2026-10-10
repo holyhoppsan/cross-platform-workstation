@@ -49,11 +49,6 @@ assert_contains "$install_output" 'install_missing: true' 'setup.sh parses insta
 agent_dry_run=$("$repo_root/setup.sh" --agent pi --dry-run)
 assert_contains "$agent_dry_run" 'would install or verify agent: pi' 'setup.sh parses a separate Pi agent install'
 
-moshi_hook_dry_run=$("$repo_root/setup.sh" --moshi-hook --dry-run)
-assert_contains "$moshi_hook_dry_run" 'would install or verify optional macOS Moshi hook' 'setup.sh parses the standalone Moshi hook install'
-
-assert_contains "$setup_sh" 'scripts/setup/moshi-hook.sh' 'setup.sh delegates Moshi hook installation to a dedicated script'
-
 agent_setup=$(cat "$repo_root/scripts/setup/agent.sh")
 assert_contains "$agent_setup" '@earendil-works/pi-coding-agent' 'agent setup knows the Pi npm package'
 assert_contains "$agent_setup" '@openai/codex' 'agent setup knows the Codex npm package'
@@ -237,20 +232,11 @@ assert_contains "$doctor_config" 'optional_command pi' 'doctor reports Pi when a
 assert_contains "$doctor_config" 'optional_command codex' 'doctor reports Codex when available'
 assert_contains "$doctor_config" 'check_vowen' 'doctor implements optional Vowen detection'
 assert_contains "$doctor_config" 'check_tailscale' 'doctor implements Tailscale status detection'
-assert_contains "$doctor_config" 'check_moshi' 'doctor implements optional macOS Moshi hook detection'
-assert_contains "$doctor_config" "'Moshi pairing'" 'doctor keeps Moshi pairing manual'
 assert_contains "$doctor_config" 'Tailscale IPv4' 'doctor reports the Tailscale host address when connected'
 assert_contains "$doctor_config" '/Applications/Tailscale.app' 'doctor detects the macOS Tailscale app'
 assert_contains "$doctor_config" "'Mosh server'" 'doctor reports optional macOS Mosh host readiness'
 assert_contains "$doctor_config" 'Vowen shortcut policy' 'doctor reports the Vowen shortcut policy'
 
-moshi_hook_setup=$(cat "$repo_root/scripts/setup/moshi-hook.sh")
-assert_contains "$moshi_hook_setup" 'brew tap rjyo/moshi' 'Moshi hook setup adds the documented Homebrew tap'
-assert_contains "$moshi_hook_setup" 'brew install moshi-hook' 'Moshi hook setup installs the Homebrew formula'
-assert_contains "$moshi_hook_setup" 'brew trust --formula rjyo/moshi/moshi-hook' 'Moshi hook setup explains the narrow required Homebrew trust action'
-assert_not_contains "$moshi_hook_setup" 'brew trust rjyo/moshi' 'Moshi hook setup does not grant broad tap trust automatically'
-assert_not_contains "$moshi_hook_setup" 'moshi-hook pair' 'Moshi hook setup does not pair credentials automatically'
-assert_not_contains "$moshi_hook_setup" 'brew services start' 'Moshi hook setup does not start a background service automatically'
 assert_contains "$common_sh" 'macos_install_formulae' 'setup.sh has macOS Homebrew formula helper'
 assert_contains "$common_sh" 'macos_install_cask' 'setup.sh has macOS Homebrew cask helper'
 assert_contains "$common_sh" 'Install or approve Homebrew yourself' 'macOS setup never installs Homebrew automatically'

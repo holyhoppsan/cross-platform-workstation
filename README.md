@@ -37,7 +37,6 @@ Useful docs:
 - [Neovim](docs/neovim.md)
 - [Yazi](docs/yazi.md)
 - [Vowen desktop dictation](docs/vowen.md)
-- [Moshi mobile terminal](docs/moshi.md)
 - [macOS agent validation](docs/macos-agent-validation.md)
 
 ## Phase 0 and Phase 1 Setup

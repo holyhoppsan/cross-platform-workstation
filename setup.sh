@@ -9,7 +9,6 @@ phase=shell
 dry_run=false
 install_missing=false
 enable_mosh_host=false
-moshi_hook=false
 agent=''
 
 while [ "$#" -gt 0 ]; do
@@ -35,10 +34,6 @@ while [ "$#" -gt 0 ]; do
       enable_mosh_host=true
       shift
       ;;
-    --moshi-hook)
-      moshi_hook=true
-      shift
-      ;;
     --agent)
       [ "$#" -ge 2 ] || die '--agent requires pi or codex'
       agent=$2
@@ -58,10 +53,6 @@ if [ "$enable_mosh_host" = true ] && [ "$phase" != tailscale ]; then
   die '--enable-mosh-host is supported only with --phase tailscale'
 fi
 
-if [ "$moshi_hook" = true ] && { [ "$phase" != shell ] || [ -n "$agent" ] || [ "$enable_mosh_host" = true ]; }; then
-  die '--moshi-hook is a standalone macOS setup option; do not combine it with --phase, --agent, or --enable-mosh-host'
-fi
-
 if [ -n "$agent" ]; then
   case "$agent" in pi|codex) ;; *) die "unknown agent: $agent" ;; esac
   if [ "$dry_run" = true ]; then
@@ -69,17 +60,6 @@ if [ -n "$agent" ]; then
     exit 0
   fi
   bash "$repo_root/scripts/setup/agent.sh" "$repo_root" "$agent" "$install_missing"
-  exit 0
-fi
-
-if [ "$moshi_hook" = true ]; then
-  if [ "$dry_run" = true ]; then
-    info 'would install or verify optional macOS Moshi hook'
-    exit 0
-  fi
-  bash "$repo_root/scripts/setup/moshi-hook.sh" "$repo_root" "$install_missing"
-  "$repo_root/scripts/doctor" --phase moshi
-  printf '\nMoshi hook installation is complete. In Moshi, copy the pairing token, then run the manual pairing and service commands documented in docs/moshi.md.\n'
   exit 0
 fi
 
