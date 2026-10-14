@@ -82,7 +82,12 @@ MCP. Those remain manual host-security decisions.
 
 ### Future Phases
 
-Rider, worktree commands, AI agents, notifications, and model tooling are future phases. macOS and Ubuntu Quake adapters also remain future platform work. Placeholder directories may exist so the repository shape is stable, but functional implementations must wait for their phase.
+Rider, worktree commands, the unified agent launcher, notifications, and model
+tooling are future phases. Independent Pi, Codex, and Claude Code installation
+paths exist, but their authentication and native configuration remain outside
+the repository. macOS and Ubuntu Quake adapters also remain future platform
+work. Placeholder directories may exist so the repository shape is stable, but
+functional implementations must wait for their phase.
 
 ## Verification Policy
 

@@ -35,7 +35,7 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
     --agent)
-      [ "$#" -ge 2 ] || die '--agent requires pi or codex'
+      [ "$#" -ge 2 ] || die '--agent requires pi, codex, or claude'
       agent=$2
       shift 2
       ;;
@@ -54,7 +54,7 @@ if [ "$enable_mosh_host" = true ] && [ "$phase" != tailscale ]; then
 fi
 
 if [ -n "$agent" ]; then
-  case "$agent" in pi|codex) ;; *) die "unknown agent: $agent" ;; esac
+  case "$agent" in pi|codex|claude) ;; *) die "unknown agent: $agent" ;; esac
   if [ "$dry_run" = true ]; then
     info "would install or verify agent: $agent"
     exit 0

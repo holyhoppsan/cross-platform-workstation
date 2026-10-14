@@ -6,7 +6,7 @@ param(
     [switch]$SkipInstall,
     [switch]$SkipApply,
     [switch]$InstallVowen,
-    [ValidateSet('pi', 'codex')][string]$Agent
+    [ValidateSet('pi', 'codex', 'claude')][string]$Agent
 )
 
 $ErrorActionPreference = 'Stop'

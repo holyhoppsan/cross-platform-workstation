@@ -18,7 +18,11 @@ The current deliverable implements Phases 0 through 2, the Windows slice of Phas
 - Yazi baseline terminal file manager
 - initial portable tests
 
-Later phases for macOS/Ubuntu Quake mode, Rider, worktrees, agents, model tooling, and hardening are documented in [PLAN.md](PLAN.md), but they are not implemented yet except as placeholders. Yazi is implemented only as a terminal file manager, not as an AI agent.
+Later phases for macOS/Ubuntu Quake mode, Rider, worktrees, the unified agent
+launcher, model tooling, and hardening are documented in [PLAN.md](PLAN.md).
+The independent Pi, Codex, and Claude Code installation paths are available;
+the unified launcher remains planned. Yazi is implemented only as a terminal
+file manager, not as an AI agent.
 
 Windows remains native and WSL-independent. MSYS2 UCRT64 Bash is the shell target, and Windows-native paths and tools are the default. This repository does not install, configure, require, or use WSL. WSL2 may nevertheless be installed on the same machine and managed by a separate infrastructure control plane; its presence alone is not an error. Git for Windows may be used to clone the repository, but it is not the configured interactive shell.
 

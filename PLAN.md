@@ -1524,6 +1524,10 @@ Tasks:
 * [x] Add independent Pi installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS. Pi setup also ensures the global `npm:@narumitw/pi-usage`, `npm:pi-mcp-adapter`, and `npm:pi-markdown-preview` extensions; it installs Pandoc as the preview prerequisite and removes the superseded Pandi Markdown viewer. The replacement requires Windows/macOS validation.
 * [x] Add optional Pi MCP support through `pi-mcp-adapter`. Status: installation is implemented for the Pi-only setup path. The repository installs only the adapter; every machine's MCP server selection, imports, endpoints, and OAuth authentication remain explicit user-local configuration and are never committed.
 * [x] Add independent Codex installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS.
+* [x] Add independent Claude Code installation/verification through
+  `@anthropic-ai/claude-code`, including managed Node.js/npm prerequisite
+  support. Status: installer and doctor support implemented; platform-specific
+  installation remains pending validation on each target machine.
 * [x] Make Windows global npm commands reachable from the managed MSYS2 UCRT64 shell. Status: the managed PATH includes Node.js and the per-user npm command directory; Pi and Codex were version-checked from a fresh UCRT64 interactive Bash session.
 * [ ] Add `agent` launcher.
 * [ ] Add adapter structure.
@@ -1534,8 +1538,8 @@ Tasks:
 * [ ] Add Goose adapter.
 * [ ] Add model profile examples.
 * [x] Document separate Pi and Codex installation commands. Status: command installation is documented; launcher/profile documentation remains pending.
-* [x] Add installation detection to doctor. Status: `doctor --phase shell` reports optional Pi and Codex commands; the full Phase 12 `--phase agents` doctor work remains pending.
-* [x] Add tests where practical. Status: portable setup tests cover Pi/Codex package selection and the Pi-only default extension installation path.
+* [x] Add installation detection to doctor. Status: `doctor --phase shell` reports optional Pi, Codex, and Claude Code commands; the full Phase 12 `--phase agents` doctor work remains pending.
+* [x] Add tests where practical. Status: portable setup tests cover Pi/Codex/Claude Code package selection and the Pi-only default extension installation path.
 
 Validation:
 
@@ -2869,3 +2873,36 @@ Format:
 - Next actions: Review this implementation, then run its non-mutating preflight
   and finally the elevated apply command on the Dell Precision with a reviewed
   public key.
+
+### 2026-10-14
+
+- Summary of changes: Added Claude Code as an independent optional agent. The
+  Windows and Bash setup paths now install or verify Anthropic's
+  `@anthropic-ai/claude-code` package and `claude` command using the existing
+  Node.js/npm workflow, and doctor reports it when available.
+- Phases touched: Phase 12 AI agent launcher.
+- Validation performed: PowerShell parsing, Bash syntax checks, Claude Code
+  dry-run parsing, and the full portable repository suite passed (208 setup
+  assertions in the complete suite). No agent installation or authentication
+  was performed by repository validation.
+- Known gaps: Claude Code installation and login remain to be manually
+  validated on each desired Windows/macOS machine. Its credentials and native
+  configuration remain outside version control.
+- Next actions: Run the platform-specific Claude Code install command on the
+  target machine, then complete Claude's own authentication flow.
+
+### 2026-10-14
+
+- Summary of changes: Fixed Claude Code installation after Windows validation
+  showed that the repository's intentional `--ignore-scripts` npm policy left
+  Claude's native binary placeholder in place. The setup now invokes Claude's
+  package-local official `install.cjs` step explicitly on Windows and macOS
+  before version verification.
+- Phases touched: Phase 12 AI agent launcher.
+- Validation performed: PowerShell parsing, Bash syntax, and 210 setup
+  assertions passed. No additional package installation or authentication was
+  performed by validation.
+- Known gaps: The corrected native-binary placement still needs a live rerun on
+  the affected Windows machine, followed by Claude authentication.
+- Next actions: Pull or retain these local changes, rerun the Claude setup, and
+  verify `claude --version` before logging in.

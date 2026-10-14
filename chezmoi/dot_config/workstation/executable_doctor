@@ -217,6 +217,7 @@ check_shell() {
   optional_command just
   optional_command pi
   optional_command codex
+  optional_command claude
 
   if [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/workstation/platform.sh" ]; then
     ok 'managed shell config' 'platform.sh readable'

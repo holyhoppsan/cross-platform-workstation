@@ -8,6 +8,8 @@ platform=$(setup_detect_platform)
 case "$agent" in
   pi) package='@earendil-works/pi-coding-agent'; command_name='pi' ;;
   codex) package='@openai/codex'; command_name='codex' ;;
+  claude) package='@anthropic-ai/claude-code'; command_name='claude' ;;
+  *) die "unsupported agent: $agent" ;;
 esac
 node_ready=false
 if has_command node && has_command npm && node --version >/dev/null 2>&1 && npm --version >/dev/null 2>&1; then
@@ -28,6 +30,12 @@ if ! has_command "$command_name"; then
   [ "$install_missing" = true ] || die "$agent is missing. Rerun with --agent $agent --install-missing."
   info "installing $agent with npm package $package"
   npm install -g --ignore-scripts "$package"
+fi
+if [ "$agent" = claude ]; then
+  claude_package_root=$(npm root -g)/@anthropic-ai/claude-code
+  [ -f "$claude_package_root/install.cjs" ] || die 'Claude Code install script was not found after npm installation.'
+  info 'placing Claude Code platform-native binary through its official install script'
+  node "$claude_package_root/install.cjs" || die 'Claude Code native binary installation failed.'
 fi
 "$command_name" --version
 

@@ -457,7 +457,7 @@ function Ensure-WindowsHerdr {
 }
 
 function Ensure-WindowsAgent {
-    param([Parameter(Mandatory)][ValidateSet('pi', 'codex')][string]$Agent, [switch]$DryRun)
+    param([Parameter(Mandatory)][ValidateSet('pi', 'codex', 'claude')][string]$Agent, [switch]$DryRun)
     Ensure-WindowsPackageCommand -Command 'node.exe' -PackageId 'OpenJS.NodeJS.LTS' -Name 'Node.js LTS' -DryRun:$DryRun
     if ($Agent -eq 'pi') {
         Ensure-WindowsPandoc -DryRun:$DryRun
@@ -473,8 +473,16 @@ function Ensure-WindowsAgent {
         return
     }
     $npm = Resolve-InstalledCommand -Name 'npm.cmd'
-    $package = if ($Agent -eq 'pi') { '@earendil-works/pi-coding-agent' } else { '@openai/codex' }
-    $command = if ($Agent -eq 'pi') { 'pi.cmd' } else { 'codex.cmd' }
+    $package = switch ($Agent) {
+        'pi' { '@earendil-works/pi-coding-agent' }
+        'codex' { '@openai/codex' }
+        'claude' { '@anthropic-ai/claude-code' }
+    }
+    $command = switch ($Agent) {
+        'pi' { 'pi.cmd' }
+        'codex' { 'codex.cmd' }
+        'claude' { 'claude.cmd' }
+    }
     if (Test-CommandAvailable -Name $command) {
         Write-SetupInfo "$Agent already available"
     } else {
@@ -483,6 +491,15 @@ function Ensure-WindowsAgent {
     }
     $agentCommand = Resolve-InstalledCommand -Name $command
     if (-not $agentCommand) { throw "$Agent was installed but command was not found." }
+    if ($Agent -eq 'claude') {
+        $node = Resolve-InstalledCommand -Name 'node.exe'
+        $globalRoot = (& $npm root -g | Select-Object -Last 1).ToString().Trim()
+        $claudeInstallScript = Join-Path (Join-Path $globalRoot '@anthropic-ai') 'claude-code\install.cjs'
+        if (-not (Test-Path -LiteralPath $claudeInstallScript)) { throw 'Claude Code install script was not found after npm installation.' }
+        Write-SetupInfo 'placing Claude Code platform-native binary through its official install script'
+        & $node $claudeInstallScript
+        if ($LASTEXITCODE -ne 0) { throw 'Claude Code native binary installation failed.' }
+    }
     & $agentCommand --version
     if ($LASTEXITCODE -ne 0) { throw "$Agent was installed but its version check failed." }
     if ($Agent -eq 'pi') {
