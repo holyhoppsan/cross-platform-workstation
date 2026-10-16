@@ -240,7 +240,7 @@ Do not include Yazi in the AI agent list.
 | 9     | Tailscale remote access                   | In progress; Windows client install/doctor validated, macOS client and tailnet/off-LAN validation pending |
 | 10    | Rider and minimal Unreal launching        | In progress; Windows Rider MCP validated, launcher work remains |
 | 11    | Project and worktree workflow             | Not started                               |
-| 12    | AI agent launcher                         | In progress; Pi/Codex installation validated on Windows/macOS, launcher work remains |
+| 12    | AI agent launcher                         | In progress; Pi/Codex validated on Windows/macOS and Claude Code validated on Windows, unified launcher work remains |
 | 13    | Agent notifications and status            | Not started                               |
 | 14    | Optional model tooling                    | Not started                               |
 | 15    | Polish and hardening                      | Not started                               |
@@ -1526,8 +1526,9 @@ Tasks:
 * [x] Add independent Codex installation/verification, including managed Node.js/npm prerequisite support. Status: implemented and installed/verified on Windows and macOS.
 * [x] Add independent Claude Code installation/verification through
   `@anthropic-ai/claude-code`, including managed Node.js/npm prerequisite
-  support. Status: installer and doctor support implemented; platform-specific
-  installation remains pending validation on each target machine.
+  support. Status: installer and doctor support implemented; Windows
+  installation/version validation is complete, while macOS and Ubuntu remain
+  pending.
 * [x] Make Windows global npm commands reachable from the managed MSYS2 UCRT64 shell. Status: the managed PATH includes Node.js and the per-user npm command directory; Pi and Codex were version-checked from a fresh UCRT64 interactive Bash session.
 * [ ] Add `agent` launcher.
 * [ ] Add adapter structure.
@@ -1537,7 +1538,7 @@ Tasks:
 * [ ] Add Codex adapter.
 * [ ] Add Goose adapter.
 * [ ] Add model profile examples.
-* [x] Document separate Pi and Codex installation commands. Status: command installation is documented; launcher/profile documentation remains pending.
+* [x] Document separate Pi, Codex, and Claude Code installation commands. Status: command installation is documented; launcher/profile documentation remains pending.
 * [x] Add installation detection to doctor. Status: `doctor --phase shell` reports optional Pi, Codex, and Claude Code commands; the full Phase 12 `--phase agents` doctor work remains pending.
 * [x] Add tests where practical. Status: portable setup tests cover Pi/Codex/Claude Code package selection and the Pi-only default extension installation path.
 
@@ -1557,7 +1558,7 @@ Notes:
 
 Deferred items:
 
-* Agent adapters, launcher behavior, profiles, notifications, and all optional agents beyond the independently installable Pi and Codex paths.
+* Agent adapters, launcher behavior, profiles, notifications, and all optional agents beyond the independently installable Pi, Codex, and Claude Code paths.
 
 ## Phase 13: Agent Notifications and Status
 
@@ -2122,18 +2123,19 @@ This section mirrors and expands the unsupported/deferred policy for quick looku
 
 Current next actions:
 
-1. Review the Phase 5.5 prerequisite automation, then validate
-   `setup-msys2-mosh.ps1 -Apply -InstallMissing` on the fresh Dell Precision
-   with a reviewed public key; do not mark that clean-machine apply path
-   validated until it succeeds there.
-2. Complete Phase 6 macOS bootstrap and agent-validation preparation before giving an agent access to the MacBook Pro.
-3. Use the Phase 6 runbook to validate macOS only when the MacBook Pro is available.
+1. Continue from this tracker using the handoff guide in `docs/handoff.md`.
+2. Validate Claude Code installation on macOS if that platform is in scope;
+   Ubuntu agent validation remains pending.
+3. Complete Phase 5.5 clean-machine apply validation on the Dell Precision if
+   it has not yet been recorded.
 4. Review IndyDevDan `just` examples and scope Phase 7 recipes.
-5. Manually validate remaining Windows GUI-only checks: Quake focused-monitor behavior and WezTerm Yazi key chords.
-6. Implement Phase 8 Vowen only when explicit system-wide dictation becomes the priority.
-7. Implement Phase 9 Tailscale only when off-LAN ShadowTerm/Mosh access becomes the priority.
-8. Begin Phase 10 Rider baseline after the relevant preceding work is accepted.
-8. Keep `PLAN.md` updated after each implementation or validation session.
+5. Manually validate remaining Windows GUI-only checks: Quake focused-monitor
+   behavior and WezTerm Yazi key chords.
+6. Implement Phase 8 Vowen only when explicit system-wide dictation becomes the
+   priority.
+7. Implement Phase 9 Tailscale off-LAN validation when remote access is needed.
+8. Begin Phase 10 Rider baseline, then Phase 11 worktree workflow.
+9. Keep `PLAN.md` updated after each implementation or validation session.
 
 ## PLAN.md Update Rules
 
@@ -2885,11 +2887,11 @@ Format:
   dry-run parsing, and the full portable repository suite passed (208 setup
   assertions in the complete suite). No agent installation or authentication
   was performed by repository validation.
-- Known gaps: Claude Code installation and login remain to be manually
-  validated on each desired Windows/macOS machine. Its credentials and native
-  configuration remain outside version control.
-- Next actions: Run the platform-specific Claude Code install command on the
-  target machine, then complete Claude's own authentication flow.
+- Known gaps: Claude Code installation/version validation remains pending on
+  macOS and Ubuntu, and login is still a per-machine action. Its credentials
+  and native configuration remain outside version control.
+- Next actions: Run the platform-specific Claude Code install command on each
+  remaining target machine, then complete Claude's own authentication flow.
 
 ### 2026-10-14
 
@@ -2902,7 +2904,20 @@ Format:
 - Validation performed: PowerShell parsing, Bash syntax, and 210 setup
   assertions passed. No additional package installation or authentication was
   performed by validation.
-- Known gaps: The corrected native-binary placement still needs a live rerun on
-  the affected Windows machine, followed by Claude authentication.
-- Next actions: Pull or retain these local changes, rerun the Claude setup, and
-  verify `claude --version` before logging in.
+- Known gaps: Claude authentication remains per-machine; macOS and Ubuntu
+  installation/version validation are still pending.
+- Next actions: Complete the Claude setup and `claude --version` check on the
+  remaining target platforms before logging in.
+
+### 2026-10-15
+
+- Summary of changes: Added `docs/handoff.md` and reconciled the agent status,
+  ownership boundaries, current baseline, and next actions for continuation by
+  Pi, Claude Code, Codex, or another independent agent.
+- Phases touched: Phase 12 AI agent launcher and cross-cutting documentation.
+- Validation performed: Documentation review and `git diff --check`; no
+  software installation or machine-state changes were performed.
+- Known gaps: Claude Code remains pending validation on macOS and Ubuntu;
+  authentication, MCP selection, and native agent settings remain machine-local.
+- Next actions: Start with `docs/handoff.md`, then continue the ordered work in
+  the Current Next Actions section above.

@@ -50,6 +50,7 @@ Useful docs:
 - [Yazi](docs/yazi.md)
 - [Vowen desktop dictation](docs/vowen.md)
 - [macOS agent validation](docs/macos-agent-validation.md)
+- [agent handoff guide](docs/handoff.md)
 
 ## Phase 0 and Phase 1 Setup
 

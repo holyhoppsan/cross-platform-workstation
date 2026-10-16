@@ -4,6 +4,18 @@ Agent launchers and model profile translation are scheduled for Phase 12. OpenCo
 
 Pi, Codex, and Claude Code can be installed independently; selecting one never installs, configures, or authenticates the others. Node.js/npm is installed only when the selected agent needs it and `--install-missing` is supplied.
 
+Current installation validation:
+
+| Agent | Windows | macOS | Ubuntu |
+| --- | --- | --- | --- |
+| Pi | validated | validated | unvalidated |
+| Codex | validated | validated | unvalidated |
+| Claude Code | validated | pending | pending |
+
+These entries cover installation/version checks only. Authentication, MCP
+server selection, project-specific permissions, and native agent settings are
+per-machine actions and are not repository state.
+
 Claude Code is installed from Anthropic's official npm package
 `@anthropic-ai/claude-code`; setup does not authenticate it or create Claude
 configuration. Complete its own login flow after installation.
